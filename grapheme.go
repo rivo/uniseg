@@ -245,3 +245,14 @@ func (g *Graphemes) Reset() {
 	g.start, g.end, g.pos, g.state = 0, 0, 0, grAny
 	g.Next() // Parse ahead again.
 }
+
+// GraphemeClusterCount returns the number of user-perceived characters
+// (grapheme clusters) for the given string. To calculate this number, it
+// iterates through the string using the Graphemes iterator.
+func GraphemeClusterCount(s string) (n int) {
+	g := NewGraphemes(s)
+	for g.Next() {
+		n++
+	}
+	return
+}

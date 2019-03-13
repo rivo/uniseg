@@ -803,3 +803,10 @@ func TestLate(t *testing.T) {
 		t.Errorf(`Expected from=%d to=%d, got from=%d to=%d`, 1, 1, from, to)
 	}
 }
+
+// Test the GraphemeClusterCount function.
+func TestCount(t *testing.T) {
+	if n := GraphemeClusterCount("🇩🇪🏳️‍🌈"); n != 2 {
+		t.Errorf(`Expected 2 grapheme clusters, got %d`, n)
+	}
+}
