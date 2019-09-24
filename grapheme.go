@@ -118,7 +118,11 @@ type Graphemes struct {
 
 // NewGraphemes returns a new grapheme cluster iterator.
 func NewGraphemes(s string) *Graphemes {
-	g := &Graphemes{}
+	ln := len(s)
+	g := &Graphemes{
+		codePoints: make([]rune, 0, ln),
+		indices:    make([]int, 0, ln+1),
+	}
 	for index, codePoint := range s {
 		g.codePoints = append(g.codePoints, codePoint)
 		g.indices = append(g.indices, index)
