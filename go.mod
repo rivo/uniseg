@@ -1,3 +1,3 @@
-module github.com/rivo/uniseg
+module github.com/Code-Hex/uniseg
 
-go 1.12
+go 1.13
