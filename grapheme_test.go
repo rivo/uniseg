@@ -1,18 +1,8 @@
 package uniseg
 
 import (
-	"fmt"
 	"testing"
 )
-
-// Type example.
-func ExampleGraphemes() {
-	gr := NewGraphemes("👍🏼!")
-	for gr.Next() {
-		fmt.Printf("%x ", gr.Runes())
-	}
-	// Output: [1f44d 1f3fc] [21]
-}
 
 // The test cases for the simple test function.
 var testCases = []struct {
