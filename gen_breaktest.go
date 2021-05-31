@@ -1,5 +1,11 @@
 // +build generate
 
+// This program generates grapheme_break_test.go from the Unicode Character
+// Database auxiliary data files at https://www.unicode.org/Public/
+// Either directly via HTTP by URL or from a local copy of the file.
+//
+//go:generate go run gen_breaktest.go
+
 package main
 
 import (
@@ -16,14 +22,13 @@ import (
 	"strings"
 )
 
-//go:generate go run gen_breaktest.go
-
 // See https://www.unicode.org/license.html for the Unicode license agreement.
 
 // We want to test against a specific version rather than the latest, which
 // can be found at:
 // https://www.unicode.org/Public/UCD/latest/ucd/auxiliary/GraphemeBreakTest.txt
-// When/if the package is upgraded to a new version, change these to generate new tests.
+// When/if the package is upgraded to a new version, change these to generate
+// new tests.
 const (
 	url      = `https://www.unicode.org/Public/13.0.0/ucd/auxiliary/GraphemeBreakTest.txt`
 	filename = `GraphemeBreakTest-13.0.0.txt`
@@ -52,8 +57,8 @@ func main() {
 	}
 }
 
-// readAndParse reads a GraphemeBreakTest text file,
-// either from a local file or from a URL.
+// readAndParse reads a GraphemeBreakTest text file, either from a local file or
+// from a URL.
 //
 // It parses the file data into Go source code representing the testcases.
 func readAndParse() ([]byte, error) {
@@ -128,7 +133,7 @@ var unicodeTestCases = []testcase {
 	return buf.Bytes(), nil
 }
 
-// used by parseRuneSequence to match input via bytes.HasPrefix
+// Used by parseRuneSequence to match input via bytes.HasPrefix.
 var (
 	prefix  = []byte("÷ ")
 	breakOk = []byte("÷")

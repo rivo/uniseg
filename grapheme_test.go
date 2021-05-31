@@ -14,13 +14,13 @@ func ExampleGraphemes() {
 	// Output: [1f44d 1f3fc] [21]
 }
 
-type testcase = struct {
+type testCase = struct {
 	original string
 	expected [][]rune
 }
 
 // The test cases for the simple test function.
-var testCases = []testcase{
+var testCases = []testCase{
 	{original: "", expected: [][]rune{}},
 	{original: "x", expected: [][]rune{{0x78}}},
 	{original: "basic", expected: [][]rune{{0x62}, {0x61}, {0x73}, {0x69}, {0x63}}},
