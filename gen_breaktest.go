@@ -87,7 +87,7 @@ package uniseg
 // unicodeTestCases are Grapheme testcases taken from
 // ` + url + `,
 // see https://www.unicode.org/license.html for the Unicode license agreement.
-var unicodeTestCases = []testcase {
+var unicodeTestCases = []testCase {
 `)
 
 	sc := bufio.NewScanner(r)

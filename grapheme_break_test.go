@@ -5,7 +5,7 @@ package uniseg
 // unicodeTestCases are Grapheme testcases taken from
 // https://www.unicode.org/Public/13.0.0/ucd/auxiliary/GraphemeBreakTest.txt,
 // see https://www.unicode.org/license.html for the Unicode license agreement.
-var unicodeTestCases = []testcase{
+var unicodeTestCases = []testCase{
 	{original: "\u0020\u0020", expected: [][]rune{{0x0020}, {0x0020}}},                                                                                 // ÷ [0.2] SPACE (Other) ÷ [999.0] SPACE (Other) ÷ [0.3]
 	{original: "\u0020\u0308\u0020", expected: [][]rune{{0x0020, 0x0308}, {0x0020}}},                                                                   // ÷ [0.2] SPACE (Other) × [9.0] COMBINING DIAERESIS (Extend_ExtCccZwj) ÷ [999.0] SPACE (Other) ÷ [0.3]
 	{original: "\u0020\u000D", expected: [][]rune{{0x0020}, {0x000D}}},                                                                                 // ÷ [0.2] SPACE (Other) ÷ [5.0] <CARRIAGE RETURN (CR)> (CR) ÷ [0.3]
