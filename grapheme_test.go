@@ -700,6 +700,61 @@ func TestSimple(t *testing.T) {
 	}
 }
 
+// Run the testCases slice above.
+func TestSimpleResetString(t *testing.T) {
+	gr := NewGraphemes("")
+	for testNum, testCase := range testCases {
+		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
+		testNum,
+		strings.TrimSpace(testCase.original),
+		testCase.expected,
+		decomposed(testCase.original),
+		[]rune(testCase.original))*/
+		gr.ResetString(testCase.original)
+		var index int
+	GraphemeLoop:
+		for index = 0; gr.Next(); index++ {
+			if index >= len(testCase.expected) {
+				t.Errorf(`Test case %d "%s" failed: More grapheme clusters returned than expected %d`,
+					testNum,
+					testCase.original,
+					len(testCase.expected))
+				break
+			}
+			cluster := gr.Runes()
+			if len(cluster) != len(testCase.expected[index]) {
+				t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+					testNum,
+					testCase.original,
+					index,
+					len(cluster),
+					cluster,
+					len(testCase.expected[index]),
+					testCase.expected[index])
+				break
+			}
+			for i, r := range cluster {
+				if r != testCase.expected[index][i] {
+					t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d is %x, expected %x`,
+						testNum,
+						testCase.original,
+						index,
+						cluster,
+						testCase.expected[index])
+					break GraphemeLoop
+				}
+			}
+		}
+		if index < len(testCase.expected) {
+			t.Errorf(`Test case %d "%s" failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+				testNum,
+				testCase.original,
+				index,
+				len(testCase.expected))
+		}
+	}
+}
+
 // Test the Str() function.
 func TestStr(t *testing.T) {
 	gr := NewGraphemes("möp")
@@ -798,5 +853,34 @@ func TestLate(t *testing.T) {
 func TestCount(t *testing.T) {
 	if n := GraphemeClusterCount("🇩🇪🏳️‍🌈"); n != 2 {
 		t.Errorf(`Expected 2 grapheme clusters, got %d`, n)
+	}
+}
+
+func BenchmarkCountDolmen(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, bcase := range testCases {
+			g := NewGraphemes(bcase.original)
+			var n int
+			for g.Next() {
+				n++
+			}
+		}
+	}
+}
+
+func BenchmarkCountDolmenResetString(b *testing.B) {
+	g := NewGraphemes("")
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, bcase := range testCases {
+			var n int
+			g.ResetString(bcase.original)
+			for g.Next() {
+				n++
+			}
+		}
 	}
 }

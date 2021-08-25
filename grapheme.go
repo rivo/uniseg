@@ -256,6 +256,34 @@ func (g *Graphemes) Reset() {
 	g.Next() // Parse ahead again.
 }
 
+// ResetString resets and parses a new string.
+// This will reuse allocations in g, but act as NewGraphemes.
+func (g *Graphemes) ResetString(s string) {
+	l := utf8.RuneCountInString(s)
+	codePoints := g.codePoints
+	if cap(codePoints) < l {
+		codePoints = make([]rune, l)
+	}
+	codePoints = codePoints[:l]
+	indices := g.indices
+	if cap(codePoints) <= l {
+		indices = make([]int, l+1)
+	}
+	indices = indices[:l+1]
+
+	i := 0
+	for pos, r := range s {
+		codePoints[i] = r
+		indices[i] = pos
+		i++
+	}
+	indices[l] = len(s)
+	g.indices = indices
+	g.codePoints = codePoints
+	g.start, g.end, g.pos, g.state = 0, 0, 0, grAny
+	g.Next() // Parse ahead.
+}
+
 // GraphemeClusterCount returns the number of user-perceived characters
 // (grapheme clusters) for the given string. To calculate this number, it
 // iterates through the string using the Graphemes iterator.
