@@ -704,12 +704,6 @@ func TestSimple(t *testing.T) {
 func TestSimpleResetString(t *testing.T) {
 	gr := NewGraphemes("")
 	for testNum, testCase := range testCases {
-		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
-		testNum,
-		strings.TrimSpace(testCase.original),
-		testCase.expected,
-		decomposed(testCase.original),
-		[]rune(testCase.original))*/
 		gr.ResetString(testCase.original)
 		var index int
 	GraphemeLoop:
@@ -856,7 +850,7 @@ func TestCount(t *testing.T) {
 	}
 }
 
-func BenchmarkCountDolmen(b *testing.B) {
+func BenchmarkCount(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -870,7 +864,7 @@ func BenchmarkCountDolmen(b *testing.B) {
 	}
 }
 
-func BenchmarkCountDolmenResetString(b *testing.B) {
+func BenchmarkCountResetString(b *testing.B) {
 	g := NewGraphemes("")
 	b.ReportAllocs()
 	b.ResetTimer()

@@ -120,22 +120,9 @@ type Graphemes struct {
 
 // NewGraphemes returns a new grapheme cluster iterator.
 func NewGraphemes(s string) *Graphemes {
-	l := utf8.RuneCountInString(s)
-	codePoints := make([]rune, l)
-	indices := make([]int, l+1)
-	i := 0
-	for pos, r := range s {
-		codePoints[i] = r
-		indices[i] = pos
-		i++
-	}
-	indices[l] = len(s)
-	g := &Graphemes{
-		codePoints: codePoints,
-		indices:    indices,
-	}
-	g.Next() // Parse ahead.
-	return g
+	var g Graphemes
+	g.ResetString(s)
+	return &g
 }
 
 // Next advances the iterator by one grapheme cluster and returns false if no
