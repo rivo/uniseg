@@ -704,7 +704,7 @@ func TestSimple(t *testing.T) {
 func TestSimpleResetString(t *testing.T) {
 	gr := NewGraphemes("")
 	for testNum, testCase := range testCases {
-		gr.ResetString(testCase.original)
+		gr.ResetToString(testCase.original)
 		var index int
 	GraphemeLoop:
 		for index = 0; gr.Next(); index++ {
@@ -871,7 +871,7 @@ func BenchmarkCountResetString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, bcase := range testCases {
 			var n int
-			g.ResetString(bcase.original)
+			g.ResetToString(bcase.original)
 			for g.Next() {
 				n++
 			}

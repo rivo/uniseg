@@ -121,7 +121,7 @@ type Graphemes struct {
 // NewGraphemes returns a new grapheme cluster iterator.
 func NewGraphemes(s string) *Graphemes {
 	var g Graphemes
-	g.ResetString(s)
+	g.ResetToString(s)
 	return &g
 }
 
@@ -243,9 +243,9 @@ func (g *Graphemes) Reset() {
 	g.Next() // Parse ahead again.
 }
 
-// ResetString resets and parses a new string.
+// ResetToString resets and parses a new string.
 // This will reuse allocations in g, but act as NewGraphemes.
-func (g *Graphemes) ResetString(s string) {
+func (g *Graphemes) ResetToString(s string) {
 	l := utf8.RuneCountInString(s)
 	codePoints := g.codePoints
 	if cap(codePoints) < l {
