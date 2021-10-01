@@ -30,8 +30,8 @@ import (
 // When/if the package is upgraded to a new version, change these to generate
 // new tests.
 const (
-	url      = `https://www.unicode.org/Public/13.0.0/ucd/auxiliary/GraphemeBreakTest.txt`
-	filename = `GraphemeBreakTest-13.0.0.txt`
+	url      = `https://www.unicode.org/Public/14.0.0/ucd/auxiliary/GraphemeBreakTest.txt`
+	filename = `GraphemeBreakTest-14.0.0.txt`
 )
 
 func main() {
