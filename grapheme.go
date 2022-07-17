@@ -156,46 +156,10 @@ func (g *Graphemes) Next() bool {
 			break
 		}
 
-		// Determine the property of the next character.
-		nextProperty := property(g.codePoints[g.pos])
-		g.pos++
-
-		// Find the applicable transition.
+		// Calculate the next state.
 		var boundary bool
-		transition, ok := grTransitions[[2]int{g.state, nextProperty}]
-		if ok {
-			// We have a specific transition. We'll use it.
-			g.state = transition[0]
-			boundary = transition[1] == grBoundary
-		} else {
-			// No specific transition found. Try the less specific ones.
-			transAnyProp, okAnyProp := grTransitions[[2]int{g.state, prAny}]
-			transAnyState, okAnyState := grTransitions[[2]int{grAny, nextProperty}]
-			if okAnyProp && okAnyState {
-				// Both apply. We'll use a mix (see comments for grTransitions).
-				g.state = transAnyState[0]
-				boundary = transAnyState[1] == grBoundary
-				if transAnyProp[2] < transAnyState[2] {
-					boundary = transAnyProp[1] == grBoundary
-				}
-			} else if okAnyProp {
-				// We only have a specific state.
-				g.state = transAnyProp[0]
-				boundary = transAnyProp[1] == grBoundary
-				// This branch will probably never be reached because okAnyState will
-				// always be true given the current transition map. But we keep it here
-				// for future modifications to the transition map where this may not be
-				// true anymore.
-			} else if okAnyState {
-				// We only have a specific property.
-				g.state = transAnyState[0]
-				boundary = transAnyState[1] == grBoundary
-			} else {
-				// No known transition. GB999: Any x Any.
-				g.state = grAny
-				boundary = true
-			}
-		}
+		g.state, boundary = transitionGraphemeState(g.state, g.codePoints[g.pos])
+		g.pos++
 
 		// If we found a cluster boundary, let's stop here. The current cluster will
 		// be the one that just ended.
@@ -206,6 +170,51 @@ func (g *Graphemes) Next() bool {
 	}
 
 	return g.start != g.end
+}
+
+// transitionGraphemeState determines the new state of the grapheme cluster
+// parser given the current state and the next code point. It also returns
+// whether a cluster boundary was detected.
+func transitionGraphemeState(state int, r rune) (newState int, boundary bool) {
+	// Determine the property of the next character.
+	nextProperty := property(r)
+
+	// Find the applicable transition.
+	transition, ok := grTransitions[[2]int{state, nextProperty}]
+	if ok {
+		// We have a specific transition. We'll use it.
+		return transition[0], transition[1] == grBoundary
+	}
+
+	// No specific transition found. Try the less specific ones.
+	transAnyProp, okAnyProp := grTransitions[[2]int{state, prAny}]
+	transAnyState, okAnyState := grTransitions[[2]int{grAny, nextProperty}]
+	if okAnyProp && okAnyState {
+		// Both apply. We'll use a mix (see comments for grTransitions).
+		newState = transAnyState[0]
+		boundary = transAnyState[1] == grBoundary
+		if transAnyProp[2] < transAnyState[2] {
+			boundary = transAnyProp[1] == grBoundary
+		}
+		return
+	}
+
+	if okAnyProp {
+		// We only have a specific state.
+		return transAnyProp[0], transAnyProp[1] == grBoundary
+		// This branch will probably never be reached because okAnyState will
+		// always be true given the current transition map. But we keep it here
+		// for future modifications to the transition map where this may not be
+		// true anymore.
+	}
+
+	if okAnyState {
+		// We only have a specific property.
+		return transAnyState[0], transAnyState[1] == grBoundary
+	}
+
+	// No known transition. GB999: Any x Any.
+	return grAny, true
 }
 
 // Runes returns a slice of runes (code points) which corresponds to the current
