@@ -44,8 +44,8 @@ func decomposed(s string) (runes [][]rune) {
 	return
 }
 
-// Run the testCases slice above.
-func TestSimple(t *testing.T) {
+// Run all lists of test cases using the Graphemes class.
+func TestGraphemesClass(t *testing.T) {
 	allCases := append(testCases, unicodeTestCases...)
 	for testNum, testCase := range allCases {
 		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
@@ -100,7 +100,7 @@ func TestSimple(t *testing.T) {
 }
 
 // Test the Str() function.
-func TestStr(t *testing.T) {
+func TestGraphemesStr(t *testing.T) {
 	gr := NewGraphemes("möp")
 	gr.Next()
 	gr.Next()
@@ -111,7 +111,7 @@ func TestStr(t *testing.T) {
 }
 
 // Test the Bytes() function.
-func TestBytes(t *testing.T) {
+func TestGraphemesBytes(t *testing.T) {
 	gr := NewGraphemes("A👩‍❤️‍💋‍👩B")
 	gr.Next()
 	gr.Next()
@@ -126,7 +126,7 @@ func TestBytes(t *testing.T) {
 }
 
 // Test the Positions() function.
-func TestPositions(t *testing.T) {
+func TestGraphemesPositions(t *testing.T) {
 	gr := NewGraphemes("A👩‍❤️‍💋‍👩B")
 	gr.Next()
 	gr.Next()
@@ -137,7 +137,7 @@ func TestPositions(t *testing.T) {
 }
 
 // Test the Reset() function.
-func TestReset(t *testing.T) {
+func TestGraphemesReset(t *testing.T) {
 	gr := NewGraphemes("möp")
 	gr.Next()
 	gr.Next()
@@ -150,7 +150,7 @@ func TestReset(t *testing.T) {
 }
 
 // Test retrieving clusters before calling Next().
-func TestEarly(t *testing.T) {
+func TestGraphemesEarly(t *testing.T) {
 	gr := NewGraphemes("test")
 	r := gr.Runes()
 	if r != nil {
@@ -171,7 +171,7 @@ func TestEarly(t *testing.T) {
 }
 
 // Test retrieving more clusters after retrieving the last cluster.
-func TestLate(t *testing.T) {
+func TestGraphemesLate(t *testing.T) {
 	gr := NewGraphemes("x")
 	gr.Next()
 	gr.Next()
@@ -194,8 +194,136 @@ func TestLate(t *testing.T) {
 }
 
 // Test the GraphemeClusterCount function.
-func TestCount(t *testing.T) {
+func TestGraphemesCount(t *testing.T) {
 	if n := GraphemeClusterCount("🇩🇪🏳️‍🌈"); n != 2 {
 		t.Errorf(`Expected 2 grapheme clusters, got %d`, n)
+	}
+}
+
+// Run all lists of test cases using the Graphemes function for byte slices.
+func TestGraphemesFunctionBytes(t *testing.T) {
+	allCases := append(testCases, unicodeTestCases...)
+	for testNum, testCase := range allCases {
+		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
+		testNum,
+		strings.TrimSpace(testCase.original),
+		testCase.expected,
+		decomposed(testCase.original),
+		[]rune(testCase.original))*/
+		b := []byte(testCase.original)
+		state := -1
+		var (
+			index int
+			c     []byte
+		)
+	GraphemeLoop:
+		for len(b) > 0 {
+			c, b, state = firstGraphemeCluster(b, state)
+
+			if index >= len(testCase.expected) {
+				t.Errorf(`Test case %d "%s" failed: More grapheme clusters returned than expected %d`,
+					testNum,
+					testCase.original,
+					len(testCase.expected))
+				break
+			}
+
+			cluster := []rune(string(c))
+			if len(cluster) != len(testCase.expected[index]) {
+				t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+					testNum,
+					testCase.original,
+					index,
+					len(cluster),
+					cluster,
+					len(testCase.expected[index]),
+					testCase.expected[index])
+				break
+			}
+			for i, r := range cluster {
+				if r != testCase.expected[index][i] {
+					t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d is %x, expected %x`,
+						testNum,
+						testCase.original,
+						index,
+						cluster,
+						testCase.expected[index])
+					break GraphemeLoop
+				}
+			}
+
+			index++
+		}
+		if index < len(testCase.expected) {
+			t.Errorf(`Test case %d "%s" failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+				testNum,
+				testCase.original,
+				index,
+				len(testCase.expected))
+		}
+	}
+}
+
+// Run all lists of test cases using the Graphemes function for strings.
+func TestGraphemesFunctionString(t *testing.T) {
+	allCases := append(testCases, unicodeTestCases...)
+	for testNum, testCase := range allCases {
+		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
+		testNum,
+		strings.TrimSpace(testCase.original),
+		testCase.expected,
+		decomposed(testCase.original),
+		[]rune(testCase.original))*/
+		str := testCase.original
+		state := -1
+		var (
+			index int
+			c     string
+		)
+	GraphemeLoop:
+		for len(str) > 0 {
+			c, str, state = firstGraphemeClusterInString(str, state)
+
+			if index >= len(testCase.expected) {
+				t.Errorf(`Test case %d "%s" failed: More grapheme clusters returned than expected %d`,
+					testNum,
+					testCase.original,
+					len(testCase.expected))
+				break
+			}
+
+			cluster := []rune(c)
+			if len(cluster) != len(testCase.expected[index]) {
+				t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+					testNum,
+					testCase.original,
+					index,
+					len(cluster),
+					cluster,
+					len(testCase.expected[index]),
+					testCase.expected[index])
+				break
+			}
+			for i, r := range cluster {
+				if r != testCase.expected[index][i] {
+					t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d is %x, expected %x`,
+						testNum,
+						testCase.original,
+						index,
+						cluster,
+						testCase.expected[index])
+					break GraphemeLoop
+				}
+			}
+
+			index++
+		}
+		if index < len(testCase.expected) {
+			t.Errorf(`Test case %d "%s" failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+				testNum,
+				testCase.original,
+				index,
+				len(testCase.expected))
+		}
 	}
 }
