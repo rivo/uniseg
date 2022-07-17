@@ -53,10 +53,10 @@ Refer to https://pkg.go.dev/github.com/rivo/uniseg for the package's documentati
 
 This package does not depend on any packages outside the standard library.
 
+## Sponsor this Project
+
+[Become a Sponsor on GitHub](https://github.com/sponsors/rivo?metadata_source=uniseg_readme) to further this project! Plans for future releases include the implementation of the rest of UAX29 (word boundaries, sentence boundaries) as well as UAX14 (line breaking).
+
 ## Your Feedback
 
 Add your issue here on GitHub. Feel free to get in touch if you have any questions.
-
-## Version
-
-Version tags will be introduced once Golang modules are official. Consider this version 0.1.
