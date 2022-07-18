@@ -76,8 +76,8 @@ var grTransitions = map[[2]int][3]int{
 	{grAny, prSpacingMark}: {grAny, grNoBoundary, 91},
 
 	// GB9b.
-	{grAny, prPreprend}: {grPrepend, grBoundary, 9990},
-	{grPrepend, prAny}:  {grAny, grNoBoundary, 92},
+	{grAny, prPrepend}: {grPrepend, grBoundary, 9990},
+	{grPrepend, prAny}: {grAny, grNoBoundary, 92},
 
 	// GB11.
 	{grAny, prExtendedPictographic}:                     {grExtendedPictographic, grBoundary, 9990},
