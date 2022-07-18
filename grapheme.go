@@ -301,6 +301,9 @@ func GraphemeClusterCount(s string) (n int) {
 // Using this function is the preferred method of extracting grapheme clusters
 // when working exclusively with byte slices and/or with large byte slices, as
 // no large allocations are made.
+//
+// For the time being, this function is private because its signature might
+// still change.
 func firstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
