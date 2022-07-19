@@ -1,9 +1,15 @@
 //go:build generate
 
-// This program generates the grapheme_properties.go file containing Grapheme
-// Break Properties, from the Unicode Character Database auxiliary data files.
+// This program generates a property file in Go file from Unicode Character
+// Database auxiliary data files. The command line arguments are as follows:
 //
-//go:generate go run gen_graphemeproperties.go
+//   1. The name of the Unicode data file (just the filename, without extension).
+//   2. The name of the locally generated Go file.
+//   3. The name of the slice mapping code points to properties.
+//   4. The name of the generator, for logging purposes.
+//
+//go:generate go run gen_properties.go GraphemeBreakProperty graphemeproperties.go graphemeCodePoints graphemes
+//go:generate go run gen_properties.go WordBreakProperty wordbreakproperties.go workBreakCodePoints workbreak
 package main
 
 import (
@@ -15,27 +21,33 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
-	gbpURL   = `https://www.unicode.org/Public/14.0.0/ucd/auxiliary/GraphemeBreakProperty.txt`
+	gbpURL   = `https://www.unicode.org/Public/14.0.0/ucd/auxiliary/%s.txt`
 	emojiURL = `https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt`
-	target   = `graphemeproperties.go`
 )
 
 // The regular expression for a line containing a code point range property.
 var propertyPattern = regexp.MustCompile(`^([0-9A-F]{4,6})(\.\.([0-9A-F]{4,6}))?\s+;\s+([A-Za-z0-9_]+)\s*#\s(.+)$`)
 
 func main() {
-	log.SetPrefix("gen_graphemeproperties: ")
+	if len(os.Args) < 5 {
+		fmt.Println("Not enough arguments, see code for details")
+		os.Exit(1)
+	}
+
+	log.SetPrefix("gen_properties (" + os.Args[4] + "): ")
 	log.SetFlags(0)
 
 	// Parse the text file and generate Go source code from it.
-	src, err := parse(gbpURL, emojiURL)
+	src, err := parse(fmt.Sprintf(gbpURL, os.Args[1]), emojiURL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,15 +59,14 @@ func main() {
 	}
 
 	// Save it to the (local) target file.
-	log.Print("Writing to ", target)
-	if err := ioutil.WriteFile(target, formatted, 0644); err != nil {
+	log.Print("Writing to ", os.Args[2])
+	if err := ioutil.WriteFile(os.Args[2], formatted, 0644); err != nil {
 		log.Fatal(err)
 	}
 }
 
-// parse parses the Grapheme Break Properties text file located at the given
-// URLs and returns its equivalent Go source code to be used in the uniseg
-// package.
+// parse parses the Unicode Properties text files located at the given URLs and
+// returns their equivalent Go source code to be used in the uniseg package.
 func parse(gbpURL, emojiURL string) (string, error) {
 	// Temporary buffer to hold properties.
 	var properties [][4]string
@@ -84,7 +95,7 @@ func parse(gbpURL, emojiURL string) (string, error) {
 		// Everything else must be a code point range, a property and a comment.
 		from, to, property, comment, err := parseProperty(line)
 		if err != nil {
-			return "", fmt.Errorf("graphemes line %d: %v", num, err)
+			return "", fmt.Errorf("%s line %d: %v", os.Args[4], num, err)
 		}
 		properties = append(properties, [4]string{from, to, property, comment})
 	}
@@ -134,17 +145,17 @@ func parse(gbpURL, emojiURL string) (string, error) {
 
 	// Header.
 	var buf bytes.Buffer
-	buf.WriteString(`// Code generated via go generate from gen_graphemeproperties.go. DO NOT EDIT.
-
+	buf.WriteString(`// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 package uniseg
 
-// graphemeCodePoints are taken from
+// ` + os.Args[3] + ` are taken from
 // ` + gbpURL + `,
 // and
 // ` + emojiURL + `,
-// ("Extended_Pictographic" only) on March 11, 2019. See
+// ("Extended_Pictographic" only) on ` + time.Now().Format("January 2, 2006") + `. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
-var graphemeCodePoints = [][3]int{`)
+var ` + os.Args[3] + ` = [][3]int{
+	`)
 
 	// Properties.
 	for _, prop := range properties {
@@ -157,9 +168,8 @@ var graphemeCodePoints = [][3]int{`)
 	return buf.String(), nil
 }
 
-// parseProperty parses a line of the Grapheme Break Properties text file
-// containing a property for a code point range and returns it along with its
-// comment.
+// parseProperty parses a line of the Unicode properties text file containing a
+// property for a code point range and returns it along with its comment.
 func parseProperty(line string) (from, to, property, comment string, err error) {
 	fields := propertyPattern.FindStringSubmatch(line)
 	if fields == nil {

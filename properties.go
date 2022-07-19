@@ -18,17 +18,30 @@ const (
 	prLVT
 	prZWJ
 	prExtendedPictographic
+	prNewline
+	prWSegSpace
+	prDoubleQuote
+	prSingleQuote
+	prMidNumLet
+	prNumeric
+	prMidLetter
+	prMidNum
+	prExtendNumLet
+	prALetter
+	prFormat
+	prHebrewLetter
+	prKatakana
 )
 
 // property returns the Unicode property value (see constants above) of the
 // given code point.
-func property(r rune) int {
+func property(dictionary [][3]int, r rune) int {
 	// Run a binary search.
 	from := 0
-	to := len(graphemeCodePoints)
+	to := len(dictionary)
 	for to > from {
 		middle := (from + to) / 2
-		cpRange := graphemeCodePoints[middle]
+		cpRange := dictionary[middle]
 		if int(r) < cpRange[0] {
 			to = middle
 			continue
