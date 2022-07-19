@@ -270,8 +270,9 @@ func (g *Graphemes) Reset() {
 // (grapheme clusters) for the given string. To calculate this number, it
 // iterates through the string using the Graphemes iterator.
 func GraphemeClusterCount(s string) (n int) {
-	g := NewGraphemes(s)
-	for g.Next() {
+	state := -1
+	for len(s) > 0 {
+		_, s, state = firstGraphemeClusterInString(s, state)
 		n++
 	}
 	return
