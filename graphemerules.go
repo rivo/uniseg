@@ -35,6 +35,8 @@ const (
 //      from the transition with the lower rule number, prefer (3) if rule numbers
 //      are equal. Stop.
 //   6. Assume grAny and grBoundary.
+//
+// Unicode version 14.0.0.
 var grTransitions = map[[2]int][3]int{
 	// GB5
 	{grAny, prCR}:      {grCR, grBoundary, 50},

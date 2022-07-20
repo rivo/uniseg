@@ -25,8 +25,8 @@ type Graphemes struct {
 	// The index of the next code point to be parsed.
 	pos int
 
-	// The current state of the code point parser.
-	state int
+	// The current state of the Grapheme code point parser.
+	graphemeState int
 }
 
 // NewGraphemes returns a new grapheme cluster iterator.
@@ -69,7 +69,7 @@ func (g *Graphemes) Next() bool {
 
 		// Calculate the next state.
 		var boundary bool
-		g.state, boundary = transitionGraphemeState(g.state, g.codePoints[g.pos])
+		g.graphemeState, boundary = transitionGraphemeState(g.graphemeState, g.codePoints[g.pos])
 
 		// If we found a cluster boundary, let's stop here. The current cluster will
 		// be the one that just ended.
@@ -128,7 +128,7 @@ func (g *Graphemes) Positions() (int, int) {
 // Reset puts the iterator into its initial state such that the next call to
 // Next() sets it to the first grapheme cluster again.
 func (g *Graphemes) Reset() {
-	g.start, g.end, g.pos, g.state = 0, 0, 0, grAny
+	g.start, g.end, g.pos, g.graphemeState = 0, 0, 0, grAny
 	g.Next() // Parse ahead again.
 }
 
