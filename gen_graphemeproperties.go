@@ -12,9 +12,9 @@ import (
 	"errors"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -41,14 +41,20 @@ func main() {
 	}
 
 	// Format the Go code.
-	formatted, err := format.Source([]byte(src))
+	formatted, err := format.Source(src)
 	if err != nil {
 		log.Fatal("gofmt:", err)
 	}
 
 	// Save it to the (local) target file.
 	log.Print("Writing to ", target)
-	if err := ioutil.WriteFile(target, formatted, 0644); err != nil {
+	tmp := target + ".tmp.go"
+	if err := os.WriteFile(tmp, formatted, 0644); err != nil {
+		os.Remove(tmp)
+		log.Fatal(err)
+	}
+	if err := os.Rename(tmp, target); err != nil {
+		os.Remove(tmp)
 		log.Fatal(err)
 	}
 }
@@ -56,7 +62,7 @@ func main() {
 // parse parses the Grapheme Break Properties text file located at the given
 // URLs and returns its equivalent Go source code to be used in the uniseg
 // package.
-func parse(gbpURL, emojiURL string) (string, error) {
+func parse(gbpURL, emojiURL string) ([]byte, error) {
 	// Temporary buffer to hold properties.
 	var properties [][4]string
 
@@ -64,7 +70,7 @@ func parse(gbpURL, emojiURL string) (string, error) {
 	log.Printf("Parsing %s", gbpURL)
 	res, err := http.Get(gbpURL)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	in1 := res.Body
 	defer in1.Close()
@@ -84,19 +90,19 @@ func parse(gbpURL, emojiURL string) (string, error) {
 		// Everything else must be a code point range, a property and a comment.
 		from, to, property, comment, err := parseProperty(line)
 		if err != nil {
-			return "", fmt.Errorf("graphemes line %d: %v", num, err)
+			return nil, fmt.Errorf("graphemes line %d: %v", num, err)
 		}
 		properties = append(properties, [4]string{from, to, property, comment})
 	}
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Open the second URL.
 	log.Printf("Parsing %s", emojiURL)
 	res, err = http.Get(emojiURL)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	in2 := res.Body
 	defer in2.Close()
@@ -117,12 +123,12 @@ func parse(gbpURL, emojiURL string) (string, error) {
 		// Everything else must be a code point range, a property and a comment.
 		from, to, property, comment, err := parseProperty(line)
 		if err != nil {
-			return "", fmt.Errorf("emojis line %d: %v", num, err)
+			return nil, fmt.Errorf("emojis line %d: %v", num, err)
 		}
 		properties = append(properties, [4]string{from, to, property, comment})
 	}
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Sort properties.
@@ -138,13 +144,19 @@ func parse(gbpURL, emojiURL string) (string, error) {
 
 package uniseg
 
+type codePoint struct {
+	lo, hi   rune
+	property uint8
+}
+
 // graphemeCodePoints are taken from
 // ` + gbpURL + `,
 // and
 // ` + emojiURL + `,
 // ("Extended_Pictographic" only) on March 11, 2019. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
-var graphemeCodePoints = [][3]int{`)
+var graphemeCodePoints = []codePoint{
+`)
 
 	// Properties.
 	for _, prop := range properties {
@@ -152,9 +164,9 @@ var graphemeCodePoints = [][3]int{`)
 	}
 
 	// Tail.
-	buf.WriteString("}")
+	buf.WriteString("}\n")
 
-	return buf.String(), nil
+	return buf.Bytes(), nil
 }
 
 // parseProperty parses a line of the Grapheme Break Properties text file

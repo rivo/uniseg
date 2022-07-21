@@ -15,13 +15,17 @@ const (
 	grExtendedPictographicZWJ
 	grRIOdd
 	grRIEven
+
+	_grLast
 )
 
-// The grapheme cluster parser's breaking instructions.
-const (
-	grNoBoundary = iota
-	grBoundary
-)
+type transition struct {
+	newState uint8
+	boundry  bool // breaking instruction
+	rule     uint16
+}
+
+func (s *transition) isValid() bool { return s != nil }
 
 // The grapheme cluster parser's state transitions. Maps (state, property) to
 // (new state, breaking instruction, rule number). The breaking instruction
@@ -37,58 +41,63 @@ const (
 //      from the transition with the lower rule number, prefer (3) if rule numbers
 //      are equal. Stop.
 //   6. Assume grAny and grBoundary.
-var grTransitions = map[[2]int][3]int{
-	// GB5
-	{grAny, prCR}:      {grCR, grBoundary, 50},
-	{grAny, prLF}:      {grControlLF, grBoundary, 50},
-	{grAny, prControl}: {grControlLF, grBoundary, 50},
+var grStateTransitions = [_grLast][_prLast]*transition{
+	grAny: {
+		prPrepend:              {grPrepend, true, 9990},
+		prCR:                   {grCR, true, 50},
+		prLF:                   {grControlLF, true, 50},
+		prControl:              {grControlLF, true, 50},
+		prExtend:               {grAny, false, 90},
+		prRegionalIndicator:    {grRIOdd, true, 9990},
+		prSpacingMark:          {grAny, false, 91},
+		prL:                    {grL, true, 9990},
+		prV:                    {grLVV, true, 9990},
+		prT:                    {grLVTT, true, 9990},
+		prLV:                   {grLVV, true, 9990},
+		prLVT:                  {grLVTT, true, 9990},
+		prZWJ:                  {grAny, false, 90},
+		prExtendedPictographic: {grExtendedPictographic, true, 9990},
+	},
+	grCR: {
+		prAny: {grAny, true, 40},
+		prLF:  {grAny, false, 30},
+	},
+	grControlLF: {
+		prAny: {grAny, true, 40},
+	},
+	grL: {
+		prL:   {grL, false, 60},
+		prV:   {grLVV, false, 60},
+		prLV:  {grLVV, false, 60},
+		prLVT: {grLVTT, false, 60},
+	},
+	grLVV: {
+		prV: {grLVV, false, 70},
+		prT: {grLVTT, false, 70},
+	},
+	grLVTT: {
+		prT: {grLVTT, false, 80},
+	},
+	grPrepend: {
+		prAny: {grAny, false, 92},
+	},
+	grExtendedPictographic: {
+		prExtend: {grExtendedPictographic, false, 110},
+		prZWJ:    {grExtendedPictographicZWJ, false, 110},
+	},
+	grExtendedPictographicZWJ: {
+		prExtendedPictographic: {grExtendedPictographic, false, 110},
+	},
+	grRIOdd: {
+		prRegionalIndicator: {grRIEven, false, 120},
+	},
+	grRIEven: {
+		prRegionalIndicator: {grRIOdd, true, 120},
+	},
+}
 
-	// GB4
-	{grCR, prAny}:        {grAny, grBoundary, 40},
-	{grControlLF, prAny}: {grAny, grBoundary, 40},
-
-	// GB3.
-	{grCR, prLF}: {grAny, grNoBoundary, 30},
-
-	// GB6.
-	{grAny, prL}: {grL, grBoundary, 9990},
-	{grL, prL}:   {grL, grNoBoundary, 60},
-	{grL, prV}:   {grLVV, grNoBoundary, 60},
-	{grL, prLV}:  {grLVV, grNoBoundary, 60},
-	{grL, prLVT}: {grLVTT, grNoBoundary, 60},
-
-	// GB7.
-	{grAny, prLV}: {grLVV, grBoundary, 9990},
-	{grAny, prV}:  {grLVV, grBoundary, 9990},
-	{grLVV, prV}:  {grLVV, grNoBoundary, 70},
-	{grLVV, prT}:  {grLVTT, grNoBoundary, 70},
-
-	// GB8.
-	{grAny, prLVT}: {grLVTT, grBoundary, 9990},
-	{grAny, prT}:   {grLVTT, grBoundary, 9990},
-	{grLVTT, prT}:  {grLVTT, grNoBoundary, 80},
-
-	// GB9.
-	{grAny, prExtend}: {grAny, grNoBoundary, 90},
-	{grAny, prZWJ}:    {grAny, grNoBoundary, 90},
-
-	// GB9a.
-	{grAny, prSpacingMark}: {grAny, grNoBoundary, 91},
-
-	// GB9b.
-	{grAny, prPrepend}: {grPrepend, grBoundary, 9990},
-	{grPrepend, prAny}: {grAny, grNoBoundary, 92},
-
-	// GB11.
-	{grAny, prExtendedPictographic}:                     {grExtendedPictographic, grBoundary, 9990},
-	{grExtendedPictographic, prExtend}:                  {grExtendedPictographic, grNoBoundary, 110},
-	{grExtendedPictographic, prZWJ}:                     {grExtendedPictographicZWJ, grNoBoundary, 110},
-	{grExtendedPictographicZWJ, prExtendedPictographic}: {grExtendedPictographic, grNoBoundary, 110},
-
-	// GB12 / GB13.
-	{grAny, prRegionalIndicator}:    {grRIOdd, grBoundary, 9990},
-	{grRIOdd, prRegionalIndicator}:  {grRIEven, grNoBoundary, 120},
-	{grRIEven, prRegionalIndicator}: {grRIOdd, grBoundary, 120},
+func lookupStateTransition(state, property int) *transition {
+	return grStateTransitions[state][property]
 }
 
 // Graphemes implements an iterator over Unicode extended grapheme clusters,
@@ -182,37 +191,36 @@ func transitionGraphemeState(state int, r rune) (newState int, boundary bool) {
 	nextProperty := property(r)
 
 	// Find the applicable transition.
-	transition, ok := grTransitions[[2]int{state, nextProperty}]
-	if ok {
+	transition := lookupStateTransition(state, nextProperty)
+	if transition.isValid() {
 		// We have a specific transition. We'll use it.
-		return transition[0], transition[1] == grBoundary
+		return int(transition.newState), transition.boundry
 	}
 
 	// No specific transition found. Try the less specific ones.
-	transAnyProp, okAnyProp := grTransitions[[2]int{state, prAny}]
-	transAnyState, okAnyState := grTransitions[[2]int{grAny, nextProperty}]
-	if okAnyProp && okAnyState {
+	transAnyProp := lookupStateTransition(state, prAny)
+	transAnyState := lookupStateTransition(grAny, nextProperty)
+	if transAnyProp.isValid() && transAnyState.isValid() {
 		// Both apply. We'll use a mix (see comments for grTransitions).
-		newState = transAnyState[0]
-		boundary = transAnyState[1] == grBoundary
-		if transAnyProp[2] < transAnyState[2] {
-			boundary = transAnyProp[1] == grBoundary
+		boundary = transAnyState.boundry
+		if transAnyProp.rule < transAnyState.rule {
+			boundary = transAnyProp.boundry
 		}
-		return
+		return int(transAnyState.newState), boundary
 	}
 
-	if okAnyProp {
+	if transAnyState.isValid() {
+		// We only have a specific property.
+		return int(transAnyState.newState), transAnyState.boundry
+	}
+
+	if transAnyProp.isValid() {
 		// We only have a specific state.
-		return transAnyProp[0], transAnyProp[1] == grBoundary
+		return int(transAnyProp.newState), transAnyProp.boundry
 		// This branch will probably never be reached because okAnyState will
 		// always be true given the current transition map. But we keep it here
 		// for future modifications to the transition map where this may not be
 		// true anymore.
-	}
-
-	if okAnyState {
-		// We only have a specific property.
-		return transAnyState[0], transAnyState[1] == grBoundary
 	}
 
 	// No known transition. GB999: Any x Any.

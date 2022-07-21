@@ -2,13 +2,19 @@
 
 package uniseg
 
+type codePoint struct {
+	lo, hi   rune
+	property uint8
+}
+
 // graphemeCodePoints are taken from
 // https://www.unicode.org/Public/14.0.0/ucd/auxiliary/GraphemeBreakProperty.txt,
 // and
 // https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt,
 // ("Extended_Pictographic" only) on March 11, 2019. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
-var graphemeCodePoints = [][3]int{{0x0000, 0x0009, prControl}, // Cc  [10] <control-0000>..<control-0009>
+var graphemeCodePoints = []codePoint{
+	{0x0000, 0x0009, prControl},                // Cc  [10] <control-0000>..<control-0009>
 	{0x000A, 0x000A, prLF},                     // Cc       <control-000A>
 	{0x000B, 0x000C, prControl},                // Cc   [2] <control-000B>..<control-000C>
 	{0x000D, 0x000D, prCR},                     // Cc       <control-000D>
@@ -1887,3 +1893,4 @@ var graphemeCodePoints = [][3]int{{0x0000, 0x0009, prControl}, // Cc  [10] <cont
 	{0xE0100, 0xE01EF, prExtend},               // Mn [240] VARIATION SELECTOR-17..VARIATION SELECTOR-256
 	{0xE01F0, 0xE0FFF, prControl},              // Cn [3600] <reserved-E01F0>..<reserved-E0FFF>
 }
+

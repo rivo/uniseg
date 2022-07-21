@@ -343,6 +343,17 @@ func BenchmarkGraphemesClass(b *testing.B) {
 	}
 }
 
+func BenchmarkGraphemesNext(b *testing.B) {
+	g := NewGraphemes(benchmarkStr)
+	orig := *g
+	for i := 0; i < b.N; i++ {
+		for g.Next() {
+			resultRunes = g.Runes()
+		}
+		*g = orig
+	}
+}
+
 // Benchmark the use of the Graphemes function for byte slices.
 func BenchmarkGraphemesFunctionBytes(b *testing.B) {
 	str := []byte(benchmarkStr)
