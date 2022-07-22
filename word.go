@@ -57,3 +57,38 @@ func firstWord(b []byte, state int) (cluster, rest []byte, newState int) {
 		}
 	}
 }
+
+// firstWordInString is like firstWord() but its input and outputs are a string.
+func firstWordInString(str string, state int) (cluster, rest string, newState int) {
+	// An empty byte slice returns nothing.
+	if len(str) == 0 {
+		return
+	}
+
+	// Extract the first rune.
+	r, length := utf8.DecodeRuneInString(str)
+	if len(str) <= length { // If we're already past the end, there is nothing else to parse.
+		return str, "", grAny
+	}
+
+	// If we don't know the state, determine it now.
+	if state < 0 {
+		state, _ = transitionWordBreakState(state, r, nil, str[length:])
+	}
+
+	// Transition until we find a boundary.
+	var boundary bool
+	for {
+		r, l := utf8.DecodeRuneInString(str[length:])
+		state, boundary = transitionWordBreakState(state, r, nil, str[length+l:])
+
+		if boundary {
+			return str[:length], str[length:], state
+		}
+
+		length += l
+		if len(str) <= length {
+			return str, "", grAny
+		}
+	}
+}

@@ -220,7 +220,7 @@ func firstGraphemeClusterInString(str string, state int) (cluster, rest string, 
 
 	// If we don't know the state, determine it now.
 	if state < 0 {
-		state, _ = transitionGraphemeState(grAny, r)
+		state, _ = transitionGraphemeState(state, r)
 	}
 
 	// Transition until we find a boundary.
