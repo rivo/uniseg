@@ -138,6 +138,23 @@ func NewGraphemes(s string) *Graphemes {
 	return g
 }
 
+// NewGraphemesFromRunes returns a new grapheme cluster iterator from []runes rs.
+func NewGraphemesFromRunes(rs []rune) *Graphemes {
+	indices := make([]int, len(rs)+1)
+	pos := 0
+	for i, r := range rs {
+		indices[i] = pos
+		pos += utf8.RuneLen(r)
+	}
+	indices[len(indices)-1] = pos
+	g := &Graphemes{
+		codePoints: rs,
+		indices:    indices,
+	}
+	g.Next() // Parse ahead.
+	return g
+}
+
 // Next advances the iterator by one grapheme cluster and returns false if no
 // clusters are left. This function must be called before the first cluster is
 // accessed.

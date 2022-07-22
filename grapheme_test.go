@@ -1,6 +1,7 @@
 package uniseg
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -329,6 +330,16 @@ func TestGraphemesFunctionString(t *testing.T) {
 				testCase.original,
 				index,
 				len(testCase.expected))
+		}
+	}
+}
+
+func TestNewGraphemesFromRunes(t *testing.T) {
+	for _, test := range testCases {
+		want := NewGraphemes(test.original)
+		got := NewGraphemesFromRunes([]rune(test.original))
+		if !reflect.DeepEqual(want, got) {
+			t.Fatalf("NewFromRunes(%q)\ngot:  %#v\nwant: %#v", test.original, got, want)
 		}
 	}
 }
