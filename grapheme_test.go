@@ -2,6 +2,7 @@ package uniseg
 
 import (
 	"testing"
+	"unicode/utf8"
 )
 
 const benchmarkStr = "This is 🏳️‍🌈, a test string ツ for grapheme cluster testing. 🏋🏽‍♀️🙂🙂"
@@ -47,6 +48,103 @@ func decomposed(s string) (runes [][]rune) {
 		runes = append(runes, gr.Runes())
 	}
 	return
+}
+
+// firstGraphemeCluster returns the first grapheme cluster (as a slice of bytes)
+// found in the given byte slice. This function can be called continuously to
+// extract all grapheme clusters from a byte slice, as follows:
+//
+//   state := -1
+//   for len(b) > 0 {
+//       c, b, state = firstGraphemeCluster(b, state)
+//       // Do something with c.
+//   }
+//
+// If you don't know the current state, for example when calling the function
+// for the first time, you must pass -1. Always passing -1 will work but it will
+// slow down the function. For consecutive calls, you should pass the state
+// returned by the previous call.
+//
+// The "rest" slice is the subslice of the original byte slice "b" starting
+// after the last byte of the identified grapheme cluster. If the length of the
+// "rest" slice is 0, the entire byte slice "b" has been processed.
+//
+// For an empty byte slice "b", the function returns nil values.
+//
+// Using this function is the preferred method of extracting grapheme clusters
+// when working exclusively with byte slices and/or with large byte slices, as
+// no large allocations are made.
+//
+// For the time being, this function is private because its signature might
+// still change.
+func firstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState int) {
+	// An empty byte slice returns nothing.
+	if len(b) == 0 {
+		return
+	}
+
+	// Extract the first rune.
+	r, length := utf8.DecodeRune(b)
+	if len(b) <= length { // If we're already past the end, there is nothing else to parse.
+		return b, nil, grAny
+	}
+
+	// If we don't know the state, determine it now.
+	if state < 0 {
+		state, _ = transitionGraphemeState(grAny, r)
+	}
+
+	// Transition until we find a boundary.
+	var boundary bool
+	for {
+		r, l := utf8.DecodeRune(b[length:])
+		state, boundary = transitionGraphemeState(state, r)
+
+		if boundary {
+			return b[:length], b[length:], state
+		}
+
+		length += l
+		if len(b) <= length {
+			return b, nil, grAny
+		}
+	}
+}
+
+// firstGraphemeClusterInString is like firstGraphemeCluster() but its input and
+// outputs are a string.
+func firstGraphemeClusterInString(str string, state int) (cluster, rest string, newState int) {
+	// An empty string returns nothing.
+	if len(str) == 0 {
+		return
+	}
+
+	// Extract the first rune.
+	r, length := utf8.DecodeRuneInString(str)
+	if len(str) <= length { // If we're already past the end, there is nothing else to parse.
+		return str, "", grAny
+	}
+
+	// If we don't know the state, determine it now.
+	if state < 0 {
+		state, _ = transitionGraphemeState(grAny, r)
+	}
+
+	// Transition until we find a boundary.
+	var boundary bool
+	for {
+		r, l := utf8.DecodeRuneInString(str[length:])
+		state, boundary = transitionGraphemeState(state, r)
+
+		if boundary {
+			return str[:length], str[length:], state
+		}
+
+		length += l
+		if len(str) <= length {
+			return str, "", grAny
+		}
+	}
 }
 
 // Run all lists of test cases using the Graphemes class.
