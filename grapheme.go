@@ -162,7 +162,7 @@ func GraphemeClusterCount(s string) (n int) {
 // after the last byte of the identified grapheme cluster. If the length of the
 // "rest" slice is 0, the entire byte slice "b" has been processed.
 //
-// For an empty byte slice "b", the function returns nil values.
+// Given an empty byte slice "b", the function returns nil values.
 //
 // Using this function is the preferred method of extracting grapheme clusters
 // when working exclusively with byte slices and/or with large byte slices, as
@@ -184,7 +184,7 @@ func firstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState i
 
 	// If we don't know the state, determine it now.
 	if state < 0 {
-		state, _ = transitionGraphemeState(grAny, r)
+		state, _ = transitionGraphemeState(state, r)
 	}
 
 	// Transition until we find a boundary.

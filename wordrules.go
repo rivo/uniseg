@@ -115,14 +115,20 @@ func transitionWordBreakState(state int, r rune, b []byte, str string) (newState
 		if state == wbNewline || state == wbCR || state == wbLF {
 			return wbAny | wbZWJBit, true // Make sure we don't apply WB4 to WB3a.
 		}
+		if state < 0 {
+			return wbAny | wbZWJBit, false
+		}
 		return state | wbZWJBit, false
 	} else if nextProperty == prExtend || nextProperty == prFormat {
 		// WB4 (for Extend and Format).
 		if state == wbNewline || state == wbCR || state == wbLF {
 			return wbAny, true // Make sure we don't apply WB4 to WB3a.
 		}
+		if state == wbWSegSpace || state == wbAny|wbZWJBit {
+			return wbAny, false // We don't break but this is also not WB3d or WB3c.
+		}
 		return state, false
-	} else if nextProperty == prExtendedPictographic && state&wbZWJBit != 0 {
+	} else if nextProperty == prExtendedPictographic && state >= 0 && state&wbZWJBit != 0 {
 		// WB3c.
 		return wbAny, false
 	}

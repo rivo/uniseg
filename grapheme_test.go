@@ -51,7 +51,7 @@ func decomposed(s string) (runes [][]rune) {
 
 // Run all lists of test cases using the Graphemes class.
 func TestGraphemesClass(t *testing.T) {
-	allCases := append(testCases, unicodeTestCases...)
+	allCases := append(testCases, graphemeBreakTestCases...)
 	for testNum, testCase := range allCases {
 		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
 		testNum,
@@ -207,7 +207,7 @@ func TestGraphemesCount(t *testing.T) {
 
 // Run all lists of test cases using the Graphemes function for byte slices.
 func TestGraphemesFunctionBytes(t *testing.T) {
-	allCases := append(testCases, unicodeTestCases...)
+	allCases := append(testCases, graphemeBreakTestCases...)
 	for testNum, testCase := range allCases {
 		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
 		testNum,
@@ -271,7 +271,7 @@ func TestGraphemesFunctionBytes(t *testing.T) {
 
 // Run all lists of test cases using the Graphemes function for strings.
 func TestGraphemesFunctionString(t *testing.T) {
-	allCases := append(testCases, unicodeTestCases...)
+	allCases := append(testCases, graphemeBreakTestCases...)
 	for testNum, testCase := range allCases {
 		/*t.Logf(`Test case %d "%s": Expecting %x, getting %x, code points %x"`,
 		testNum,

@@ -9,7 +9,7 @@
 //   4. The name of the generator, for logging purposes.
 //
 //go:generate go run gen_properties.go GraphemeBreakProperty graphemeproperties.go graphemeCodePoints graphemes
-//go:generate go run gen_properties.go WordBreakProperty wordbreakproperties.go workBreakCodePoints workbreak
+//go:generate go run gen_properties.go WordBreakProperty wordproperties.go workBreakCodePoints words
 package main
 
 import (
@@ -29,6 +29,8 @@ import (
 	"time"
 )
 
+// We want to test against a specific version rather than the latest. When the
+// package is upgraded to a new version, change these to generate new tests.
 const (
 	gbpURL   = `https://www.unicode.org/Public/14.0.0/ucd/auxiliary/%s.txt`
 	emojiURL = `https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt`
@@ -85,7 +87,7 @@ func parse(gbpURL, emojiURL string) (string, error) {
 	num := 0
 	for scanner.Scan() {
 		num++
-		line := scanner.Text()
+		line := strings.TrimSpace(scanner.Text())
 
 		// Skip comments and empty lines.
 		if strings.HasPrefix(line, "#") || line == "" {

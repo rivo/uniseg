@@ -1,10 +1,16 @@
 //go:build generate
 
-// This program generates grapheme_break_test.go from the Unicode Character
-// Database auxiliary data files at https://www.unicode.org/Public/
-// Either directly via HTTP by URL or from a local copy of the file.
+// This program generates a Go containing a slice of test cases based on the
+// Unicode Character Database auxiliary data files. The command line arguments
+// are as follows:
 //
-//go:generate go run gen_breaktest.go
+//   1. The name of the Unicode data file (just the filename, without extension).
+//   2. The name of the locally generated Go file.
+//   3. The name of the slice containing the test cases.
+//   4. The name of the generator, for logging purposes.
+//
+//go:generate go run gen_breaktest.go GraphemeBreakTest graphemebreak_test.go graphemeBreakTestCases graphemes
+//go:generate go run gen_breaktest.go WordBreakTest wordbreak_test.go wordBreakTestCases wordbreak
 
 package main
 
@@ -14,69 +20,57 @@ import (
 	"errors"
 	"fmt"
 	"go/format"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strings"
+	"time"
 )
 
-// See https://www.unicode.org/license.html for the Unicode license agreement.
-
-// We want to test against a specific version rather than the latest, which
-// can be found at:
-// https://www.unicode.org/Public/UCD/latest/ucd/auxiliary/GraphemeBreakTest.txt
-// When/if the package is upgraded to a new version, change these to generate
-// new tests.
+// We want to test against a specific version rather than the latest. When the
+// package is upgraded to a new version, change these to generate new tests.
 const (
-	url      = `https://www.unicode.org/Public/14.0.0/ucd/auxiliary/GraphemeBreakTest.txt`
-	filename = `GraphemeBreakTest-14.0.0.txt`
+	testCaseURL = `https://www.unicode.org/Public/14.0.0/ucd/auxiliary/%s.txt`
 )
 
 func main() {
-	log.SetPrefix("gen_breaktest: ")
+	if len(os.Args) < 5 {
+		fmt.Println("Not enough arguments, see code for details")
+		os.Exit(1)
+	}
+
+	log.SetPrefix("gen_breaktest (" + os.Args[4] + "): ")
 	log.SetFlags(0)
 
 	// Read text of testcases and parse into Go source code.
-	src, err := readAndParse()
+	src, err := parse(fmt.Sprintf(testCaseURL, os.Args[1]))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Format the Go code.
-	srcfmt, err := format.Source(src)
+	formatted, err := format.Source(src)
 	if err != nil {
 		log.Fatalln("gofmt:", err)
-		//srcfmt = src
 	}
 
 	// Write it out.
-	if err := ioutil.WriteFile("grapheme_break_test.go", srcfmt, 0644); err != nil {
+	log.Print("Writing to ", os.Args[2])
+	if err := ioutil.WriteFile(os.Args[2], formatted, 0644); err != nil {
 		log.Fatal(err)
 	}
 }
 
-// readAndParse reads a GraphemeBreakTest text file, either from a local file or
-// from a URL.
-//
-// It parses the file data into Go source code representing the testcases.
-func readAndParse() ([]byte, error) {
-	var r io.ReadCloser
-	if f, err := os.Open(filename); err == nil {
-		log.Printf("using %q", filename)
-		r = f
-	} else if !errors.Is(err, os.ErrNotExist) {
+// parse reads a break text file, either from a local file or from a URL. It
+// parses the file data into Go source code representing the test cases.
+func parse(url string) ([]byte, error) {
+	log.Printf("Parsing %s", url)
+	res, err := http.Get(url)
+	if err != nil {
 		return nil, err
-	} else {
-		log.Printf("using %q", url)
-		resp, err := http.Get(url)
-		if err != nil {
-			return nil, err
-		}
-		r = resp.Body
 	}
-	defer r.Close()
+	body := res.Body
+	defer body.Close()
 
 	buf := new(bytes.Buffer)
 	buf.Grow(120 << 10)
@@ -84,23 +78,16 @@ func readAndParse() ([]byte, error) {
 
 package uniseg
 
-// unicodeTestCases are Grapheme testcases taken from
-// ` + url + `,
-// see https://www.unicode.org/license.html for the Unicode license agreement.
-var unicodeTestCases = []testCase {
+// ` + os.Args[3] + ` are Grapheme testcases taken from
+// ` + url + `
+// on ` + time.Now().Format("January 2, 2006") + `. See
+// https://www.unicode.org/license.html for the Unicode license agreement.
+var ` + os.Args[3] + ` = []testCase {
 `)
 
-	sc := bufio.NewScanner(r)
+	sc := bufio.NewScanner(body)
 	num := 1
 	var line []byte
-	if sc.Scan() {
-		// Check first line for "# filename"
-		line = sc.Bytes()
-		if len(line) != 2+len(filename) || !strings.HasSuffix(string(line), filename) {
-			return nil, fmt.Errorf(`line %d: exected "# %v", got %q`, num, filename, line)
-		}
-	}
-
 	original := make([]byte, 0, 64)
 	expected := make([]byte, 0, 64)
 	for sc.Scan() {
@@ -129,7 +116,6 @@ var unicodeTestCases = []testCase {
 		return nil, fmt.Errorf(`line %d: exected "# EOF" as final line, got %q`, num, line)
 	}
 	buf.WriteString("}\n")
-	log.Printf("processed %d lines to %d/%d bytes", num, buf.Len(), buf.Cap())
 	return buf.Bytes(), nil
 }
 
