@@ -31,6 +31,15 @@ const (
 	prFormat
 	prHebrewLetter
 	prKatakana
+	prSp
+	prSTerm
+	prClose
+	prSContinue
+	prATerm
+	prUpper
+	prLower
+	prSep
+	prOLetter
 )
 
 // property returns the Unicode property value (see constants above) of the

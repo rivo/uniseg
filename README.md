@@ -59,4 +59,4 @@ This package does not depend on any packages outside the standard library.
 
 ## Your Feedback
 
-Add your issue here on GitHub. Feel free to get in touch if you have any questions.
+Add your issue here on GitHub, preferably before submitting any PR's. Feel free to get in touch if you have any questions.

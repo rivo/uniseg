@@ -10,7 +10,8 @@
 //   4. The name of the generator, for logging purposes.
 //
 //go:generate go run gen_breaktest.go GraphemeBreakTest graphemebreak_test.go graphemeBreakTestCases graphemes
-//go:generate go run gen_breaktest.go WordBreakTest wordbreak_test.go wordBreakTestCases wordbreak
+//go:generate go run gen_breaktest.go WordBreakTest wordbreak_test.go wordBreakTestCases words
+//go:generate go run gen_breaktest.go SentenceBreakTest sentencebreak_test.go sentenceBreakTestCases sentences
 
 package main
 

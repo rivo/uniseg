@@ -24,7 +24,7 @@ import "unicode/utf8"
 //
 // For the time being, this function is private because its signature might
 // still change.
-func firstWord(b []byte, state int) (cluster, rest []byte, newState int) {
+func firstWord(b []byte, state int) (word, rest []byte, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
 		return
@@ -59,7 +59,7 @@ func firstWord(b []byte, state int) (cluster, rest []byte, newState int) {
 }
 
 // firstWordInString is like firstWord() but its input and outputs are a string.
-func firstWordInString(str string, state int) (cluster, rest string, newState int) {
+func firstWordInString(str string, state int) (word, rest string, newState int) {
 	// An empty byte slice returns nothing.
 	if len(str) == 0 {
 		return

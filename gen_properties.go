@@ -7,9 +7,11 @@
 //   2. The name of the locally generated Go file.
 //   3. The name of the slice mapping code points to properties.
 //   4. The name of the generator, for logging purposes.
+//   5. (Optional) If "noemojis", don't include emoji properties.
 //
 //go:generate go run gen_properties.go GraphemeBreakProperty graphemeproperties.go graphemeCodePoints graphemes
 //go:generate go run gen_properties.go WordBreakProperty wordproperties.go workBreakCodePoints words
+//go:generate go run gen_properties.go SentenceBreakProperty sentenceproperties.go sentenceBreakCodePoints sentences noemojis
 package main
 
 import (
@@ -49,7 +51,11 @@ func main() {
 	log.SetFlags(0)
 
 	// Parse the text file and generate Go source code from it.
-	src, err := parse(fmt.Sprintf(gbpURL, os.Args[1]), emojiURL)
+	emojis := emojiURL
+	if len(os.Args) >= 6 && os.Args[5] == "noemojis" {
+		emojis = ""
+	}
+	src, err := parse(fmt.Sprintf(gbpURL, os.Args[1]), emojis)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +74,8 @@ func main() {
 }
 
 // parse parses the Unicode Properties text files located at the given URLs and
-// returns their equivalent Go source code to be used in the uniseg package.
+// returns their equivalent Go source code to be used in the uniseg package. If
+// "emojiURL" is an empty string, no emoji code points will be included.
 func parse(gbpURL, emojiURL string) (string, error) {
 	// Temporary buffer to hold properties.
 	var properties [][4]string
@@ -106,36 +113,38 @@ func parse(gbpURL, emojiURL string) (string, error) {
 	}
 
 	// Open the second URL.
-	log.Printf("Parsing %s", emojiURL)
-	res, err = http.Get(emojiURL)
-	if err != nil {
-		return "", err
-	}
-	in2 := res.Body
-	defer in2.Close()
-
-	// Parse it.
-	scanner = bufio.NewScanner(in2)
-	num = 0
-	for scanner.Scan() {
-		num++
-		line := scanner.Text()
-
-		// Skip comments, empty lines, and everything not containing
-		// "Extended_Pictographic".
-		if strings.HasPrefix(line, "#") || line == "" || !strings.Contains(line, "Extended_Pictographic") {
-			continue
-		}
-
-		// Everything else must be a code point range, a property and a comment.
-		from, to, property, comment, err := parseProperty(line)
+	if emojiURL != "" {
+		log.Printf("Parsing %s", emojiURL)
+		res, err = http.Get(emojiURL)
 		if err != nil {
-			return "", fmt.Errorf("emojis line %d: %v", num, err)
+			return "", err
 		}
-		properties = append(properties, [4]string{from, to, property, comment})
-	}
-	if err := scanner.Err(); err != nil {
-		return "", err
+		in2 := res.Body
+		defer in2.Close()
+
+		// Parse it.
+		scanner = bufio.NewScanner(in2)
+		num = 0
+		for scanner.Scan() {
+			num++
+			line := scanner.Text()
+
+			// Skip comments, empty lines, and everything not containing
+			// "Extended_Pictographic".
+			if strings.HasPrefix(line, "#") || line == "" || !strings.Contains(line, "Extended_Pictographic") {
+				continue
+			}
+
+			// Everything else must be a code point range, a property and a comment.
+			from, to, property, comment, err := parseProperty(line)
+			if err != nil {
+				return "", fmt.Errorf("emojis line %d: %v", num, err)
+			}
+			properties = append(properties, [4]string{from, to, property, comment})
+		}
+		if err := scanner.Err(); err != nil {
+			return "", err
+		}
 	}
 
 	// Sort properties.

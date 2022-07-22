@@ -102,9 +102,9 @@ var wbTransitions = map[[2]int][3]int{
 
 // transitionWordBreakState determines the new state of the word break parser
 // given the current state and the next code point. It also returns whether a
-// word break was detected. If more than one code point is needed to determine
-// the new state, the byte slice or the string starting after rune "r" can be
-// used (whichever is not nil or empty) for further lookups.
+// word bounadry was detected. If more than one code point is needed to
+// determine the new state, the byte slice or the string starting after rune "r"
+// can be used (whichever is not nil or empty) for further lookups.
 func transitionWordBreakState(state int, r rune, b []byte, str string) (newState int, wordBreak bool) {
 	// Determine the property of the next character.
 	nextProperty := property(workBreakCodePoints, r)
