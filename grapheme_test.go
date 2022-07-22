@@ -1,10 +1,23 @@
 package uniseg
 
 import (
+	"fmt"
 	"testing"
+	"unicode/utf8"
 )
 
-const benchmarkStr = "This is 🏳️‍🌈, a test string ツ for grapheme cluster testing. 🏋🏽‍♀️🙂🙂"
+const (
+	benchmarkStr      = "This is 🏳️‍🌈, a test string ツ for grapheme cluster testing. 🏋🏽‍♀️🙂🙂"
+	asciiBenchmarkStr = "This is flag, a test string smily for grapheme cluster testing. lift happy happy"
+)
+
+func init() {
+	for _, r := range asciiBenchmarkStr {
+		if r >= utf8.RuneSelf {
+			panic(fmt.Sprintf("non-ASCII char: %q", r))
+		}
+	}
+}
 
 // Variables to avoid compiler optimizations.
 var resultRunes []rune
@@ -64,7 +77,7 @@ func TestGraphemesClass(t *testing.T) {
 	GraphemeLoop:
 		for index = 0; gr.Next(); index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d "%s" failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
 					testNum,
 					testCase.original,
 					len(testCase.expected))
@@ -72,7 +85,7 @@ func TestGraphemesClass(t *testing.T) {
 			}
 			cluster := gr.Runes()
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %q, %d expected %q`,
 					testNum,
 					testCase.original,
 					index,
@@ -84,7 +97,7 @@ func TestGraphemesClass(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d "%s" failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
 						index,
@@ -93,9 +106,27 @@ func TestGraphemesClass(t *testing.T) {
 					break GraphemeLoop
 				}
 			}
+			if gr.Str() != string(testCase.expected[index]) {
+				t.Errorf(`Test case %d %q failed: Str() = %q want: %q`,
+					testNum,
+					testCase.original,
+					gr.Str(),
+					string(testCase.expected[index]),
+				)
+				break
+			}
+			if string(gr.Bytes()) != string(testCase.expected[index]) {
+				t.Errorf(`Test case %d %q failed: Bytes() = %q want: %q`,
+					testNum,
+					testCase.original,
+					gr.Str(),
+					string(testCase.expected[index]),
+				)
+				break
+			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d "%s" failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
 				index,
@@ -159,15 +190,15 @@ func TestGraphemesEarly(t *testing.T) {
 	gr := NewGraphemes("test")
 	r := gr.Runes()
 	if r != nil {
-		t.Errorf(`Expected nil rune slice, got %x`, r)
+		t.Errorf(`Expected nil rune slice, got %q`, r)
 	}
 	str := gr.Str()
 	if str != "" {
-		t.Errorf(`Expected empty string, got "%s"`, str)
+		t.Errorf(`Expected empty string, got %q`, str)
 	}
 	b := gr.Bytes()
 	if b != nil {
-		t.Errorf(`Expected byte rune slice, got %x`, b)
+		t.Errorf(`Expected byte rune slice, got %q`, b)
 	}
 	from, to := gr.Positions()
 	if from != 0 || to != 0 {
@@ -340,6 +371,28 @@ func BenchmarkGraphemesClass(b *testing.B) {
 		for g.Next() {
 			resultRunes = g.Runes()
 		}
+	}
+}
+
+func BenchmarkGraphemesNext(b *testing.B) {
+	g := NewGraphemes(benchmarkStr)
+	orig := *g
+	for i := 0; i < b.N; i++ {
+		for g.Next() {
+			resultRunes = g.Runes()
+		}
+		*g = orig
+	}
+}
+
+func BenchmarkGraphemesNext_ASCII(b *testing.B) {
+	g := NewGraphemes(asciiBenchmarkStr)
+	orig := *g
+	for i := 0; i < b.N; i++ {
+		for g.Next() {
+			_ = g.Str()
+		}
+		*g = orig
 	}
 }
 

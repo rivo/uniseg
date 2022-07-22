@@ -99,6 +99,9 @@ var grTransitions = map[[2]int][3]int{
 // woman) and the rules described in Annex #29 must be applied to group those
 // code points into clusters perceived by the user as one character.
 type Graphemes struct {
+	// String literal if there are only printable ASCII characters.
+	str string
+
 	// The code points over which this class iterates.
 	codePoints []rune
 
@@ -118,9 +121,22 @@ type Graphemes struct {
 	state int
 }
 
+func isPrint(s string) bool {
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c < ' ' || '~' < c {
+			return false
+		}
+	}
+	return true
+}
+
 // NewGraphemes returns a new grapheme cluster iterator.
 func NewGraphemes(s string) *Graphemes {
 	l := utf8.RuneCountInString(s)
+	if l == len(s) && isPrint(s) {
+		return &Graphemes{str: s}
+	}
 	codePoints := make([]rune, l)
 	indices := make([]int, l+1)
 	i := 0
@@ -143,6 +159,13 @@ func NewGraphemes(s string) *Graphemes {
 // accessed.
 func (g *Graphemes) Next() bool {
 	g.start = g.end
+	if g.str != "" {
+		if g.end < len(g.str) {
+			g.end++
+			return true
+		}
+		return false
+	}
 
 	// The state transition gives us a boundary instruction BEFORE the next code
 	// point so we always need to stay ahead by one code point.
@@ -226,6 +249,9 @@ func (g *Graphemes) Runes() []rune {
 	if g.start == g.end {
 		return nil
 	}
+	if g.str != "" {
+		return []rune{rune(g.str[g.start])}
+	}
 	return g.codePoints[g.start:g.end]
 }
 
@@ -235,6 +261,9 @@ func (g *Graphemes) Runes() []rune {
 func (g *Graphemes) Str() string {
 	if g.start == g.end {
 		return ""
+	}
+	if g.str != "" {
+		return g.str[g.start : g.start+1]
 	}
 	return string(g.codePoints[g.start:g.end])
 }
@@ -246,6 +275,9 @@ func (g *Graphemes) Bytes() []byte {
 	if g.start == g.end {
 		return nil
 	}
+	if g.str != "" {
+		return []byte{g.str[g.start]}
+	}
 	return []byte(string(g.codePoints[g.start:g.end]))
 }
 
@@ -256,6 +288,9 @@ func (g *Graphemes) Bytes() []byte {
 // the original string "str". If Next() has not yet been called, both values are
 // 0. If the iterator is already past the end, both values are 1.
 func (g *Graphemes) Positions() (int, int) {
+	if g.str != "" {
+		return g.start, g.start
+	}
 	return g.indices[g.start], g.indices[g.end]
 }
 
