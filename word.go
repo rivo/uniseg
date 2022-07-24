@@ -33,7 +33,7 @@ func firstWord(b []byte, state int) (word, rest []byte, newState int) {
 	// Extract the first rune.
 	r, length := utf8.DecodeRune(b)
 	if len(b) <= length { // If we're already past the end, there is nothing else to parse.
-		return b, nil, grAny
+		return b, nil, wbAny
 	}
 
 	// If we don't know the state, determine it now.
@@ -53,7 +53,7 @@ func firstWord(b []byte, state int) (word, rest []byte, newState int) {
 
 		length += l
 		if len(b) <= length {
-			return b, nil, grAny
+			return b, nil, wbAny
 		}
 	}
 }
@@ -68,7 +68,7 @@ func firstWordInString(str string, state int) (word, rest string, newState int) 
 	// Extract the first rune.
 	r, length := utf8.DecodeRuneInString(str)
 	if len(str) <= length { // If we're already past the end, there is nothing else to parse.
-		return str, "", grAny
+		return str, "", wbAny
 	}
 
 	// If we don't know the state, determine it now.
@@ -88,7 +88,7 @@ func firstWordInString(str string, state int) (word, rest string, newState int) 
 
 		length += l
 		if len(str) <= length {
-			return str, "", grAny
+			return str, "", wbAny
 		}
 	}
 }

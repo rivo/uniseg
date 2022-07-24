@@ -2,11 +2,12 @@
 package uniseg
 
 // workBreakCodePoints are taken from
-// https://www.unicode.org/Public/14.0.0/ucd/auxiliary/WordBreakProperty.txt,
+// https://www.unicode.org/Public/14.0.0/ucd/auxiliary/WordBreakProperty.txt
 // and
-// https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt,
-// ("Extended_Pictographic" only) on July 22, 2022. See
-// https://www.unicode.org/license.html for the Unicode license agreement.
+// https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt
+// ("Extended_Pictographic" only)
+// on July 23, 2022. See https://www.unicode.org/license.html for the Unicode
+// license agreement.
 var workBreakCodePoints = [][3]int{
 	{0x000A, 0x000A, prLF},                     // Cc       <control-000A>
 	{0x000B, 0x000C, prNewline},                // Cc   [2] <control-000B>..<control-000C>

@@ -1,9 +1,10 @@
 package uniseg
 
-// The unicode properties. Only the ones needed in the context of this package
-// are included.
+// The Unicode properties as used in the various parsers. Only the ones needed
+// in the context of this package are included.
 const (
-	prAny = iota
+	prXX  = 0    // Same as prAny.
+	prAny = iota // prAny must be 0.
 	prPrepend
 	prCR
 	prLF
@@ -40,11 +41,93 @@ const (
 	prLower
 	prSep
 	prOLetter
+	prCM
+	prBA
+	prBK
+	prSP
+	prEX
+	prQU
+	prAL
+	prPR
+	prPO
+	prOP
+	prCP
+	prIS
+	prHY
+	prSY
+	prNU
+	prCL
+	prNL
+	prGL
+	prAI
+	prBB
+	prHL
+	prSA
+	prJL
+	prJV
+	prJT
+	prNS
+	prZW
+	prB2
+	prIN
+	prWJ
+	prID
+	prEB
+	prCJ
+	prH2
+	prH3
+	prSG
+	prCB
+	prRI
+	prEM
+	prN
+	prNa
+	prA
+	prW
+	prH
+	prF
 )
 
-// property returns the Unicode property value (see constants above) of the
-// given code point.
-func property(dictionary [][3]int, r rune) int {
+// Unicode General Categories. Only the ones needed in the context of this
+// package are included.
+const (
+	gcNone = iota // gcNone must be 0.
+	gcCc
+	gcZs
+	gcPo
+	gcSc
+	gcPs
+	gcPe
+	gcSm
+	gcPd
+	gcNd
+	gcLu
+	gcSk
+	gcPc
+	gcLl
+	gcSo
+	gcLo
+	gcPi
+	gcCf
+	gcNo
+	gcPf
+	gcLC
+	gcLm
+	gcMn
+	gcMe
+	gcMc
+	gcNl
+	gcZl
+	gcZp
+	gcCn
+	gcCs
+	gcCo
+)
+
+// propertySearch performs a binary search on a property slice and returns the
+// entry whose range (start = first array element, end = second array element)
+// includes r, or an array of 0's if no such entry was found.
+func propertySearch[E interface{ [3]int | [4]int }](dictionary []E, r rune) (result E) {
 	// Run a binary search.
 	from := 0
 	to := len(dictionary)
@@ -59,7 +142,20 @@ func property(dictionary [][3]int, r rune) int {
 			from = middle + 1
 			continue
 		}
-		return cpRange[2]
+		return cpRange
 	}
-	return prAny
+	return
+}
+
+// property returns the Unicode property value (see constants above) of the
+// given code point.
+func property(dictionary [][3]int, r rune) int {
+	return propertySearch(dictionary, r)[2]
+}
+
+// propertyWithGenCat returns the Unicode property value and General Category
+// (see constants above) of the given code point.
+func propertyWithGenCat(dictionary [][4]int, r rune) (property, generalCategory int) {
+	entry := propertySearch(dictionary, r)
+	return entry[2], entry[3]
 }

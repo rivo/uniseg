@@ -12,6 +12,7 @@
 //go:generate go run gen_breaktest.go GraphemeBreakTest graphemebreak_test.go graphemeBreakTestCases graphemes
 //go:generate go run gen_breaktest.go WordBreakTest wordbreak_test.go wordBreakTestCases words
 //go:generate go run gen_breaktest.go SentenceBreakTest sentencebreak_test.go sentenceBreakTestCases sentences
+//go:generate go run gen_breaktest.go LineBreakTest linebreak_test.go lineBreakTestCases lines
 
 package main
 
@@ -122,9 +123,10 @@ var ` + os.Args[3] + ` = []testCase {
 
 // Used by parseRuneSequence to match input via bytes.HasPrefix.
 var (
-	prefix  = []byte("÷ ")
-	breakOk = []byte("÷")
-	breakNo = []byte("×")
+	prefixBreak     = []byte("÷ ")
+	prefixDontBreak = []byte("× ")
+	breakOk         = []byte("÷")
+	breakNo         = []byte("×")
 )
 
 // parseRuneSequence parses a rune + breaking opportunity sequence from b
@@ -142,11 +144,15 @@ var (
 // Note we explicitly require the sequence to start with ÷ and we implicitly
 // require it to end with ÷.
 func parseRuneSequence(b, orig, exp []byte) ([]byte, []byte, error) {
-	// Check for and remove first ÷.
-	if !bytes.HasPrefix(b, prefix) {
-		return nil, nil, fmt.Errorf("expected line to start with %q", prefix)
+	// Check for and remove first ÷ or ×.
+	if !bytes.HasPrefix(b, prefixBreak) && !bytes.HasPrefix(b, prefixDontBreak) {
+		return nil, nil, errors.New("expected ÷ or × as first character")
 	}
-	b = b[len(prefix):]
+	if bytes.HasPrefix(b, prefixBreak) {
+		b = b[len(prefixBreak):]
+	} else {
+		b = b[len(prefixDontBreak):]
+	}
 
 	boundary := true
 	exp = append(exp, "[][]rune{"...)

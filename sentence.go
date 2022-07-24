@@ -12,7 +12,7 @@ func firstSentence(b []byte, state int) (sentence, rest []byte, newState int) {
 	// Extract the first rune.
 	r, length := utf8.DecodeRune(b)
 	if len(b) <= length { // If we're already past the end, there is nothing else to parse.
-		return b, nil, grAny
+		return b, nil, sbAny
 	}
 
 	// If we don't know the state, determine it now.
@@ -32,7 +32,7 @@ func firstSentence(b []byte, state int) (sentence, rest []byte, newState int) {
 
 		length += l
 		if len(b) <= length {
-			return b, nil, grAny
+			return b, nil, sbAny
 		}
 	}
 }
@@ -48,7 +48,7 @@ func firstSentenceInString(str string, state int) (sentence, rest string, newSta
 	// Extract the first rune.
 	r, length := utf8.DecodeRuneInString(str)
 	if len(str) <= length { // If we're already past the end, there is nothing else to parse.
-		return str, "", grAny
+		return str, "", sbAny
 	}
 
 	// If we don't know the state, determine it now.
@@ -68,7 +68,7 @@ func firstSentenceInString(str string, state int) (sentence, rest string, newSta
 
 		length += l
 		if len(str) <= length {
-			return str, "", grAny
+			return str, "", sbAny
 		}
 	}
 }

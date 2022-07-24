@@ -7,11 +7,15 @@
 //   2. The name of the locally generated Go file.
 //   3. The name of the slice mapping code points to properties.
 //   4. The name of the generator, for logging purposes.
-//   5. (Optional) If "noemojis", don't include emoji properties.
+//   5. (Optional) Flags, comma-separated. The following flags are available:
+//        - "emojis": include emoji properties (Extended Pictographic only).
+//        - "gencat": include general category properties.
 //
-//go:generate go run gen_properties.go GraphemeBreakProperty graphemeproperties.go graphemeCodePoints graphemes
-//go:generate go run gen_properties.go WordBreakProperty wordproperties.go workBreakCodePoints words
-//go:generate go run gen_properties.go SentenceBreakProperty sentenceproperties.go sentenceBreakCodePoints sentences noemojis
+//go:generate go run gen_properties.go auxiliary/GraphemeBreakProperty graphemeproperties.go graphemeCodePoints graphemes emojis
+//go:generate go run gen_properties.go auxiliary/WordBreakProperty wordproperties.go workBreakCodePoints words emojis
+//go:generate go run gen_properties.go auxiliary/SentenceBreakProperty sentenceproperties.go sentenceBreakCodePoints sentences
+//go:generate go run gen_properties.go LineBreak lineproperties.go lineBreakCodePoints lines gencat
+//go:generate go run gen_properties.go EastAsianWidth eastasianwidth.go eastAsianWidth eastasianwidth
 package main
 
 import (
@@ -34,12 +38,12 @@ import (
 // We want to test against a specific version rather than the latest. When the
 // package is upgraded to a new version, change these to generate new tests.
 const (
-	gbpURL   = `https://www.unicode.org/Public/14.0.0/ucd/auxiliary/%s.txt`
+	gbpURL   = `https://www.unicode.org/Public/14.0.0/ucd/%s.txt`
 	emojiURL = `https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt`
 )
 
 // The regular expression for a line containing a code point range property.
-var propertyPattern = regexp.MustCompile(`^([0-9A-F]{4,6})(\.\.([0-9A-F]{4,6}))?\s+;\s+([A-Za-z0-9_]+)\s*#\s(.+)$`)
+var propertyPattern = regexp.MustCompile(`^([0-9A-F]{4,6})(\.\.([0-9A-F]{4,6}))?\s*;\s*([A-Za-z0-9_]+)\s*#\s(.+)$`)
 
 func main() {
 	if len(os.Args) < 5 {
@@ -50,12 +54,21 @@ func main() {
 	log.SetPrefix("gen_properties (" + os.Args[4] + "): ")
 	log.SetFlags(0)
 
-	// Parse the text file and generate Go source code from it.
-	emojis := emojiURL
-	if len(os.Args) >= 6 && os.Args[5] == "noemojis" {
-		emojis = ""
+	// Parse flags.
+	flags := make(map[string]struct{})
+	if len(os.Args) >= 6 {
+		for _, flag := range strings.Split(os.Args[5], ",") {
+			flags[flag] = struct{}{}
+		}
 	}
-	src, err := parse(fmt.Sprintf(gbpURL, os.Args[1]), emojis)
+
+	// Parse the text file and generate Go source code from it.
+	var emojis string
+	if _, ok := flags["emojis"]; ok {
+		emojis = emojiURL
+	}
+	_, includeGeneralCategory := flags["gencat"]
+	src, err := parse(fmt.Sprintf(gbpURL, os.Args[1]), emojis, includeGeneralCategory)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,8 +88,10 @@ func main() {
 
 // parse parses the Unicode Properties text files located at the given URLs and
 // returns their equivalent Go source code to be used in the uniseg package. If
-// "emojiURL" is an empty string, no emoji code points will be included.
-func parse(gbpURL, emojiURL string) (string, error) {
+// "emojiURL" is an empty string, no emoji code points will be included. If
+// "includeGeneralCategory" is true, the Unicode General Category property will
+// be extracted from the comments and included in the output.
+func parse(gbpURL, emojiURL string, includeGeneralCategory bool) (string, error) {
 	// Temporary buffer to hold properties.
 	var properties [][4]string
 
@@ -155,22 +170,42 @@ func parse(gbpURL, emojiURL string) (string, error) {
 	})
 
 	// Header.
-	var buf bytes.Buffer
+	var (
+		buf          bytes.Buffer
+		emojiComment string
+	)
+	columns := 3
+	if includeGeneralCategory {
+		columns = 4
+	}
+	if emojiURL != "" {
+		emojiComment = `
+// and
+// ` + emojiURL + `
+// ("Extended_Pictographic" only)`
+	}
 	buf.WriteString(`// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 package uniseg
 
 // ` + os.Args[3] + ` are taken from
-// ` + gbpURL + `,
-// and
-// ` + emojiURL + `,
-// ("Extended_Pictographic" only) on ` + time.Now().Format("January 2, 2006") + `. See
-// https://www.unicode.org/license.html for the Unicode license agreement.
-var ` + os.Args[3] + ` = [][3]int{
+// ` + gbpURL + emojiComment + `
+// on ` + time.Now().Format("January 2, 2006") + `. See https://www.unicode.org/license.html for the Unicode
+// license agreement.
+var ` + os.Args[3] + ` = [][` + strconv.Itoa(columns) + `]int{
 	`)
 
 	// Properties.
 	for _, prop := range properties {
-		fmt.Fprintf(&buf, "{0x%s,0x%s,%s}, // %s\n", prop[0], prop[1], translateProperty("pr", prop[2]), prop[3])
+		if includeGeneralCategory {
+			generalCategory := "gc" + prop[3][:2]
+			if generalCategory == "gcL&" {
+				generalCategory = "gcLC"
+			}
+			prop[3] = prop[3][3:]
+			fmt.Fprintf(&buf, "{0x%s,0x%s,%s,%s}, // %s\n", prop[0], prop[1], translateProperty("pr", prop[2]), generalCategory, prop[3])
+		} else {
+			fmt.Fprintf(&buf, "{0x%s,0x%s,%s}, // %s\n", prop[0], prop[1], translateProperty("pr", prop[2]), prop[3])
+		}
 	}
 
 	// Tail.

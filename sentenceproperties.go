@@ -2,11 +2,9 @@
 package uniseg
 
 // sentenceBreakCodePoints are taken from
-// https://www.unicode.org/Public/14.0.0/ucd/auxiliary/SentenceBreakProperty.txt,
-// and
-// ,
-// ("Extended_Pictographic" only) on July 22, 2022. See
-// https://www.unicode.org/license.html for the Unicode license agreement.
+// https://www.unicode.org/Public/14.0.0/ucd/auxiliary/SentenceBreakProperty.txt
+// on July 23, 2022. See https://www.unicode.org/license.html for the Unicode
+// license agreement.
 var sentenceBreakCodePoints = [][3]int{
 	{0x0009, 0x0009, prSp},        // Cc       <control-0009>
 	{0x000A, 0x000A, prLF},        // Cc       <control-000A>
