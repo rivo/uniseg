@@ -2,9 +2,43 @@ package uniseg
 
 import "unicode/utf8"
 
-//TODO: Adapt from firstWord() when making it public.
-//TODO: Add description of "mustBreak".
-func firstLineSegment(b []byte, state int) (segment, rest []byte, mustBreak bool, newState int) {
+// FirstLineSegment returns the prefix of the given byte slice after which a
+// decision to break the string over to the next line can or must be made,
+// according to the rules of Unicode Standard Annex #14. This is used to
+// implement line breaking.
+//
+// Line breaking, also known as word wrapping, is the process of breaking a
+// section of text into lines such that it will fit in the available width of a
+// page, window or other display area.
+//
+// The returned "segment" may not be broken into smaller parts, unless no other
+// breaking opportunities present themselves, in which case you may break by
+// grapheme clusters (using the FirstGraphemeCluster() function to determine the
+// grapheme clusters).
+//
+// The "mustBreak" flag indicates whether you MUST break the line after the
+// given segment (true), for example after newline characters, or you MAY break
+// the line after the given segment (false).
+//
+// This function can be called continuously to extract all non-breaking sub-sets
+// from a byte slice, as illustrated in the example below.
+//
+// If you don't know the current state, for example when calling the function
+// for the first time, you must pass -1. For consecutive calls, pass the state
+// and rest slice returned by the previous call.
+//
+// The "rest" slice is the sub-slice of the original byte slice "b" starting
+// after the last byte of the identified line segment. If the length of the
+// "rest" slice is 0, the entire byte slice "b" has been processed. The
+// "segment" byte slice is the sub-slice of the input slice containing the
+// identified line segment.
+//
+// Given an empty byte slice "b", the function returns nil values.
+//
+// Note that in accordance with UAX #14 LB3, the final segment will end with
+// "mustBreak" set to true. You can choose to ignore this by checking if the
+// length of the "rest" slice is 0.
+func FirstLineSegment(b []byte, state int) (segment, rest []byte, mustBreak bool, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
 		return
@@ -38,9 +72,9 @@ func firstLineSegment(b []byte, state int) (segment, rest []byte, mustBreak bool
 	}
 }
 
-// firstLineSegmentInString is like firstLineSegment() but its input and outputs
-// are a string.
-func firstLineSegmentInString(str string, state int) (sentence, rest string, mustBreak bool, newState int) {
+// FirstLineSegmentInString is like FirstLineSegment() but its input and outputs
+// are strings.
+func FirstLineSegmentInString(str string, state int) (segment, rest string, mustBreak bool, newState int) {
 	// An empty byte slice returns nothing.
 	if len(str) == 0 {
 		return

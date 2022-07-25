@@ -133,44 +133,37 @@ func (g *Graphemes) Reset() {
 }
 
 // GraphemeClusterCount returns the number of user-perceived characters
-// (grapheme clusters) for the given string. To calculate this number, it
-// iterates through the string using the Graphemes iterator.
+// (grapheme clusters) for the given string.
 func GraphemeClusterCount(s string) (n int) {
 	state := -1
 	for len(s) > 0 {
-		_, s, state = firstGraphemeClusterInString(s, state)
+		_, s, state = FirstGraphemeClusterInString(s, state)
 		n++
 	}
 	return
 }
 
-// firstGraphemeCluster returns the first grapheme cluster (as a slice of bytes)
-// found in the given byte slice. This function can be called continuously to
-// extract all grapheme clusters from a byte slice, as follows:
-//
-//   state := -1
-//   for len(b) > 0 {
-//       c, b, state = firstGraphemeCluster(b, state)
-//       // Do something with c.
-//   }
+// FirstGraphemeCluster returns the first grapheme cluster found in the given
+// byte slice according to the rules of Unicode Standard Annex #29, Grapheme
+// Cluster Boundaries. This function can be called continuously to extract all
+// grapheme clusters from a byte slice, as illustrated in the example below.
 //
 // If you don't know the current state, for example when calling the function
 // for the first time, you must pass -1. For consecutive calls, pass the state
-// returned by the previous call.
+// and rest slice returned by the previous call.
 //
-// The "rest" slice is the subslice of the original byte slice "b" starting
+// The "rest" slice is the sub-slice of the original byte slice "b" starting
 // after the last byte of the identified grapheme cluster. If the length of the
-// "rest" slice is 0, the entire byte slice "b" has been processed.
+// "rest" slice is 0, the entire byte slice "b" has been processed. The
+// "cluster" byte slice is the sub-slice of the input slice containing the
+// identified grapheme cluster.
 //
 // Given an empty byte slice "b", the function returns nil values.
 //
-// Using this function is the preferred method of extracting grapheme clusters
-// when working exclusively with byte slices and/or with large byte slices, as
-// no large allocations are made.
-//
-// For the time being, this function is private because its signature might
-// still change.
-func firstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState int) {
+// While slightly less convenient than using the Graphemes class, this function
+// has much better performance and makes no allocations. It lends itself well to
+// large byte slices.
+func FirstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
 		return
@@ -204,9 +197,9 @@ func firstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState i
 	}
 }
 
-// firstGraphemeClusterInString is like firstGraphemeCluster() but its input and
-// outputs are a string.
-func firstGraphemeClusterInString(str string, state int) (cluster, rest string, newState int) {
+// FirstGraphemeClusterInString is like FirstGraphemeCluster() but its input and
+// outputs are strings.
+func FirstGraphemeClusterInString(str string, state int) (cluster, rest string, newState int) {
 	// An empty string returns nothing.
 	if len(str) == 0 {
 		return

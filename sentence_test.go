@@ -30,7 +30,7 @@ func TestSentenceCasesBytes(t *testing.T) {
 					len(testCase.expected))
 				break
 			}
-			sentence, b, state = firstSentence(b, state)
+			sentence, b, state = FirstSentence(b, state)
 			cluster := []rune(string(sentence))
 			if len(cluster) != len(testCase.expected[index]) {
 				t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
@@ -91,7 +91,7 @@ func TestSentenceCasesString(t *testing.T) {
 					len(testCase.expected))
 				break
 			}
-			sentence, str, state = firstSentenceInString(str, state)
+			sentence, str, state = FirstSentenceInString(str, state)
 			cluster := []rune(string(sentence))
 			if len(cluster) != len(testCase.expected[index]) {
 				t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
@@ -122,6 +122,32 @@ func TestSentenceCasesString(t *testing.T) {
 				testCase.original,
 				index,
 				len(testCase.expected))
+		}
+	}
+}
+
+// Benchmark the use of the sentence break function for byte slices.
+func BenchmarkSentenceFunctionBytes(b *testing.B) {
+	str := []byte(benchmarkStr)
+	for i := 0; i < b.N; i++ {
+		var c []byte
+		state := -1
+		for len(str) > 0 {
+			c, str, state = FirstSentence(str, state)
+			resultRunes = []rune(string(c))
+		}
+	}
+}
+
+// Benchmark the use of the sentence break function for strings.
+func BenchmarkSentenceFunctionString(b *testing.B) {
+	str := benchmarkStr
+	for i := 0; i < b.N; i++ {
+		var c string
+		state := -1
+		for len(str) > 0 {
+			c, str, state = FirstSentenceInString(str, state)
+			resultRunes = []rune(c)
 		}
 	}
 }

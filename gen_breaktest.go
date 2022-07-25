@@ -76,9 +76,9 @@ func parse(url string) ([]byte, error) {
 
 	buf := new(bytes.Buffer)
 	buf.Grow(120 << 10)
-	buf.WriteString(`// Code generated via go generate from gen_breaktest.go. DO NOT EDIT.
+	buf.WriteString(`package uniseg
 
-package uniseg
+// Code generated via go generate from gen_breaktest.go. DO NOT EDIT.
 
 // ` + os.Args[3] + ` are Grapheme testcases taken from
 // ` + url + `

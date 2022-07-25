@@ -1,9 +1,10 @@
-// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 package uniseg
+
+// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 
 // sentenceBreakCodePoints are taken from
 // https://www.unicode.org/Public/14.0.0/ucd/auxiliary/SentenceBreakProperty.txt
-// on July 23, 2022. See https://www.unicode.org/license.html for the Unicode
+// on July 25, 2022. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var sentenceBreakCodePoints = [][3]int{
 	{0x0009, 0x0009, prSp},        // Cc       <control-0009>

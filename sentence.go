@@ -2,8 +2,22 @@ package uniseg
 
 import "unicode/utf8"
 
-//TODO: Adapt from firstWord() when making it public.
-func firstSentence(b []byte, state int) (sentence, rest []byte, newState int) {
+// FirstSentence returns the first sentence found in the given byte slice
+// according to the rules of Unicode Standard Annex #29, Sentence Boundaries.
+// This function can be called continuously to extract all sentences from a byte
+// slice, as illustrated in the example below.
+//
+// If you don't know the current state, for example when calling the function
+// for the first time, you must pass -1. For consecutive calls, pass the state
+// and rest slice returned by the previous call.
+//
+// The "rest" slice is the sub-slice of the original byte slice "b" starting
+// after the last byte of the identified sentence. If the length of the "rest"
+// slice is 0, the entire byte slice "b" has been processed. The "sentence" byte
+// slice is the sub-slice of the input slice containing the identified sentence.
+//
+// Given an empty byte slice "b", the function returns nil values.
+func FirstSentence(b []byte, state int) (sentence, rest []byte, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
 		return
@@ -37,9 +51,9 @@ func firstSentence(b []byte, state int) (sentence, rest []byte, newState int) {
 	}
 }
 
-// firstSentenceInString is like firstSentence() but its input and outputs are a
-// string.
-func firstSentenceInString(str string, state int) (sentence, rest string, newState int) {
+// FirstSentenceInString is like FirstSentence() but its input and outputs are
+// strings.
+func FirstSentenceInString(str string, state int) (sentence, rest string, newState int) {
 	// An empty byte slice returns nothing.
 	if len(str) == 0 {
 		return

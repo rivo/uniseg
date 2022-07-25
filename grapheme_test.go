@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-const benchmarkStr = "This is 🏳️‍🌈, a test string ツ for grapheme cluster testing. 🏋🏽‍♀️🙂🙂"
+const benchmarkStr = "This is 🏳️‍🌈, a test string ツ for grapheme cluster testing. 🏋🏽‍♀️🙂🙂 It's only relevant for benchmark tests."
 
 // Variables to avoid compiler optimizations.
 var resultRunes []rune
@@ -223,7 +223,7 @@ func TestGraphemesFunctionBytes(t *testing.T) {
 		)
 	GraphemeLoop:
 		for len(b) > 0 {
-			c, b, state = firstGraphemeCluster(b, state)
+			c, b, state = FirstGraphemeCluster(b, state)
 
 			if index >= len(testCase.expected) {
 				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
@@ -287,7 +287,7 @@ func TestGraphemesFunctionString(t *testing.T) {
 		)
 	GraphemeLoop:
 		for len(str) > 0 {
-			c, str, state = firstGraphemeClusterInString(str, state)
+			c, str, state = FirstGraphemeClusterInString(str, state)
 
 			if index >= len(testCase.expected) {
 				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
@@ -350,7 +350,7 @@ func BenchmarkGraphemesFunctionBytes(b *testing.B) {
 		var c []byte
 		state := -1
 		for len(str) > 0 {
-			c, str, state = firstGraphemeCluster(str, state)
+			c, str, state = FirstGraphemeCluster(str, state)
 			resultRunes = []rune(string(c))
 		}
 	}
@@ -363,8 +363,8 @@ func BenchmarkGraphemesFunctionString(b *testing.B) {
 		var c string
 		state := -1
 		for len(str) > 0 {
-			c, str, state = firstGraphemeClusterInString(str, state)
-			resultRunes = []rune(string(c))
+			c, str, state = FirstGraphemeClusterInString(str, state)
+			resultRunes = []rune(c)
 		}
 	}
 }

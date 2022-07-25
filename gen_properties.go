@@ -184,8 +184,9 @@ func parse(gbpURL, emojiURL string, includeGeneralCategory bool) (string, error)
 // ` + emojiURL + `
 // ("Extended_Pictographic" only)`
 	}
-	buf.WriteString(`// Code generated via go generate from gen_properties.go. DO NOT EDIT.
-package uniseg
+	buf.WriteString(`package uniseg
+
+// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 
 // ` + os.Args[3] + ` are taken from
 // ` + gbpURL + emojiComment + `

@@ -1,12 +1,13 @@
-// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 package uniseg
+
+// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 
 // graphemeCodePoints are taken from
 // https://www.unicode.org/Public/14.0.0/ucd/auxiliary/GraphemeBreakProperty.txt
 // and
 // https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt
 // ("Extended_Pictographic" only)
-// on July 23, 2022. See https://www.unicode.org/license.html for the Unicode
+// on July 25, 2022. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var graphemeCodePoints = [][3]int{
 	{0x0000, 0x0009, prControl},                // Cc  [10] <control-0000>..<control-0009>

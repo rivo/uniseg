@@ -28,7 +28,7 @@ func TestWordCasesBytes(t *testing.T) {
 					len(testCase.expected))
 				break
 			}
-			word, b, state = firstWord(b, state)
+			word, b, state = FirstWord(b, state)
 			cluster := []rune(string(word))
 			if len(cluster) != len(testCase.expected[index]) {
 				t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
@@ -89,7 +89,7 @@ func TestWordCasesString(t *testing.T) {
 					len(testCase.expected))
 				break
 			}
-			word, str, state = firstWordInString(str, state)
+			word, str, state = FirstWordInString(str, state)
 			cluster := []rune(string(word))
 			if len(cluster) != len(testCase.expected[index]) {
 				t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
@@ -120,6 +120,32 @@ func TestWordCasesString(t *testing.T) {
 				testCase.original,
 				index,
 				len(testCase.expected))
+		}
+	}
+}
+
+// Benchmark the use of the word break function for byte slices.
+func BenchmarkWordFunctionBytes(b *testing.B) {
+	str := []byte(benchmarkStr)
+	for i := 0; i < b.N; i++ {
+		var c []byte
+		state := -1
+		for len(str) > 0 {
+			c, str, state = FirstWord(str, state)
+			resultRunes = []rune(string(c))
+		}
+	}
+}
+
+// Benchmark the use of the word break function for strings.
+func BenchmarkWordFunctionString(b *testing.B) {
+	str := benchmarkStr
+	for i := 0; i < b.N; i++ {
+		var c string
+		state := -1
+		for len(str) > 0 {
+			c, str, state = FirstWordInString(str, state)
+			resultRunes = []rune(c)
 		}
 	}
 }
