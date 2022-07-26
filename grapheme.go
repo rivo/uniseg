@@ -2,117 +2,88 @@ package uniseg
 
 import "unicode/utf8"
 
-// Graphemes implements an iterator over Unicode extended grapheme clusters,
-// specified in the Unicode Standard Annex #29. Grapheme clusters correspond to
-// "user-perceived characters". These characters often consist of multiple
-// code points (e.g. the "woman kissing woman" emoji consists of 8 code points:
-// woman + ZWJ + heavy black heart (2 code points) + ZWJ + kiss mark + ZWJ +
-// woman) and the rules described in Annex #29 must be applied to group those
-// code points into clusters perceived by the user as one character.
+// Graphemes implements an iterator over Unicode grapheme clusters, or
+// user-perceived characters. While iterating, it also provides information
+// about word boundaries, sentence boundaries, and line breaks.
+//
+// After constructing the class via NewGraphemes(str) for a given string "str",
+// Next() is called for every grapheme cluster in a loop until it returns false.
+// Inside the loop, information about the grapheme cluster as well as boundary
+// information is available via the various methods (see examples below).
+//
+// Using this class to iterate over a string is convenient but it is much slower
+// than using this package's Step() or StepString() functions or any of the
+// other specialized functions starting with "First".
 type Graphemes struct {
-	// The code points over which this class iterates.
-	codePoints []rune
+	// The original string.
+	original string
 
-	// The (byte-based) indices of the code points into the original string plus
-	// len(original string). Thus, len(indices) = len(codePoints) + 1.
-	indices []int
+	// The remaining string to be parsed.
+	remaining string
 
-	// The current grapheme cluster to be returned. These are indices into
-	// codePoints/indices. If start == end, we either haven't started iterating
-	// yet (0) or the iteration has already completed (1).
-	start, end int
+	// The current grapheme cluster.
+	cluster string
 
-	// The index of the next code point to be parsed.
-	pos int
+	// The byte offset of the current grapheme cluster relative to the original
+	// string.
+	offset int
 
-	// The current state of the Grapheme code point parser.
-	graphemeState int
+	// The current boundary information of the Step() parser.
+	boundaries int
+
+	// The current state of the Step() parser.
+	state int
 }
 
 // NewGraphemes returns a new grapheme cluster iterator.
 func NewGraphemes(s string) *Graphemes {
-	l := utf8.RuneCountInString(s)
-	codePoints := make([]rune, l)
-	indices := make([]int, l+1)
-	i := 0
-	for pos, r := range s {
-		codePoints[i] = r
-		indices[i] = pos
-		i++
+	return &Graphemes{
+		original:  s,
+		remaining: s,
+		state:     -1,
 	}
-	indices[l] = len(s)
-	g := &Graphemes{
-		codePoints: codePoints,
-		indices:    indices,
-	}
-	g.Next() // Parse ahead.
-	return g
 }
 
 // Next advances the iterator by one grapheme cluster and returns false if no
 // clusters are left. This function must be called before the first cluster is
 // accessed.
 func (g *Graphemes) Next() bool {
-	g.start = g.end
-
-	// The state transition gives us a boundary instruction BEFORE the next code
-	// point so we always need to stay ahead by one code point.
-
-	// Parse the next code point.
-	for g.pos <= len(g.codePoints) {
-		// GB2.
-		if g.pos == len(g.codePoints) {
-			g.end = g.pos
-			g.pos++
-			break
-		}
-
-		// Calculate the next state.
-		var boundary bool
-		g.graphemeState, boundary = transitionGraphemeState(g.graphemeState, g.codePoints[g.pos])
-
-		// If we found a cluster boundary, let's stop here. The current cluster will
-		// be the one that just ended.
-		if g.pos == 0 /* GB1 */ || boundary {
-			g.end = g.pos
-			g.pos++
-			break
-		}
-
-		g.pos++
+	if len(g.remaining) == 0 {
+		// We're already past the end.
+		g.state = -2
+		g.cluster = ""
+		return false
 	}
-
-	return g.start != g.end
+	g.offset += len(g.cluster)
+	g.cluster, g.remaining, g.boundaries, g.state = StepString(g.remaining, g.state)
+	return true
 }
 
 // Runes returns a slice of runes (code points) which corresponds to the current
 // grapheme cluster. If the iterator is already past the end or Next() has not
 // yet been called, nil is returned.
 func (g *Graphemes) Runes() []rune {
-	if g.start == g.end {
+	if g.state < 0 {
 		return nil
 	}
-	return g.codePoints[g.start:g.end]
+	return []rune(g.cluster)
 }
 
 // Str returns a substring of the original string which corresponds to the
 // current grapheme cluster. If the iterator is already past the end or Next()
 // has not yet been called, an empty string is returned.
 func (g *Graphemes) Str() string {
-	if g.start == g.end {
-		return ""
-	}
-	return string(g.codePoints[g.start:g.end])
+	return g.cluster
 }
 
 // Bytes returns a byte slice which corresponds to the current grapheme cluster.
 // If the iterator is already past the end or Next() has not yet been called,
 // nil is returned.
 func (g *Graphemes) Bytes() []byte {
-	if g.start == g.end {
+	if g.state < 0 {
 		return nil
 	}
-	return []byte(string(g.codePoints[g.start:g.end]))
+	return []byte(g.cluster)
 }
 
 // Positions returns the interval of the current grapheme cluster as byte
@@ -122,14 +93,53 @@ func (g *Graphemes) Bytes() []byte {
 // the original string "str". If Next() has not yet been called, both values are
 // 0. If the iterator is already past the end, both values are 1.
 func (g *Graphemes) Positions() (int, int) {
-	return g.indices[g.start], g.indices[g.end]
+	if g.state == -1 {
+		return 0, 0
+	} else if g.state == -2 {
+		return 1, 1
+	}
+	return g.offset, g.offset + len(g.cluster)
+}
+
+// IsWordBoundary returns true if a word ends after the current grapheme
+// cluster.
+func (g *Graphemes) IsWordBoundary() bool {
+	if g.state < 0 {
+		return true
+	}
+	return g.boundaries&MaskWord != 0
+}
+
+// IsSentenceBoundary returns true if a sentence ends after the current
+// grapheme cluster.
+func (g *Graphemes) IsSentenceBoundary() bool {
+	if g.state < 0 {
+		return true
+	}
+	return g.boundaries&MaskSentence != 0
+}
+
+// LineBreak returns whether the line can be broken after the current grapheme
+// cluster. A value of LineDontBreak means the line may not be broken, a value
+// of LineMustBreak means the line must be broken, and a value of LineCanBreak
+// means the line may or may not be broken.
+func (g *Graphemes) LineBreak() int {
+	if g.state == -1 {
+		return LineDontBreak
+	}
+	if g.state == -2 {
+		return LineMustBreak
+	}
+	return g.boundaries & MaskLine
 }
 
 // Reset puts the iterator into its initial state such that the next call to
 // Next() sets it to the first grapheme cluster again.
 func (g *Graphemes) Reset() {
-	g.start, g.end, g.pos, g.graphemeState = 0, 0, 0, grAny
-	g.Next() // Parse ahead again.
+	g.state = -1
+	g.offset = 0
+	g.cluster = ""
+	g.remaining = g.original
 }
 
 // GraphemeClusterCount returns the number of user-perceived characters

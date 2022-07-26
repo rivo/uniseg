@@ -95,7 +95,7 @@ func TestStepBytesWord(t *testing.T) {
 			c, b, boundaries, state = Step(b, state)
 
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q failed: More words returned than expected %d`,
 					testNum,
 					testCase.original,
 					len(testCase.expected))
@@ -109,7 +109,7 @@ func TestStepBytesWord(t *testing.T) {
 			cluster := growingCluster
 			growingCluster = nil
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
 					index,
@@ -121,7 +121,7 @@ func TestStepBytesWord(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q failed: Word at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
 						index,
@@ -134,7 +134,7 @@ func TestStepBytesWord(t *testing.T) {
 			index++
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q failed: Fewer words returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
 				index,
@@ -165,7 +165,7 @@ func TestStepBytesSentence(t *testing.T) {
 			c, b, boundaries, state = Step(b, state)
 
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q failed: More sentences returned than expected %d`,
 					testNum,
 					testCase.original,
 					len(testCase.expected))
@@ -179,7 +179,7 @@ func TestStepBytesSentence(t *testing.T) {
 			cluster := growingCluster
 			growingCluster = nil
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
 					index,
@@ -191,7 +191,7 @@ func TestStepBytesSentence(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q failed: Sentence at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
 						index,
@@ -204,7 +204,7 @@ func TestStepBytesSentence(t *testing.T) {
 			index++
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q failed: Fewer sentences returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
 				index,
@@ -312,7 +312,7 @@ func TestStepStringWord(t *testing.T) {
 			c, str, boundaries, state = StepString(str, state)
 
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q failed: More words returned than expected %d`,
 					testNum,
 					testCase.original,
 					len(testCase.expected))
@@ -326,7 +326,7 @@ func TestStepStringWord(t *testing.T) {
 			cluster := growingCluster
 			growingCluster = nil
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
 					index,
@@ -338,7 +338,7 @@ func TestStepStringWord(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q failed: Word at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
 						index,
@@ -351,7 +351,7 @@ func TestStepStringWord(t *testing.T) {
 			index++
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q failed: Fewer words returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
 				index,
@@ -382,7 +382,7 @@ func TestStepStringSentence(t *testing.T) {
 			c, str, boundaries, state = StepString(str, state)
 
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q failed: More sentences returned than expected %d`,
 					testNum,
 					testCase.original,
 					len(testCase.expected))
@@ -396,7 +396,7 @@ func TestStepStringSentence(t *testing.T) {
 			cluster := growingCluster
 			growingCluster = nil
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
 					index,
@@ -408,7 +408,7 @@ func TestStepStringSentence(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q failed: Sentence at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
 						index,
@@ -421,7 +421,7 @@ func TestStepStringSentence(t *testing.T) {
 			index++
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q failed: Fewer sentences returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
 				index,

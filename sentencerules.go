@@ -133,6 +133,9 @@ func transitionSentenceBreakState(state int, r rune, b []byte, str string) (newS
 		if state == sbParaSep || state == sbCR {
 			return sbAny, true // Make sure we don't apply SB5 to SB3 or SB4.
 		}
+		if state < 0 {
+			return sbAny, true // SB1.
+		}
 		return state, false
 	}
 

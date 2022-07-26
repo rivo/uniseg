@@ -127,6 +127,9 @@ func transitionWordBreakState(state int, r rune, b []byte, str string) (newState
 		if state == wbWSegSpace || state == wbAny|wbZWJBit {
 			return wbAny, false // We don't break but this is also not WB3d or WB3c.
 		}
+		if state < 0 {
+			return wbAny, false
+		}
 		return state, false
 	} else if nextProperty == prExtendedPictographic && state >= 0 && state&wbZWJBit != 0 {
 		// WB3c.

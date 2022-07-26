@@ -104,6 +104,137 @@ func TestGraphemesClass(t *testing.T) {
 	}
 }
 
+// Run the standard Unicode test cases for word boundaries using the Graphemes
+// class.
+func TestGraphemesClassWord(t *testing.T) {
+	for testNum, testCase := range wordBreakTestCases {
+		if testNum == 1700 {
+			// This test case reveals an inconsistency in the Unicode rule set,
+			// namely the handling of ZWJ within two RI graphemes. (Grapheme
+			// rules will restart the RI count, word rules will ignore the ZWJ.)
+			// An error has been reported.
+			continue
+		}
+		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,
+		testNum,
+		strings.TrimSpace(testCase.original),
+		testCase.expected,
+		decomposed(testCase.original),
+		[]rune(testCase.original))*/
+		gr := NewGraphemes(testCase.original)
+		var (
+			index   int
+			cluster []rune
+		)
+	GraphemeLoop:
+		for gr.Next() {
+			if index >= len(testCase.expected) {
+				t.Errorf(`Test case %d %q failed: More words returned than expected %d`,
+					testNum,
+					testCase.original,
+					len(testCase.expected))
+				break
+			}
+			cluster = append(cluster, gr.Runes()...)
+			if gr.IsWordBoundary() {
+				if len(cluster) != len(testCase.expected[index]) {
+					t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
+						testNum,
+						testCase.original,
+						index,
+						len(cluster),
+						cluster,
+						len(testCase.expected[index]),
+						testCase.expected[index])
+					break
+				}
+				for i, r := range cluster {
+					if r != testCase.expected[index][i] {
+						t.Errorf(`Test case %d %q failed: Word at index %d is %x, expected %x`,
+							testNum,
+							testCase.original,
+							index,
+							cluster,
+							testCase.expected[index])
+						break GraphemeLoop
+					}
+				}
+				cluster = nil
+				index++
+			}
+		}
+		if index < len(testCase.expected) {
+			t.Errorf(`Test case %d %q failed: Fewer words returned (%d) than expected (%d)`,
+				testNum,
+				testCase.original,
+				index,
+				len(testCase.expected))
+		}
+	}
+}
+
+// Run the standard Unicode test cases for sentence boundaries using the
+// Graphemes class.
+func TestGraphemesClassSentence(t *testing.T) {
+	for testNum, testCase := range sentenceBreakTestCases {
+		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,
+		testNum,
+		strings.TrimSpace(testCase.original),
+		testCase.expected,
+		decomposed(testCase.original),
+		[]rune(testCase.original))*/
+		gr := NewGraphemes(testCase.original)
+		var (
+			index   int
+			cluster []rune
+		)
+	GraphemeLoop:
+		for gr.Next() {
+			if index >= len(testCase.expected) {
+				t.Errorf(`Test case %d %q failed: More sentences returned than expected %d`,
+					testNum,
+					testCase.original,
+					len(testCase.expected))
+				break
+			}
+			cluster = append(cluster, gr.Runes()...)
+			if gr.IsSentenceBoundary() {
+				if len(cluster) != len(testCase.expected[index]) {
+					t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
+						testNum,
+						testCase.original,
+						index,
+						len(cluster),
+						cluster,
+						len(testCase.expected[index]),
+						testCase.expected[index])
+					break
+				}
+				for i, r := range cluster {
+					if r != testCase.expected[index][i] {
+						t.Errorf(`Test case %d %q failed: Sentence at index %d is %x, expected %x`,
+							testNum,
+							testCase.original,
+							index,
+							cluster,
+							testCase.expected[index])
+						break GraphemeLoop
+					}
+				}
+				cluster = nil
+				index++
+			}
+		}
+		if index < len(testCase.expected) {
+			t.Errorf(`Test case %d %q failed: Fewer sentences returned (%d) than expected (%d)`,
+				testNum,
+				testCase.original,
+				index,
+				len(testCase.expected))
+		}
+	}
+}
+
 // Test the Str() function.
 func TestGraphemesStr(t *testing.T) {
 	gr := NewGraphemes("möp")
@@ -366,5 +497,12 @@ func BenchmarkGraphemesFunctionString(b *testing.B) {
 			c, str, state = FirstGraphemeClusterInString(str, state)
 			resultRunes = []rune(c)
 		}
+	}
+}
+
+func TestTest(t *testing.T) {
+	g := NewGraphemes("͏\u0600")
+	for g.Next() {
+		t.Log(g.Runes())
 	}
 }

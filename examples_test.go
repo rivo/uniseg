@@ -6,14 +6,6 @@ import (
 	"github.com/rivo/uniseg"
 )
 
-func ExampleGraphemes() {
-	gr := uniseg.NewGraphemes("👍🏼!")
-	for gr.Next() {
-		fmt.Printf("%x ", gr.Runes())
-	}
-	// Output: [1f44d 1f3fc] [21]
-}
-
 func ExampleGraphemeClusterCount() {
 	n := uniseg.GraphemeClusterCount("🇩🇪🏳️‍🌈")
 	fmt.Println(n)
@@ -264,6 +256,51 @@ func ExampleStepString_lineBreaking() {
 		if boundaries&uniseg.MaskLine == uniseg.LineCanBreak {
 			fmt.Print("|")
 		} else if boundaries&uniseg.MaskLine == uniseg.LineMustBreak {
+			fmt.Print("‖")
+		}
+	}
+	// Output: First |line.
+	//‖Second |line.‖
+}
+
+func ExampleGraphemes_graphemes() {
+	g := uniseg.NewGraphemes("🇩🇪🏳️‍🌈")
+	for g.Next() {
+		fmt.Println(g.Str())
+	}
+	// Output: 🇩🇪
+	//🏳️‍🌈
+}
+
+func ExampleGraphemes_word() {
+	g := uniseg.NewGraphemes("Hello, world!")
+	for g.Next() {
+		fmt.Print(g.Str())
+		if g.IsWordBoundary() {
+			fmt.Print("|")
+		}
+	}
+	// Output: Hello|,| |world|!|
+}
+
+func ExampleGraphemes_sentence() {
+	g := uniseg.NewGraphemes("This is sentence 1.0. And this is sentence two.")
+	for g.Next() {
+		fmt.Print(g.Str())
+		if g.IsSentenceBoundary() {
+			fmt.Print("|")
+		}
+	}
+	// Output: This is sentence 1.0. |And this is sentence two.|
+}
+
+func ExampleGraphemes_lineBreaking() {
+	g := uniseg.NewGraphemes("First line.\nSecond line.")
+	for g.Next() {
+		fmt.Print(g.Str())
+		if g.LineBreak() == uniseg.LineCanBreak {
+			fmt.Print("|")
+		} else if g.LineBreak() == uniseg.LineMustBreak {
 			fmt.Print("‖")
 		}
 	}
