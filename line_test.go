@@ -66,7 +66,7 @@ func TestLineCasesBytes(t *testing.T) {
 // Test all official Unicode test cases for line breaks using the string
 // function.
 func TestLineCasesString(t *testing.T) {
-	for testNum, testCase := range lineBreakTestCases[:1] { //TODO: Revert!
+	for testNum, testCase := range lineBreakTestCases {
 		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,
 		testNum,
 		strings.TrimSpace(testCase.original),

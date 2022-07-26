@@ -38,6 +38,10 @@ import "unicode/utf8"
 // Note that in accordance with UAX #14 LB3, the final segment will end with
 // "mustBreak" set to true. You can choose to ignore this by checking if the
 // length of the "rest" slice is 0.
+//
+// Note also that this algorithm may break within grapheme clusters. This is
+// addressed in Section 8.2 Example 6 of UAX #14. To avoid this, you can use
+// the Step() function instead.
 func FirstLineSegment(b []byte, state int) (segment, rest []byte, mustBreak bool, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
