@@ -17,9 +17,9 @@ Grapheme Clusters
 
 Consider the rainbow flag emoji: 🏳️‍🌈. On most modern systems, it appears as one
 character. But its string representation actually has 14 bytes, so counting
-bytes (or using len(str)) will not work as expected. Counting runes won't,
+bytes (or using len("🏳️‍🌈")) will not work as expected. Counting runes won't,
 either: The flag has 4 Unicode code points, thus 4 runes. The stdlib function
-utf8.RuneCountInString(str) and len([]rune(str)) will both return 4.
+utf8.RuneCountInString("🏳️‍🌈") and len([]rune("🏳️‍🌈")) will both return 4.
 
 The uniseg.GraphemeClusterCount(str) function will return 1 for the rainbow flag
 emoji. The Graphemes class and a variety of functions in this package will allow

@@ -56,7 +56,7 @@ const (
 //     the boundary.
 //
 // This function can be called continuously to extract all grapheme clusters
-// from a byte slice, as illustrated in the example below.
+// from a byte slice, as illustrated in the examples below.
 //
 // If you don't know which state to pass, for example when calling the function
 // for the first time, you must pass -1. For consecutive calls, pass the state
@@ -66,7 +66,7 @@ const (
 // after the last byte of the identified grapheme cluster. If the length of the
 // "rest" slice is 0, the entire byte slice "b" has been processed. The
 // "cluster" byte slice is the sub-slice of the input slice containing the
-// identified grapheme cluster.
+// first identified grapheme cluster.
 //
 // Given an empty byte slice "b", the function returns nil values.
 //
