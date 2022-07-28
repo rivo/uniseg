@@ -354,7 +354,7 @@ func TestGraphemesFunctionBytes(t *testing.T) {
 		)
 	GraphemeLoop:
 		for len(b) > 0 {
-			c, b, state = FirstGraphemeCluster(b, state)
+			c, b, _, state = FirstGraphemeCluster(b, state)
 
 			if index >= len(testCase.expected) {
 				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
@@ -418,7 +418,7 @@ func TestGraphemesFunctionString(t *testing.T) {
 		)
 	GraphemeLoop:
 		for len(str) > 0 {
-			c, str, state = FirstGraphemeClusterInString(str, state)
+			c, str, _, state = FirstGraphemeClusterInString(str, state)
 
 			if index >= len(testCase.expected) {
 				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
@@ -481,7 +481,7 @@ func BenchmarkGraphemesFunctionBytes(b *testing.B) {
 		var c []byte
 		state := -1
 		for len(str) > 0 {
-			c, str, state = FirstGraphemeCluster(str, state)
+			c, str, _, state = FirstGraphemeCluster(str, state)
 			resultRunes = []rune(string(c))
 		}
 	}
@@ -494,15 +494,8 @@ func BenchmarkGraphemesFunctionString(b *testing.B) {
 		var c string
 		state := -1
 		for len(str) > 0 {
-			c, str, state = FirstGraphemeClusterInString(str, state)
+			c, str, _, state = FirstGraphemeClusterInString(str, state)
 			resultRunes = []rune(c)
 		}
-	}
-}
-
-func TestTest(t *testing.T) {
-	g := NewGraphemes("͏\u0600")
-	for g.Next() {
-		t.Log(g.Runes())
 	}
 }

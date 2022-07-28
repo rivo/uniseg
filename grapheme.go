@@ -147,7 +147,7 @@ func (g *Graphemes) Reset() {
 func GraphemeClusterCount(s string) (n int) {
 	state := -1
 	for len(s) > 0 {
-		_, s, state = FirstGraphemeClusterInString(s, state)
+		_, s, _, state = FirstGraphemeClusterInString(s, state)
 		n++
 	}
 	return
@@ -173,7 +173,10 @@ func GraphemeClusterCount(s string) (n int) {
 // While slightly less convenient than using the Graphemes class, this function
 // has much better performance and makes no allocations. It lends itself well to
 // large byte slices.
-func FirstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState int) {
+//
+// The "reserved" return value is a placeholder for future functionality and may
+// be ignored for the time being.
+func FirstGraphemeCluster(b []byte, state int) (cluster, rest []byte, reserved, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
 		return
@@ -182,7 +185,7 @@ func FirstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState i
 	// Extract the first rune.
 	r, length := utf8.DecodeRune(b)
 	if len(b) <= length { // If we're already past the end, there is nothing else to parse.
-		return b, nil, grAny
+		return b, nil, 0, grAny
 	}
 
 	// If we don't know the state, determine it now.
@@ -197,19 +200,19 @@ func FirstGraphemeCluster(b []byte, state int) (cluster, rest []byte, newState i
 		state, boundary = transitionGraphemeState(state, r)
 
 		if boundary {
-			return b[:length], b[length:], state
+			return b[:length], b[length:], 0, state
 		}
 
 		length += l
 		if len(b) <= length {
-			return b, nil, grAny
+			return b, nil, 0, grAny
 		}
 	}
 }
 
 // FirstGraphemeClusterInString is like FirstGraphemeCluster() but its input and
 // outputs are strings.
-func FirstGraphemeClusterInString(str string, state int) (cluster, rest string, newState int) {
+func FirstGraphemeClusterInString(str string, state int) (cluster, rest string, reserved, newState int) {
 	// An empty string returns nothing.
 	if len(str) == 0 {
 		return
@@ -218,7 +221,7 @@ func FirstGraphemeClusterInString(str string, state int) (cluster, rest string, 
 	// Extract the first rune.
 	r, length := utf8.DecodeRuneInString(str)
 	if len(str) <= length { // If we're already past the end, there is nothing else to parse.
-		return str, "", grAny
+		return str, "", 0, grAny
 	}
 
 	// If we don't know the state, determine it now.
@@ -233,12 +236,12 @@ func FirstGraphemeClusterInString(str string, state int) (cluster, rest string, 
 		state, boundary = transitionGraphemeState(state, r)
 
 		if boundary {
-			return str[:length], str[length:], state
+			return str[:length], str[length:], 0, state
 		}
 
 		length += l
 		if len(str) <= length {
-			return str, "", grAny
+			return str, "", 0, grAny
 		}
 	}
 }

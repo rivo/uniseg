@@ -17,7 +17,7 @@ func ExampleFirstGraphemeCluster() {
 	state := -1
 	var c []byte
 	for len(b) > 0 {
-		c, b, state = uniseg.FirstGraphemeCluster(b, state)
+		c, b, _, state = uniseg.FirstGraphemeCluster(b, state)
 		fmt.Println(string(c))
 	}
 	// Output: 🇩🇪
@@ -29,7 +29,7 @@ func ExampleFirstGraphemeClusterInString() {
 	state := -1
 	var c string
 	for len(str) > 0 {
-		c, str, state = uniseg.FirstGraphemeClusterInString(str, state)
+		c, str, _, state = uniseg.FirstGraphemeClusterInString(str, state)
 		fmt.Println(c)
 	}
 	// Output: 🇩🇪
