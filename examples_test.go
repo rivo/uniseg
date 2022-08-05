@@ -240,7 +240,7 @@ func ExampleStep_lineBreaking() {
 		}
 	}
 	// Output: First |line.
-	//‖Second |line.‖
+	//‖Second |line.|
 }
 
 func ExampleStepString_lineBreaking() {
@@ -260,7 +260,7 @@ func ExampleStepString_lineBreaking() {
 		}
 	}
 	// Output: First |line.
-	//‖Second |line.‖
+	//‖Second |line.|
 }
 
 func ExampleGraphemes_graphemes() {
@@ -305,5 +305,5 @@ func ExampleGraphemes_lineBreaking() {
 		}
 	}
 	// Output: First |line.
-	//‖Second |line.‖
+	//‖Second |line.|
 }
