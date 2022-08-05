@@ -74,12 +74,9 @@ const (
 // has much better performance and makes no allocations. It lends itself well to
 // large byte slices.
 //
-// Note that this algorithm diverges from UAX #14 in LB3, in that the final
-// segment will not end with an optional line break (boundaries&MaskLine ==
-// LineCanBreak). The reason for this is that when the text ends with a newline
-// character, it is impossible to know whether the line break is due to that
-// character or due to the end of the text. You can enforce LB3 yourself by
-// checking if the length of the "rest" slice is 0.
+// Note that in accordance with UAX #14 LB3, the final segment will end with
+// a mandatory line break (boundaries&MaskLine == LineMustBreak). You can choose
+// to ignore this by checking if the length of the "rest" slice is 0.
 func Step(b []byte, state int) (cluster, rest []byte, boundaries int, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {
@@ -89,7 +86,7 @@ func Step(b []byte, state int) (cluster, rest []byte, boundaries int, newState i
 	// Extract the first rune.
 	r, length := utf8.DecodeRune(b)
 	if len(b) <= length { // If we're already past the end, there is nothing else to parse.
-		return b, nil, LineCanBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
+		return b, nil, LineMustBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
 	}
 
 	// If we don't know the state, determine it now.
@@ -134,7 +131,7 @@ func Step(b []byte, state int) (cluster, rest []byte, boundaries int, newState i
 
 		length += l
 		if len(b) <= length {
-			return b, nil, LineCanBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
+			return b, nil, LineMustBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
 		}
 	}
 }
@@ -149,7 +146,7 @@ func StepString(str string, state int) (cluster, rest string, boundaries int, ne
 	// Extract the first rune.
 	r, length := utf8.DecodeRuneInString(str)
 	if len(str) <= length { // If we're already past the end, there is nothing else to parse.
-		return str, "", LineCanBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
+		return str, "", LineMustBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
 	}
 
 	// If we don't know the state, determine it now.
@@ -194,7 +191,7 @@ func StepString(str string, state int) (cluster, rest string, boundaries int, ne
 
 		length += l
 		if len(str) <= length {
-			return str, "", LineCanBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
+			return str, "", LineMustBreak | (1 << shiftWord) | (1 << shiftSentence), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
 		}
 	}
 }
