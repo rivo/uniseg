@@ -105,7 +105,7 @@ func ExampleFirstLineSegment() {
 		}
 	}
 	// Output: (First )(line.
-	//)!(Second )(line.)!
+	//)!(Second )(line.)
 }
 
 func ExampleFirstLineSegmentInString() {
@@ -128,7 +128,7 @@ func ExampleFirstLineSegmentInString() {
 	//(line.
 	//) < must break
 	//(Second ) < may break
-	//(line.) < must break
+	//(line.) < may break
 }
 
 func ExampleStep_graphemes() {

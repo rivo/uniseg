@@ -35,9 +35,11 @@ import "unicode/utf8"
 //
 // Given an empty byte slice "b", the function returns nil values.
 //
-// Note that in accordance with UAX #14 LB3, the final segment will end with
-// "mustBreak" set to true. You can choose to ignore this by checking if the
-// length of the "rest" slice is 0.
+// Note that this algorithm diverges from UAX #14 in LB3, in that the final
+// segment will end with "mustBreak" set to false. The reason for this is that
+// when the text ends with a newline character, it is impossible to know whether
+// the line break is due to that character or due to the end of the text. You
+// can enforce LB3 yourself by checking if the length of the "rest" slice is 0.
 //
 // Note also that this algorithm may break within grapheme clusters. This is
 // addressed in Section 8.2 Example 6 of UAX #14. To avoid this, you can use
@@ -71,7 +73,7 @@ func FirstLineSegment(b []byte, state int) (segment, rest []byte, mustBreak bool
 
 		length += l
 		if len(b) <= length {
-			return b, nil, true, lbAny // LB3
+			return b, nil, false, lbAny // LB3 is ignored.
 		}
 	}
 }
@@ -107,7 +109,7 @@ func FirstLineSegmentInString(str string, state int) (segment, rest string, must
 
 		length += l
 		if len(str) <= length {
-			return str, "", true, lbAny // LB3.
+			return str, "", false, lbAny // LB3 is ignored.
 		}
 	}
 }
