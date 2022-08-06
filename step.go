@@ -2,7 +2,7 @@ package uniseg
 
 import "unicode/utf8"
 
-// The bit masks used to extract boundary information returned by the Step()
+// The bit masks used to extract boundary information returned by the [Step]
 // function.
 const (
 	MaskLine     = 3
@@ -10,14 +10,14 @@ const (
 	MaskSentence = 8
 )
 
-// The bit positions by which boundary flags are shifted by the Step() function.
+// The bit positions by which boundary flags are shifted by the [Step] function.
 // This must correspond to the Mask constants.
 const (
 	shiftWord     = 2
 	shiftSentence = 3
 )
 
-// The bit positions by which states are shifted by the Step() function. These
+// The bit positions by which states are shifted by the [Step] function. These
 // values must ensure state values defined for each of the boundary algorithms
 // don't overlap (and that they all still fit in a single int).
 const (
@@ -26,7 +26,7 @@ const (
 	shiftLineState     = 13
 )
 
-// The bit mask used to extract the state returned by the Step() function, after
+// The bit mask used to extract the state returned by the [Step] function, after
 // shifting. These values must correspond to the shift constants.
 const (
 	maskGraphemeState = 0xf
@@ -39,8 +39,8 @@ const (
 // the given byte slice. It also returns information about the boundary between
 // that grapheme cluster and the one following it. There are three types of
 // boundary information: word boundaries, sentence boundaries, and line breaks.
-// This function is therefore a combination of FirstGraphemeCluster(),
-// FirstWord(), FirstSentence(), and FirstLineSegment().
+// This function is therefore a combination of [FirstGraphemeCluster],
+// [FirstWord], [FirstSentence], and [FirstLineSegment].
 //
 // The "boundaries" return value can be evaluated as follows:
 //

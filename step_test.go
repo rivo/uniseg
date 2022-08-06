@@ -3,7 +3,7 @@ package uniseg
 import "testing"
 
 // Test official Grapheme Cluster Unicode test cases for grapheme clusters using
-// the Step() function.
+// the [Step] function.
 func TestStepBytesGrapheme(t *testing.T) {
 	for testNum, testCase := range graphemeBreakTestCases {
 		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,
@@ -67,7 +67,7 @@ func TestStepBytesGrapheme(t *testing.T) {
 }
 
 // Test official word boundaries Unicode test cases for grapheme clusters using
-// the Step() function.
+// the [Step] function.
 func TestStepBytesWord(t *testing.T) {
 	for testNum, testCase := range wordBreakTestCases {
 		if testNum == 1700 {
@@ -144,7 +144,7 @@ func TestStepBytesWord(t *testing.T) {
 }
 
 // Test official sentence boundaries Unicode test cases for grapheme clusters
-// using the Step() function.
+// using the [Step] function.
 func TestStepBytesSentence(t *testing.T) {
 	for testNum, testCase := range sentenceBreakTestCases {
 		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,
@@ -213,7 +213,7 @@ func TestStepBytesSentence(t *testing.T) {
 	}
 }
 
-// We don't test the Step() function for UAX #14 line breaking because the rules
+// We don't test the [Step] function for UAX #14 line breaking because the rules
 // aren't really compatible. Specifically emoji modifiers and zero-width joiners
 // are kept together by the grapheme cluster rules while line breaking rules
 // will allow them to be broken apart. The handling of this limitation is
@@ -430,7 +430,7 @@ func TestStepStringSentence(t *testing.T) {
 	}
 }
 
-// Benchmark the use of the Step() function.
+// Benchmark the use of the [Step] function.
 func BenchmarkStepBytes(b *testing.B) {
 	str := []byte(benchmarkStr)
 	for i := 0; i < b.N; i++ {

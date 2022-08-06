@@ -13,7 +13,7 @@ import "unicode/utf8"
 //
 // The returned "segment" may not be broken into smaller parts, unless no other
 // breaking opportunities present themselves, in which case you may break by
-// grapheme clusters (using the FirstGraphemeCluster() function to determine the
+// grapheme clusters (using the [FirstGraphemeCluster] function to determine the
 // grapheme clusters).
 //
 // The "mustBreak" flag indicates whether you MUST break the line after the
@@ -42,7 +42,7 @@ import "unicode/utf8"
 //
 // Note also that this algorithm may break within grapheme clusters. This is
 // addressed in Section 8.2 Example 6 of UAX #14. To avoid this, you can use
-// the Step() function instead.
+// the [Step] function instead.
 func FirstLineSegment(b []byte, state int) (segment, rest []byte, mustBreak bool, newState int) {
 	// An empty byte slice returns nothing.
 	if len(b) == 0 {

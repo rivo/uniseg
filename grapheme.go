@@ -7,9 +7,10 @@ import "unicode/utf8"
 // about word boundaries, sentence boundaries, and line breaks.
 //
 // After constructing the class via [NewGraphemes] for a given string "str",
-// [Next] is called for every grapheme cluster in a loop until it returns false.
-// Inside the loop, information about the grapheme cluster as well as boundary
-// information is available via the various methods (see examples below).
+// [Graphemes.Next] is called for every grapheme cluster in a loop until it
+// returns false. Inside the loop, information about the grapheme cluster as
+// well as boundary information is available via the various methods (see
+// examples below).
 //
 // Using this class to iterate over a string is convenient but it is much slower
 // than using this package's [Step] or [StepString] functions or any of the
@@ -28,10 +29,10 @@ type Graphemes struct {
 	// string.
 	offset int
 
-	// The current boundary information of the Step() parser.
+	// The current boundary information of the [Step] parser.
 	boundaries int
 
-	// The current state of the Step() parser.
+	// The current state of the [Step] parser.
 	state int
 }
 
@@ -60,8 +61,8 @@ func (g *Graphemes) Next() bool {
 }
 
 // Runes returns a slice of runes (code points) which corresponds to the current
-// grapheme cluster. If the iterator is already past the end or [Next] has not
-// yet been called, nil is returned.
+// grapheme cluster. If the iterator is already past the end or [Graphemes.Next]
+// has not yet been called, nil is returned.
 func (g *Graphemes) Runes() []rune {
 	if g.state < 0 {
 		return nil
@@ -70,15 +71,15 @@ func (g *Graphemes) Runes() []rune {
 }
 
 // Str returns a substring of the original string which corresponds to the
-// current grapheme cluster. If the iterator is already past the end or [Next]
-// has not yet been called, an empty string is returned.
+// current grapheme cluster. If the iterator is already past the end or
+// [Graphemes.Next] has not yet been called, an empty string is returned.
 func (g *Graphemes) Str() string {
 	return g.cluster
 }
 
 // Bytes returns a byte slice which corresponds to the current grapheme cluster.
-// If the iterator is already past the end or [Next] has not yet been called,
-// nil is returned.
+// If the iterator is already past the end or [Graphemes.Next] has not yet been
+// called, nil is returned.
 func (g *Graphemes) Bytes() []byte {
 	if g.state < 0 {
 		return nil
@@ -90,8 +91,8 @@ func (g *Graphemes) Bytes() []byte {
 // positions into the original string. The first returned value "from" indexes
 // the first byte and the second returned value "to" indexes the first byte that
 // is not included anymore, i.e. str[from:to] is the current grapheme cluster of
-// the original string "str". If [Next] has not yet been called, both values are
-// 0. If the iterator is already past the end, both values are 1.
+// the original string "str". If [Graphemes.Next] has not yet been called, both
+// values are 0. If the iterator is already past the end, both values are 1.
 func (g *Graphemes) Positions() (int, int) {
 	if g.state == -1 {
 		return 0, 0
@@ -134,7 +135,7 @@ func (g *Graphemes) LineBreak() int {
 }
 
 // Reset puts the iterator into its initial state such that the next call to
-// [Next] sets it to the first grapheme cluster again.
+// [Graphemes.Next] sets it to the first grapheme cluster again.
 func (g *Graphemes) Reset() {
 	g.state = -1
 	g.offset = 0
