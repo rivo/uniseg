@@ -307,3 +307,8 @@ func ExampleGraphemes_lineBreaking() {
 	// Output: First |line.
 	//‖Second |line.‖
 }
+
+func ExampleStringWidth() {
+	fmt.Println(uniseg.StringWidth("Hello, 世界"))
+	// Output: 11
+}
