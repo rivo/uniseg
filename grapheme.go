@@ -38,10 +38,10 @@ type Graphemes struct {
 }
 
 // NewGraphemes returns a new grapheme cluster iterator.
-func NewGraphemes(s string) *Graphemes {
+func NewGraphemes(str string) *Graphemes {
 	return &Graphemes{
-		original:  s,
-		remaining: s,
+		original:  str,
+		remaining: str,
 		state:     -1,
 	}
 }

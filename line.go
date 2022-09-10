@@ -114,7 +114,9 @@ func FirstLineSegmentInString(str string, state int) (segment, rest string, must
 }
 
 // HasTrailingLineBreak returns true if the last rune in the given byte slice is
-// one of the hard line break code points as defined in LB4 and LB5 of UAX #14.
+// one of the hard line break code points defined in LB4 and LB5 of [UAX #14].
+//
+// [UAX #14]: https://www.unicode.org/reports/tr14/#Algorithm
 func HasTrailingLineBreak(b []byte) bool {
 	r, _ := utf8.DecodeLastRune(b)
 	property, _ := propertyWithGenCat(lineBreakCodePoints, r)

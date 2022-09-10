@@ -43,10 +43,11 @@ const (
 
 // Step returns the first grapheme cluster (user-perceived character) found in
 // the given byte slice. It also returns information about the boundary between
-// that grapheme cluster and the one following it. There are three types of
-// boundary information: word boundaries, sentence boundaries, and line breaks.
-// This function is therefore a combination of [FirstGraphemeCluster],
-// [FirstWord], [FirstSentence], and [FirstLineSegment].
+// that grapheme cluster and the one following it as well as the monospace width
+// of the grapheme cluster. There are three types of boundary information: word
+// boundaries, sentence boundaries, and line breaks. This function is therefore
+// a combination of [FirstGraphemeCluster], [FirstWord], [FirstSentence], and
+// [FirstLineSegment].
 //
 // The "boundaries" return value can be evaluated as follows:
 //
@@ -218,7 +219,7 @@ func StepString(str string, state int) (cluster, rest string, boundaries int, ne
 			if sentenceBoundary {
 				boundary |= 1 << shiftSentence
 			}
-			return str[:length], str[length:], boundary, graphemeState | (wordState << shiftWordState) | (sentenceState << shiftSentenceState) | (lineState << shiftLineState)
+			return str[:length], str[length:], boundary, graphemeState | (wordState << shiftWordState) | (sentenceState << shiftSentenceState) | (lineState << shiftLineState) | (prop << shiftPropState)
 		}
 
 		if firstProp != prExtendedPictographic && firstProp != prRegionalIndicator && firstProp != prL {
@@ -233,7 +234,7 @@ func StepString(str string, state int) (cluster, rest string, boundaries int, ne
 
 		length += l
 		if len(str) <= length {
-			return str, "", LineMustBreak | (1 << shiftWord) | (1 << shiftSentence) | (width << ShiftWidth), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState)
+			return str, "", LineMustBreak | (1 << shiftWord) | (1 << shiftSentence) | (width << ShiftWidth), grAny | (wbAny << shiftWordState) | (sbAny << shiftSentenceState) | (lbAny << shiftLineState) | (prop << shiftPropState)
 		}
 	}
 }

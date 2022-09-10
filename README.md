@@ -9,7 +9,7 @@ This Go package implements Unicode Text Segmentation according to [Unicode Stand
 
 ### Grapheme Clusters
 
-In Go, [strings are read-only slices of bytes](https://blog.golang.org/strings). They can be turned into Unicode code points using the `for` loop or by casting: `[]rune(str)`. However, multiple code points may be combined into one user-perceived character or what the Unicode specification calls "grapheme cluster". Here are some examples:
+In Go, [strings are read-only slices of bytes](https://go.dev/blog/strings). They can be turned into Unicode code points using the `for` loop or by casting: `[]rune(str)`. However, multiple code points may be combined into one user-perceived character or what the Unicode specification calls "grapheme cluster". Here are some examples:
 
 |String|Bytes (UTF-8)|Code points (runes)|Grapheme clusters|
 |-|-|-|-|

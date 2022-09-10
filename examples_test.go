@@ -13,27 +13,31 @@ func ExampleGraphemeClusterCount() {
 }
 
 func ExampleFirstGraphemeCluster() {
-	b := []byte("🇩🇪🏳️‍🌈")
+	b := []byte("🇩🇪🏳️‍🌈!")
 	state := -1
 	var c []byte
 	for len(b) > 0 {
-		c, b, _, state = uniseg.FirstGraphemeCluster(b, state)
-		fmt.Println(string(c))
+		var width int
+		c, b, width, state = uniseg.FirstGraphemeCluster(b, state)
+		fmt.Println(string(c), width)
 	}
-	// Output: 🇩🇪
-	//🏳️‍🌈
+	// Output: 🇩🇪 2
+	//🏳️‍🌈 2
+	//! 1
 }
 
 func ExampleFirstGraphemeClusterInString() {
-	str := "🇩🇪🏳️‍🌈"
+	str := "🇩🇪🏳️‍🌈!"
 	state := -1
 	var c string
 	for len(str) > 0 {
-		c, str, _, state = uniseg.FirstGraphemeClusterInString(str, state)
-		fmt.Println(c)
+		var width int
+		c, str, width, state = uniseg.FirstGraphemeClusterInString(str, state)
+		fmt.Println(c, width)
 	}
-	// Output: 🇩🇪
-	//🏳️‍🌈
+	// Output: 🇩🇪 2
+	//🏳️‍🌈 2
+	//! 1
 }
 
 func ExampleFirstWord() {
@@ -132,27 +136,31 @@ func ExampleFirstLineSegmentInString() {
 }
 
 func ExampleStep_graphemes() {
-	b := []byte("🇩🇪🏳️‍🌈")
+	b := []byte("🇩🇪🏳️‍🌈!")
 	state := -1
 	var c []byte
 	for len(b) > 0 {
-		c, b, _, state = uniseg.Step(b, state)
-		fmt.Println(string(c))
+		var boundaries int
+		c, b, boundaries, state = uniseg.Step(b, state)
+		fmt.Println(string(c), boundaries>>uniseg.ShiftWidth)
 	}
-	// Output: 🇩🇪
-	//🏳️‍🌈
+	// Output: 🇩🇪 2
+	//🏳️‍🌈 2
+	//! 1
 }
 
 func ExampleStepString_graphemes() {
-	str := "🇩🇪🏳️‍🌈"
+	str := "🇩🇪🏳️‍🌈!"
 	state := -1
 	var c string
 	for len(str) > 0 {
-		c, str, _, state = uniseg.StepString(str, state)
-		fmt.Println(c)
+		var boundaries int
+		c, str, boundaries, state = uniseg.StepString(str, state)
+		fmt.Println(c, boundaries>>uniseg.ShiftWidth)
 	}
-	// Output: 🇩🇪
-	//🏳️‍🌈
+	// Output: 🇩🇪 2
+	//🏳️‍🌈 2
+	//! 1
 }
 
 func ExampleStep_word() {
