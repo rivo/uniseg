@@ -125,6 +125,12 @@ const (
 	gcCo
 )
 
+// Special code points.
+const (
+	vs15 = 0xfe0e // Variation Selector-15 (text presentation)
+	vs16 = 0xfe0f // Variation Selector-16 (emoji presentation)
+)
+
 // propertySearch performs a binary search on a property slice and returns the
 // entry whose range (start = first array element, end = second array element)
 // includes r, or an array of 0's if no such entry was found.

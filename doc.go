@@ -96,7 +96,8 @@ For Hangul grapheme clusters composed of conjoining Jamo and for Regional
 Indicators (flags), all code points except the first one have a width of 0. For
 grapheme clusters starting with an Extended Pictographic, any additional code
 point will force a total width of 2, except if the Variation Selector-15
-(U+FE0E) is included, in which case the total width is always 1.
+(U+FE0E) is included, in which case the total width is always 1. Grapheme
+clusters ending with Variation Selector-16 (U+FE0F) have a width of 2.
 
 Note that whether these widths appear correct depends on your application's
 render engine, to which extent it conforms to the Unicode Standard, and its

@@ -338,6 +338,7 @@ var widthTestCases = []struct {
 	{"\u263a\ufe0f", 2},                         // White smiling face (with variation selector 16 = emoji presentation)
 	{"\u231b", 2},                               // Hourglass
 	{"\u231b\ufe0e", 1},                         // Hourglass (with variation selector 15 = text presentation)
+	{"1\ufe0f", 2},                              // Emoji presentation of digit one.
 }
 
 // String width tests using the StringWidth function.
