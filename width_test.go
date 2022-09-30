@@ -327,6 +327,7 @@ var widthTestCases = []struct {
 	{"\U0001f3f3\ufe0f\u200d\U0001f308", 2}, // Rainbow flag
 	{"\U0001f1e9\U0001f1ea", 2},             // German flag
 	{"\u0916\u093e", 2},                     // खा (Hindi, "eat")
+	{"\u0915\u0948\u0938\u0947", 2},         // कैसे (Hindi, "how")
 	{"\U0001f468\u200d\U0001f469\u200d\U0001f467\u200d\U0001f466", 2}, // Family: Man, Woman, Girl, Boy
 	{"\u1112\u116f\u11b6", 2},                   // 훯 (Hangul, conjoining Jamo, "h+weo+lh")
 	{"\ud6ef", 2},                               // 훯 (Hangul, precomposed, "h+weo+lh")
