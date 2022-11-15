@@ -1,6 +1,8 @@
 package uniseg
 
-import "testing"
+import (
+	"testing"
+)
 
 // widthTestCases is a list of test cases for the calculation of string widths.
 var widthTestCases = []struct {
@@ -426,6 +428,53 @@ func TestWidthStepString(t *testing.T) {
 		}
 		if actual != testCase.expected {
 			t.Errorf("Width of %q is %d, expected %d (test case %d)", testCase.original, actual, testCase.expected, index)
+		}
+	}
+}
+
+func TestRunesWidth(t *testing.T) {
+	tc := []struct {
+		name  string
+		raw   string
+		width int
+	}{
+		{"latin    ", "long", 4},
+		{"chinese  ", "中国", 4},
+		{"combining", "shangha\u0308\u0308i", 8},
+		{
+			"emoji 1", "🏝",
+			1,
+		},
+		{
+			"emoji 2", "🗻",
+			2,
+		},
+		{
+			"emoji 3", "🏖",
+			1,
+		},
+		{
+			"flags", "🇳🇱🇧🇷i",
+			5,
+		},
+		{
+			"flag 2", "🇨🇳",
+			2,
+		},
+	}
+
+	for _, v := range tc {
+		graphemes := NewGraphemes(v.raw)
+		width := 0
+		var rs []rune
+		for graphemes.Next() {
+			rs = graphemes.Runes()
+			width += StringWidth(string(rs))
+		}
+
+		if v.width != width {
+			t.Logf("%s :\t %q %U\n", v.name, v.raw, rs)
+			t.Errorf("%s:\t %q  expect width %d, got %d\n", v.name, v.raw, v.width, width)
 		}
 	}
 }

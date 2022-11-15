@@ -336,6 +336,30 @@ func TestGraphemesCount(t *testing.T) {
 	}
 }
 
+// Test the ReverseString function.
+func TestReverseString(t *testing.T) {
+	for _, testCase := range testCases {
+		var r []rune
+		for index := len(testCase.expected) - 1; index >= 0; index-- {
+			r = append(r, testCase.expected[index]...)
+		}
+		if string(r) != ReverseString(testCase.original) {
+			t.Errorf(`Exepected reverse of %q to be %q, got %q`, testCase.original, string(r), ReverseString(testCase.original))
+		}
+	}
+
+	// Three additional ones, for good measure.
+	if ReverseString("🇩🇪🏳️‍🌈") != "🏳️‍🌈🇩🇪" {
+		t.Error("Flags weren't reversed correctly")
+	}
+	if ReverseString("🏳️‍🌈") != "🏳️‍🌈" {
+		t.Error("Flag wasn't reversed correctly")
+	}
+	if ReverseString("") != "" {
+		t.Error("Empty string wasn't reversed correctly")
+	}
+}
+
 // Run all lists of test cases using the Graphemes function for byte slices.
 func TestGraphemesFunctionBytes(t *testing.T) {
 	allCases := append(testCases, graphemeBreakTestCases...)
