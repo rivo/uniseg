@@ -1,6 +1,8 @@
 package uniseg
 
-import "testing"
+import (
+	"testing"
+)
 
 // Test official Grapheme Cluster Unicode test cases for grapheme clusters using
 // the [Step] function.
@@ -454,4 +456,49 @@ func BenchmarkStepString(b *testing.B) {
 			resultRunes = []rune(c)
 		}
 	}
+}
+
+// Fuzz the StepString function.
+func FuzzStepString(f *testing.F) {
+	for _, tc := range graphemeBreakTestCases {
+		f.Add(tc.original)
+	}
+	f.Fuzz(func(t *testing.T, orig string) {
+		var (
+			c          string
+			b          []byte
+			boundaries int
+		)
+		str := orig
+		state := -1
+		for len(str) > 0 {
+			c, str, boundaries, state = StepString(str, state)
+			b = append(b, []byte(c)...)
+		}
+
+		// Check if the constructed string is the same as the original.
+		if string(b) != orig {
+			t.Errorf("Fuzzing failed: %q != %q", string(b), orig)
+		}
+
+		// For all other checks, we need to have a non-empty string.
+		if orig == "" {
+			return
+		}
+
+		// Check end boundaries.
+		if boundaries&MaskWord == 0 {
+			t.Errorf("String %q does not end on a word boundary (final boundary = %x)", orig, state)
+		}
+		if boundaries&MaskSentence == 0 {
+			t.Errorf("String %q does not end on a sentence boundary (final boundary = %x)", orig, state)
+		}
+		if boundaries&MaskLine != LineMustBreak {
+			t.Errorf("String %q does not end with a mandatory line break (final boundary = %x)", orig, state)
+		}
+
+		// Note: If you have ideas for more useful checks we could add here,
+		// please submit them here:
+		// https://github.com/rivo/uniseg/issues
+	})
 }
