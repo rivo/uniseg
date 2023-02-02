@@ -63,6 +63,16 @@ func TestSentenceCasesBytes(t *testing.T) {
 				len(testCase.expected))
 		}
 	}
+	sentence, rest, newState := FirstSentence([]byte{}, -1)
+	if len(sentence) > 0 {
+		t.Errorf(`Expected sentence to be empty byte slice, got %q`, sentence)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty byte slice, got %q`, rest)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
+	}
 }
 
 // Test all official Unicode test cases for sentence boundaries using the string
@@ -123,6 +133,16 @@ func TestSentenceCasesString(t *testing.T) {
 				index,
 				len(testCase.expected))
 		}
+	}
+	sentence, rest, newState := FirstSentenceInString("", -1)
+	if len(sentence) > 0 {
+		t.Errorf(`Expected sentence to be empty string, got %q`, sentence)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty string, got %q`, rest)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
 	}
 }
 
