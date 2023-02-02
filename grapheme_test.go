@@ -126,6 +126,9 @@ func TestGraphemesClassWord(t *testing.T) {
 			index   int
 			cluster []rune
 		)
+		if !gr.IsWordBoundary() {
+			t.Error("Expected initial IsWordBoundary to be true, got false")
+		}
 	GraphemeLoop:
 		for gr.Next() {
 			if index >= len(testCase.expected) {
@@ -188,6 +191,9 @@ func TestGraphemesClassSentence(t *testing.T) {
 			index   int
 			cluster []rune
 		)
+		if !gr.IsSentenceBoundary() {
+			t.Error("Expected initial IsSentenceBoundary to be true, got false")
+		}
 	GraphemeLoop:
 		for gr.Next() {
 			if index >= len(testCase.expected) {
@@ -421,6 +427,19 @@ func TestGraphemesFunctionBytes(t *testing.T) {
 				index,
 				len(testCase.expected))
 		}
+	}
+	cluster, rest, width, newState := FirstGraphemeCluster([]byte{}, 0)
+	if len(cluster) > 0 {
+		t.Errorf(`Expected cluster to be empty byte slice, got %q`, cluster)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty byte slice, got %q`, rest)
+	}
+	if width != 0 {
+		t.Errorf(`Expected width to be 0, got %d`, width)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
 	}
 }
 
