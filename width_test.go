@@ -359,6 +359,9 @@ func TestWidthGraphemes(t *testing.T) {
 	for index, testCase := range widthTestCases {
 		var actual int
 		graphemes := NewGraphemes(testCase.original)
+		if w := graphemes.Width(); w != 0 {
+			t.Errorf("Expected initial Width to be 0, got %d", w)
+		}
 		for graphemes.Next() {
 			actual += graphemes.Width()
 		}
@@ -396,6 +399,19 @@ func TestWidthGraphemesFunctionString(t *testing.T) {
 		}
 		if actual != testCase.expected {
 			t.Errorf("Width of %q is %d, expected %d (test case %d)", testCase.original, actual, testCase.expected, index)
+		}
+		cluster, rest, width, newState := FirstGraphemeClusterInString(text, -1)
+		if len(cluster) > 0 {
+			t.Errorf(`Expected cluster to be empty string, got %q`, cluster)
+		}
+		if len(rest) > 0 {
+			t.Errorf(`Expected rest to be empty string, got %q`, rest)
+		}
+		if width != 0 {
+			t.Errorf(`Expected width to be 0, got %d`, width)
+		}
+		if newState != 0 {
+			t.Errorf(`Expected newState to be 0, got %d`, newState)
 		}
 	}
 }
