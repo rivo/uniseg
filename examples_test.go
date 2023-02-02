@@ -312,8 +312,17 @@ func ExampleGraphemes_lineBreaking() {
 			fmt.Print("‖")
 		}
 	}
+	if g.LineBreak() == uniseg.LineMustBreak {
+		fmt.Print("\nNo clusters left. LineMustBreak")
+	}
+	g.Reset()
+	if g.LineBreak() == uniseg.LineDontBreak {
+		fmt.Print("\nIterator has been reset. LineDontBreak")
+	}
 	// Output: First |line.
 	//‖Second |line.‖
+	//No clusters left. LineMustBreak
+	//Iterator has been reset. LineDontBreak
 }
 
 func ExampleStringWidth() {
