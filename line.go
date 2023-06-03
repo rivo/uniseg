@@ -80,7 +80,7 @@ func FirstLineSegment(b []byte, state int) (segment, rest []byte, mustBreak bool
 	}
 }
 
-// FirstLineSegmentInString is like FirstLineSegment() but its input and outputs
+// FirstLineSegmentInString is like [FirstLineSegment] but its input and outputs
 // are strings.
 func FirstLineSegmentInString(str string, state int) (segment, rest string, mustBreak bool, newState int) {
 	// An empty byte slice returns nothing.
