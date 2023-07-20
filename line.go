@@ -123,12 +123,12 @@ func FirstLineSegmentInString(str string, state int) (segment, rest string, must
 func HasTrailingLineBreak(b []byte) bool {
 	r, _ := utf8.DecodeLastRune(b)
 	property, _ := propertyWithGenCat(lineBreakCodePoints, r)
-	return property == lbBK || property == lbCR || property == lbLF || property == lbNL
+	return property == prBK || property == prCR || property == prLF || property == prNL
 }
 
 // HasTrailingLineBreakInString is like [HasTrailingLineBreak] but for a string.
 func HasTrailingLineBreakInString(str string) bool {
 	r, _ := utf8.DecodeLastRuneInString(str)
 	property, _ := propertyWithGenCat(lineBreakCodePoints, r)
-	return property == lbBK || property == lbCR || property == lbLF || property == lbNL
+	return property == prBK || property == prCR || property == prLF || property == prNL
 }

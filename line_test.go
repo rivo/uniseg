@@ -124,6 +124,37 @@ func TestLineCasesString(t *testing.T) {
 	}
 }
 
+var hasTrailingLineBreakTestCases = []struct {
+	input string
+	want  bool
+}{
+	{"\v", true},     // prBK
+	{"\r", true},     // prCR
+	{"\n", true},     // prLF
+	{"\u0085", true}, // prNL
+	{" ", false},
+	{"A", false},
+	{"", false},
+}
+
+func TestHasTrailingLineBreak(t *testing.T) {
+	for _, tt := range hasTrailingLineBreakTestCases {
+		got := HasTrailingLineBreak([]byte(tt.input))
+		if got != tt.want {
+			t.Errorf("HasTrailingLineBreak(%q) = %v, want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestHasTrailingLineBreakInString(t *testing.T) {
+	for _, tt := range hasTrailingLineBreakTestCases {
+		got := HasTrailingLineBreakInString(tt.input)
+		if got != tt.want {
+			t.Errorf("HasTrailingLineBreak(%q) = %v, want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
 // Benchmark the use of the line break function for byte slices.
 func BenchmarkLineFunctionBytes(b *testing.B) {
 	str := []byte(benchmarkStr)
