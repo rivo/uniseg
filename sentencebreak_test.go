@@ -1,10 +1,10 @@
-package uniseg
-
 // Code generated via go generate from gen_breaktest.go. DO NOT EDIT.
+
+package uniseg
 
 // sentenceBreakTestCases are Grapheme testcases taken from
 // https://www.unicode.org/Public/14.0.0/ucd/auxiliary/SentenceBreakTest.txt
-// on September 10, 2022. See
+// on July 17, 2023. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
 var sentenceBreakTestCases = []testCase{
 	{original: "\u0001\u0001", expected: [][]rune{{0x0001, 0x0001}}},                                               // ÷ [0.2] <START OF HEADING> (Other) × [998.0] <START OF HEADING> (Other) ÷ [0.3]

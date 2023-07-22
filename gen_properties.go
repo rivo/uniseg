@@ -200,9 +200,9 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 // ` + emojiURL + `
 // ("Extended_Pictographic" only)`
 	}
-	buf.WriteString(`package uniseg
+	buf.WriteString(`// Code generated via go generate from gen_properties.go. DO NOT EDIT.
 
-// Code generated via go generate from gen_properties.go. DO NOT EDIT.
+package uniseg
 
 // ` + os.Args[3] + ` are taken from
 // ` + propertyURL + emojiComment + `
