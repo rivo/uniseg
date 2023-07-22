@@ -139,7 +139,7 @@ func propertySearch[E interface{ [3]int | [4]int }](dictionary []E, r rune) (res
 	from := 0
 	to := len(dictionary)
 	for to > from {
-		middle := (from + to) / 2
+		middle := int(uint(from+to) >> 1) // avoid overflow when computing middle
 		cpRange := dictionary[middle]
 		if int(r) < cpRange[0] {
 			to = middle
