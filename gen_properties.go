@@ -178,9 +178,8 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 		}
 	}
 
-	// check the size of properties.
+	// Avoid overflow during binary search.
 	if len(properties) >= 1<<31 {
-		// propertySearch cause overflow in this case.
 		// see https://github.com/rivo/uniseg/pull/37
 		return "", errors.New("too many properties")
 	}
