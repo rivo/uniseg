@@ -157,10 +157,10 @@ func TestHasTrailingLineBreakInString(t *testing.T) {
 
 // Benchmark the use of the line break function for byte slices.
 func BenchmarkLineFunctionBytes(b *testing.B) {
-	str := []byte(benchmarkStr)
 	for i := 0; i < b.N; i++ {
 		var c []byte
 		state := -1
+		str := benchmarkBytes
 		for len(str) > 0 {
 			c, str, _, state = FirstLineSegment(str, state)
 			resultRunes = []rune(string(c))
@@ -170,10 +170,10 @@ func BenchmarkLineFunctionBytes(b *testing.B) {
 
 // Benchmark the use of the line break function for strings.
 func BenchmarkLineFunctionString(b *testing.B) {
-	str := benchmarkStr
 	for i := 0; i < b.N; i++ {
 		var c string
 		state := -1
+		str := benchmarkStr
 		for len(str) > 0 {
 			c, str, _, state = FirstLineSegmentInString(str, state)
 			resultRunes = []rune(c)

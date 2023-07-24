@@ -6,6 +6,8 @@ import (
 
 const benchmarkStr = "This is 🏳️‍🌈, a test string ツ for grapheme cluster testing. 🏋🏽‍♀️🙂🙂 It's only relevant for benchmark tests."
 
+var benchmarkBytes = []byte(benchmarkStr)
+
 // Variables to avoid compiler optimizations.
 var resultRunes []rune
 
@@ -501,10 +503,10 @@ func BenchmarkGraphemesClass(b *testing.B) {
 
 // Benchmark the use of the Graphemes function for byte slices.
 func BenchmarkGraphemesFunctionBytes(b *testing.B) {
-	str := []byte(benchmarkStr)
 	for i := 0; i < b.N; i++ {
 		var c []byte
 		state := -1
+		str := benchmarkBytes
 		for len(str) > 0 {
 			c, str, _, state = FirstGraphemeCluster(str, state)
 			resultRunes = []rune(string(c))
@@ -514,10 +516,10 @@ func BenchmarkGraphemesFunctionBytes(b *testing.B) {
 
 // Benchmark the use of the Graphemes function for strings.
 func BenchmarkGraphemesFunctionString(b *testing.B) {
-	str := benchmarkStr
 	for i := 0; i < b.N; i++ {
 		var c string
 		state := -1
+		str := benchmarkStr
 		for len(str) > 0 {
 			c, str, _, state = FirstGraphemeClusterInString(str, state)
 			resultRunes = []rune(c)
