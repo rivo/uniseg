@@ -97,7 +97,7 @@ var wbTransitions = map[[2]int][3]int{
 	{wbExtendNumLet, prALetter}:      {wbALetter, wbDontBreak, 132},
 	{wbExtendNumLet, prHebrewLetter}: {wbHebrewLetter, wbDontBreak, 132},
 	{wbExtendNumLet, prNumeric}:      {wbNumeric, wbDontBreak, 132},
-	{wbExtendNumLet, prKatakana}:     {prKatakana, wbDontBreak, 132},
+	{wbExtendNumLet, prKatakana}:     {wbKatakana, wbDontBreak, 132},
 }
 
 // transitionWordBreakState determines the new state of the word break parser
