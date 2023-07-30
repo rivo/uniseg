@@ -180,7 +180,6 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 
 	// Avoid overflow during binary search.
 	if len(properties) >= 1<<31 {
-		// see https://github.com/rivo/uniseg/pull/37
 		return "", errors.New("too many properties")
 	}
 
