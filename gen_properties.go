@@ -178,6 +178,11 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 		}
 	}
 
+	// Avoid overflow during binary search.
+	if len(properties) >= 1<<31 {
+		return "", errors.New("too many properties")
+	}
+
 	// Sort properties.
 	sort.Slice(properties, func(i, j int) bool {
 		left, _ := strconv.ParseUint(properties[i][0], 16, 64)
