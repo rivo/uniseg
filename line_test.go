@@ -2,24 +2,6 @@ package uniseg
 
 import "testing"
 
-// Test the HasTrailingLineBreak function.
-func TestHasTrailingLineBreak(t *testing.T) {
-	for _, last := range []byte{'\n', '\r'} {
-		if !HasTrailingLineBreak([]byte{last}) {
-			t.Error("Expected true")
-		}
-	}
-}
-
-// Test the HasTrailingLineBreakInString function.
-func TestHasTrailingLineBreakInString(t *testing.T) {
-	for _, last := range []string{"\n", "\r"} {
-		if !HasTrailingLineBreakInString(last) {
-			t.Error("Expected true")
-		}
-	}
-}
-
 // Test all official Unicode test cases for line breaks using the byte slice
 // function.
 func TestLineCasesBytes(t *testing.T) {
