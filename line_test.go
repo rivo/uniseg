@@ -168,12 +168,43 @@ func TestLineCasesString(t *testing.T) {
 	}
 }
 
+var hasTrailingLineBreakTestCases = []struct {
+	input string
+	want  bool
+}{
+	{"\v", true},     // prBK
+	{"\r", true},     // prCR
+	{"\n", true},     // prLF
+	{"\u0085", true}, // prNL
+	{" ", false},
+	{"A", false},
+	{"", false},
+}
+
+func TestHasTrailingLineBreak(t *testing.T) {
+	for _, tt := range hasTrailingLineBreakTestCases {
+		got := HasTrailingLineBreak([]byte(tt.input))
+		if got != tt.want {
+			t.Errorf("HasTrailingLineBreak(%q) = %v, want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestHasTrailingLineBreakInString(t *testing.T) {
+	for _, tt := range hasTrailingLineBreakTestCases {
+		got := HasTrailingLineBreakInString(tt.input)
+		if got != tt.want {
+			t.Errorf("HasTrailingLineBreak(%q) = %v, want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
 // Benchmark the use of the line break function for byte slices.
 func BenchmarkLineFunctionBytes(b *testing.B) {
-	str := []byte(benchmarkStr)
 	for i := 0; i < b.N; i++ {
 		var c []byte
 		state := -1
+		str := benchmarkBytes
 		for len(str) > 0 {
 			c, str, _, state = FirstLineSegment(str, state)
 			resultRunes = []rune(string(c))
@@ -183,10 +214,10 @@ func BenchmarkLineFunctionBytes(b *testing.B) {
 
 // Benchmark the use of the line break function for strings.
 func BenchmarkLineFunctionString(b *testing.B) {
-	str := benchmarkStr
 	for i := 0; i < b.N; i++ {
 		var c string
 		state := -1
+		str := benchmarkStr
 		for len(str) > 0 {
 			c, str, _, state = FirstLineSegmentInString(str, state)
 			resultRunes = []rune(c)

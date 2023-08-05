@@ -1,13 +1,13 @@
-package uniseg
-
 // Code generated via go generate from gen_properties.go. DO NOT EDIT.
+
+package uniseg
 
 // emojiPresentation are taken from
 //
 // and
 // https://unicode.org/Public/14.0.0/ucd/emoji/emoji-data.txt
 // ("Extended_Pictographic" only)
-// on September 10, 2022. See https://www.unicode.org/license.html for the Unicode
+// on July 17, 2023. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var emojiPresentation = [][3]int{
 	{0x231A, 0x231B, prEmojiPresentation},   // E0.6   [2] (⌚..⌛)    watch..hourglass done
