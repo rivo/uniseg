@@ -61,6 +61,19 @@ func TestLineCasesBytes(t *testing.T) {
 				len(testCase.expected))
 		}
 	}
+	segment, rest, mustBreak, newState := FirstLineSegment([]byte{}, -1)
+	if len(segment) > 0 {
+		t.Errorf(`Expected segment to be empty byte slice, got %q`, segment)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty byte slice, got %q`, rest)
+	}
+	if mustBreak {
+		t.Error(`Expected mustBreak to be false, got true`)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
+	}
 }
 
 // Test all official Unicode test cases for line breaks using the string
@@ -121,6 +134,19 @@ func TestLineCasesString(t *testing.T) {
 				index,
 				len(testCase.expected))
 		}
+	}
+	segment, rest, mustBreak, newState := FirstLineSegmentInString("", -1)
+	if len(segment) > 0 {
+		t.Errorf(`Expected segment to be empty string, got %q`, segment)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty string, got %q`, rest)
+	}
+	if mustBreak {
+		t.Error(`Expected mustBreak to be false, got true`)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
 	}
 }
 

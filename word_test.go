@@ -61,6 +61,16 @@ func TestWordCasesBytes(t *testing.T) {
 				len(testCase.expected))
 		}
 	}
+	word, rest, newState := FirstWord([]byte{}, -1)
+	if len(word) > 0 {
+		t.Errorf(`Expected word to be empty byte slice, got %q`, word)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty byte slice, got %q`, rest)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
+	}
 }
 
 // Test all official Unicode test cases for word boundaries using the string
@@ -121,6 +131,16 @@ func TestWordCasesString(t *testing.T) {
 				index,
 				len(testCase.expected))
 		}
+	}
+	word, rest, newState := FirstWordInString("", -1)
+	if len(word) > 0 {
+		t.Errorf(`Expected word to be empty string, got %q`, word)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty string, got %q`, rest)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
 	}
 }
 

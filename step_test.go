@@ -66,6 +66,19 @@ func TestStepBytesGrapheme(t *testing.T) {
 				len(testCase.expected))
 		}
 	}
+	cluster, rest, boundaries, newState := Step([]byte{}, -1)
+	if len(cluster) > 0 {
+		t.Errorf(`Expected cluster to be empty byte slice, got %q`, cluster)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty byte slice, got %q`, rest)
+	}
+	if boundaries != 0 {
+		t.Errorf(`Expected width to be 0, got %d`, boundaries)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
+	}
 }
 
 // Test official word boundaries Unicode test cases for grapheme clusters using
@@ -282,6 +295,19 @@ func TestStepStringGrapheme(t *testing.T) {
 				index,
 				len(testCase.expected))
 		}
+	}
+	cluster, rest, boundaries, newState := StepString("", -1)
+	if len(cluster) > 0 {
+		t.Errorf(`Expected cluster to be empty string, got %q`, cluster)
+	}
+	if len(rest) > 0 {
+		t.Errorf(`Expected rest to be empty string, got %q`, rest)
+	}
+	if boundaries != 0 {
+		t.Errorf(`Expected width to be 0, got %d`, boundaries)
+	}
+	if newState != 0 {
+		t.Errorf(`Expected newState to be 0, got %d`, newState)
 	}
 }
 
