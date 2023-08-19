@@ -41,12 +41,6 @@ Most terminals or text displays / text editors using a monospace font (for examp
 go get github.com/rivo/uniseg
 ```
 
-## Testing
-
-```bash
-go test -v -coverprofile coverage.out && go tool cover -html coverage.out -o coverage.html
-```
-
 ## Examples
 
 ### Counting Characters in a String
