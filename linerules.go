@@ -65,7 +65,7 @@ const (
 )
 
 // The line break parser's state transitions. It's anologous to grTransitions,
-// see comments there for details. Unicode version 14.0.0.
+// see comments there for details. Unicode version 15.0.0.
 var lbTransitions = map[[2]int][3]int{
 	// LB4.
 	{lbAny, prBK}: {lbBK, LineCanBreak, 310},

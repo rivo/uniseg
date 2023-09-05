@@ -36,7 +36,7 @@ const (
 //     are equal. Stop.
 //  6. Assume grAny and grBoundary.
 //
-// Unicode version 14.0.0.
+// Unicode version 15.0.0.
 var grTransitions = map[[2]int][3]int{
 	// GB5
 	{grAny, prCR}:      {grCR, grBoundary, 50},
