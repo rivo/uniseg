@@ -3,8 +3,8 @@
 package uniseg
 
 // graphemeBreakTestCases are Grapheme testcases taken from
-// https://www.unicode.org/Public/14.0.0/ucd/auxiliary/GraphemeBreakTest.txt
-// on July 17, 2023. See
+// https://www.unicode.org/Public/15.0.0/ucd/auxiliary/GraphemeBreakTest.txt
+// on September 5, 2023. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
 var graphemeBreakTestCases = []testCase{
 	{original: "\u0020\u0020", expected: [][]rune{{0x0020}, {0x0020}}},                                                                                 // ÷ [0.2] SPACE (Other) ÷ [999.0] SPACE (Other) ÷ [0.3]

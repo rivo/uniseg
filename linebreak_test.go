@@ -3,8 +3,8 @@
 package uniseg
 
 // lineBreakTestCases are Grapheme testcases taken from
-// https://www.unicode.org/Public/14.0.0/ucd/auxiliary/LineBreakTest.txt
-// on July 17, 2023. See
+// https://www.unicode.org/Public/15.0.0/ucd/auxiliary/LineBreakTest.txt
+// on September 5, 2023. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
 var lineBreakTestCases = []testCase{
 	{original: "\u0023\u0023", expected: [][]rune{{0x0023, 0x0023}}},                                                                                                                               // × [0.3] NUMBER SIGN (AL) × [28.0] NUMBER SIGN (AL) ÷ [0.3]

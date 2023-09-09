@@ -3,8 +3,8 @@
 package uniseg
 
 // wordBreakTestCases are Grapheme testcases taken from
-// https://www.unicode.org/Public/14.0.0/ucd/auxiliary/WordBreakTest.txt
-// on July 17, 2023. See
+// https://www.unicode.org/Public/15.0.0/ucd/auxiliary/WordBreakTest.txt
+// on September 5, 2023. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
 var wordBreakTestCases = []testCase{
 	{original: "\u0001\u0001", expected: [][]rune{{0x0001}, {0x0001}}},                                                                                 // ÷ [0.2] <START OF HEADING> (Other) ÷ [999.0] <START OF HEADING> (Other) ÷ [0.3]
