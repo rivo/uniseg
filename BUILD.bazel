@@ -1,0 +1,54 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "uniseg",
+    srcs = [
+        "doc.go",
+        "eastasianwidth.go",
+        "emojipresentation.go",
+        "gen_properties.go",
+        "grapheme.go",
+        "graphemeproperties.go",
+        "graphemerules.go",
+        "line.go",
+        "lineproperties.go",
+        "linerules.go",
+        "properties.go",
+        "sentence.go",
+        "sentenceproperties.go",
+        "sentencerules.go",
+        "step.go",
+        "width.go",
+        "word.go",
+        "wordproperties.go",
+        "wordrules.go",
+    ],
+    importpath = "github.com/rivo/uniseg",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":uniseg",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "uniseg_test",
+    srcs = [
+        "examples_test.go",
+        "gen_breaktest.go",
+        "graphemebreak_test.go",
+        "grapheme_test.go",
+        "linebreak_test.go",
+        "line_test.go",
+        "sentencebreak_test.go",
+        "sentence_test.go",
+        "step_test.go",
+        "width_test.go",
+        "wordbreak_test.go",
+        "word_test.go",
+    ],
+    embed = [":uniseg"],
+    timeout = "short",
+)
