@@ -1,5 +1,8 @@
 package uniseg
 
+// EastAsianAmbiguousWidth specifies the monospace width for East Asian
+// characters classified as Ambiguous. The default is 1 but some rare fonts
+// render them with a width of 2.
 var EastAsianAmbiguousWidth = 1
 
 // runeWidth returns the monospace width for the given rune. The provided
