@@ -39,11 +39,10 @@ const (
 //
 // Unicode version 15.0.0.
 func grTransitions(state, prop int) (newState int, newProp int, boundary int) {
-	// It turns out that using a big switch statement is faster than using a map
-	// by a factor of about 2.3.
+	// It turns out that using a big switch statement is much faster than using
+	// a map.
 
-	key := uint64(state) | uint64(prop)<<32
-	switch key {
+	switch uint64(state) | uint64(prop)<<32 {
 	// GB5
 	case grAny | prCR<<32:
 		return grCR, grBoundary, 50
@@ -139,10 +138,10 @@ func transitionGraphemeState(state int, r rune) (newState, prop int, boundary bo
 	prop = propertyGraphemes(r)
 
 	// Find the applicable transition.
-	transState, transProp, _ := grTransitions(state, prop)
-	if transState >= 0 {
+	nextState, nextProp, _ := grTransitions(state, prop)
+	if nextState >= 0 {
 		// We have a specific transition. We'll use it.
-		return transState, prop, transProp == grBoundary
+		return nextState, prop, nextProp == grBoundary
 	}
 
 	// No specific transition found. Try the less specific ones.
