@@ -13,9 +13,10 @@ import "unicode/utf8"
 // well as boundary information and character width is available via the various
 // methods (see examples below).
 //
-// Using this class to iterate over a string is convenient but it is much slower
-// than using this package's [Step] or [StepString] functions or any of the
-// other specialized functions starting with "First".
+// This class basically wraps the [StepString] parser and provides a convenient
+// interface to it. If you are only interested in some parts of this package's
+// functionality, using the specialized functions starting with "First" is
+// almost always faster.
 type Graphemes struct {
 	// The original string.
 	original string
