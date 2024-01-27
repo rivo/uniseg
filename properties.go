@@ -166,3 +166,33 @@ func propertyWithGenCat(dictionary [][4]int, r rune) (property, generalCategory 
 	entry := propertySearch(dictionary, r)
 	return entry[2], entry[3]
 }
+
+// propertyGraphemes returns the Unicode grapheme cluster property value of the
+// given code point while fast tracking ASCII characters.
+func propertyGraphemes(r rune) int {
+	if r >= 0x20 && r <= 0x7e {
+		return prAny
+	}
+	if r == 0x0a {
+		return prLF
+	}
+	if r == 0x0d {
+		return prCR
+	}
+	if r >= 0 && r <= 0x1f || r == 0x7f {
+		return prControl
+	}
+	return property(graphemeCodePoints, r)
+}
+
+// propertyEastAsianWidth returns the Unicode East Asian Width property value of
+// the given code point while fast tracking ASCII characters.
+func propertyEastAsianWidth(r rune) int {
+	if r >= 0x20 && r <= 0x7e {
+		return prNa
+	}
+	if r >= 0 && r <= 0x1f || r == 0x7f {
+		return prN
+	}
+	return property(eastAsianWidth, r)
+}

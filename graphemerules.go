@@ -97,7 +97,7 @@ var grTransitions = map[[2]int][3]int{
 // table) and whether a cluster boundary was detected.
 func transitionGraphemeState(state int, r rune) (newState, prop int, boundary bool) {
 	// Determine the property of the next character.
-	prop = property(graphemeCodePoints, r)
+	prop = propertyGraphemes(r)
 
 	// Find the applicable transition.
 	transition, ok := grTransitions[[2]int{state, prop}]

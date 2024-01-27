@@ -38,7 +38,7 @@ func runeWidth(r rune, graphemeProperty int) int {
 		return 4
 	}
 
-	switch property(eastAsianWidth, r) {
+	switch propertyEastAsianWidth(r) {
 	case prW, prF:
 		return 2
 	case prA:

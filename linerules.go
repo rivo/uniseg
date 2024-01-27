@@ -306,7 +306,7 @@ func transitionLineBreakState(state int, r rune, b []byte, str string) (newState
 	defer func() {
 		// Transition into LB30.
 		if newState == lbCP || newState == lbNUCP {
-			ea := property(eastAsianWidth, r)
+			ea := propertyEastAsianWidth(r)
 			if ea != prF && ea != prW && ea != prH {
 				newState |= lbCPeaFWHBit
 			}
@@ -424,7 +424,7 @@ func transitionLineBreakState(state int, r rune, b []byte, str string) (newState
 	// LB30 (part one).
 	if rule > 300 {
 		if (state == lbAL || state == lbHL || state == lbNU || state == lbNUNU) && nextProperty == prOP {
-			ea := property(eastAsianWidth, r)
+			ea := propertyEastAsianWidth(r)
 			if ea != prF && ea != prW && ea != prH {
 				return lbOP, LineDontBreak
 			}
@@ -460,7 +460,7 @@ func transitionLineBreakState(state int, r rune, b []byte, str string) (newState
 				return prAny, LineDontBreak
 			}
 		}
-		graphemeProperty := property(graphemeCodePoints, r)
+		graphemeProperty := propertyGraphemes(r)
 		if graphemeProperty == prExtendedPictographic && generalCategory == gcCn {
 			return lbExtPicCn, LineCanBreak
 		}
