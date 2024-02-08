@@ -253,16 +253,14 @@ func FirstGraphemeCluster(b []byte, state int) (cluster, rest []byte, width, new
 			return b[:length], b[length:], width, state | (prop << shiftGraphemePropState)
 		}
 
-		if r == vs16 {
-			width = 2
-		} else if firstProp != prExtendedPictographic && firstProp != prRegionalIndicator && firstProp != prL {
-			width += runeWidth(r, prop)
-		} else if firstProp == prExtendedPictographic {
+		if firstProp == prExtendedPictographic {
 			if r == vs15 {
 				width = 1
-			} else {
+			} else if r == vs16 {
 				width = 2
 			}
+		} else if firstProp != prRegionalIndicator && firstProp != prL {
+			width += runeWidth(r, prop)
 		}
 
 		length += l
@@ -315,16 +313,14 @@ func FirstGraphemeClusterInString(str string, state int) (cluster, rest string, 
 			return str[:length], str[length:], width, state | (prop << shiftGraphemePropState)
 		}
 
-		if r == vs16 {
-			width = 2
-		} else if firstProp != prExtendedPictographic && firstProp != prRegionalIndicator && firstProp != prL {
-			width += runeWidth(r, prop)
-		} else if firstProp == prExtendedPictographic {
+		if firstProp == prExtendedPictographic {
 			if r == vs15 {
 				width = 1
-			} else {
+			} else if r == vs16 {
 				width = 2
 			}
+		} else if firstProp != prRegionalIndicator && firstProp != prL {
+			width += runeWidth(r, prop)
 		}
 
 		length += l
