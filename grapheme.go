@@ -1,6 +1,9 @@
 package uniseg
 
-import "unicode/utf8"
+import (
+	"fmt"
+	"unicode/utf8"
+)
 
 // Graphemes implements an iterator over Unicode grapheme clusters, or
 // user-perceived characters. While iterating, it also provides information
@@ -45,6 +48,17 @@ func NewGraphemes(str string) *Graphemes {
 		remaining: str,
 		state:     -1,
 	}
+}
+
+// String returns a string representation of the current grapheme cluster
+// iterator. It includes the current grapheme cluster, wrapped in curly
+// brackets, and the first 10 bytes of the remaining string.
+func (g *Graphemes) String() string {
+	remaining := g.remaining
+	if len(remaining) > 10 {
+		remaining = remaining[:10] + "..."
+	}
+	return fmt.Sprintf("{%s}%s", g.cluster, remaining)
 }
 
 // Next advances the iterator by one grapheme cluster and returns false if no
