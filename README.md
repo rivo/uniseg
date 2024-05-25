@@ -5,6 +5,8 @@
 
 This Go package implements Unicode Text Segmentation according to [Unicode Standard Annex #29](https://unicode.org/reports/tr29/), Unicode Line Breaking according to [Unicode Standard Annex #14](https://unicode.org/reports/tr14/) (Unicode version 15.0.0), and monospace font string width calculation similar to [wcwidth](https://man7.org/linux/man-pages/man3/wcwidth.3.html).
 
+It allows to pass all the tests mentionned in [The String Type is Broken](https://mortoray.com/the-string-type-is-broken/) and [this article](https://bignerdranch.com/blog/elixir-and-unicode-part-1-unicode-and-utf-8-explained/).
+
 ## Background
 
 ### Grapheme Clusters
