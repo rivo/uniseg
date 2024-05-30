@@ -510,6 +510,28 @@ func TestGraphemesFunctionString(t *testing.T) {
 	}
 }
 
+func TestIsGraphemeClusterEmoji(t *testing.T) {
+	testCases := []struct {
+		cluster  string
+		width    int
+		expected bool
+	}{
+		{"👋", 2, true},
+		{"a", 1, false},
+		{"咪", 2, false},
+		{"ض", 1, false},
+		{"🇩🇪", 2, true},
+		{"👨🏿‍🌾", 2, true},
+		{"🏳️‍🌈", 2, true},
+		{"☺️", 2, true}, // White smiling face (with variation selector 16 = emoji presentation)
+	}
+	for index, testCase := range testCases {
+		if result := IsGraphemeClusterEmoji([]byte(testCase.cluster), testCase.width); result != testCase.expected {
+			t.Errorf(`Test case %d %q failed: Expected %t, got %t`, index, testCase.cluster, testCase.expected, result)
+		}
+	}
+}
+
 // Benchmark the use of the Graphemes class.
 func BenchmarkGraphemesClass(b *testing.B) {
 	for i := 0; i < b.N; i++ {
