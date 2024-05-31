@@ -103,6 +103,11 @@ func (g *Graphemes) Bytes() []byte {
 	return []byte(g.cluster)
 }
 
+// IsEmoji returns true if the current grapheme cluster is an emoji.
+func (g *Graphemes) IsEmoji() bool {
+	return IsGraphemeClusterInStringEmoji(g.cluster, g.Width())
+}
+
 // Positions returns the interval of the current grapheme cluster as byte
 // positions into the original string. The first returned value "from" indexes
 // the first byte and the second returned value "to" indexes the first byte that
@@ -342,4 +347,51 @@ func FirstGraphemeClusterInString(str string, state int) (cluster, rest string, 
 			return str, "", width, grAny | (prop << shiftGraphemePropState)
 		}
 	}
+}
+
+const (
+	regionalIndicatorA = 0x1F1E6
+	regionalIndicatorZ = 0x1F1FF
+)
+
+// IsGraphemeClusterEmoji returns true if the given byte slice grapheme cluster
+// and width is an emoji according to the Unicode Standard Annex #51, Unicode
+// Emoji.
+func IsGraphemeClusterEmoji(cluster []byte, width int) bool {
+	return isGraphemeClusterEmoji(cluster, utf8.DecodeRune, width)
+}
+
+// IsGraphemeClusterInStringEmoji is like [IsGraphemeClusterEmoji] but its input
+// is a string.
+func IsGraphemeClusterInStringEmoji(cluster string, width int) bool {
+	return isGraphemeClusterEmoji(cluster, utf8.DecodeRuneInString, width)
+}
+
+func isGraphemeClusterEmoji[C []byte | string, F func(C) (rune, int)](cluster C, fn F, width int) bool {
+	if width != 2 {
+		return false
+	}
+
+	r, rw := fn(cluster)
+	if r == vs16 {
+		return true
+	}
+	if r >= regionalIndicatorA && r <= regionalIndicatorZ {
+		return true
+	}
+	if propertyGraphemes(r) == prExtendedPictographic &&
+		property(emojiPresentation, r) == prEmojiPresentation {
+		return true
+	}
+
+	cluster = cluster[rw:]
+	for len(cluster) > 0 {
+		r, rw := fn(cluster)
+		if r == vs16 {
+			return true
+		}
+		cluster = cluster[rw:]
+	}
+
+	return false
 }
