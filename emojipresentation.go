@@ -7,9 +7,9 @@ package uniseg
 // and
 // https://unicode.org/Public/15.0.0/ucd/emoji/emoji-data.txt
 // ("Extended_Pictographic" only)
-// on September 5, 2023. See https://www.unicode.org/license.html for the Unicode
+// on July 2, 2025. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
-var emojiPresentation = [][3]int{
+var emojiPresentation = [][3]rune{
 	{0x231A, 0x231B, prEmojiPresentation},   // E0.6   [2] (⌚..⌛)    watch..hourglass done
 	{0x23E9, 0x23EC, prEmojiPresentation},   // E0.6   [4] (⏩..⏬)    fast-forward button..fast down button
 	{0x23F0, 0x23F0, prEmojiPresentation},   // E0.6   [1] (⏰)       alarm clock

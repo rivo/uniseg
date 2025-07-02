@@ -134,18 +134,18 @@ const (
 // propertySearch performs a binary search on a property slice and returns the
 // entry whose range (start = first array element, end = second array element)
 // includes r, or an array of 0's if no such entry was found.
-func propertySearch[E interface{ [3]int | [4]int }](dictionary []E, r rune) (result E) {
+func propertySearch[E interface{ [3]rune | [4]rune }](dictionary []E, r rune) (result E) {
 	// Run a binary search.
 	from := 0
 	to := len(dictionary)
 	for to > from {
 		middle := (from + to) / 2
 		cpRange := dictionary[middle]
-		if int(r) < cpRange[0] {
+		if r < cpRange[0] {
 			to = middle
 			continue
 		}
-		if int(r) > cpRange[1] {
+		if r > cpRange[1] {
 			from = middle + 1
 			continue
 		}
@@ -156,8 +156,8 @@ func propertySearch[E interface{ [3]int | [4]int }](dictionary []E, r rune) (res
 
 // property returns the Unicode property value (see constants above) of the
 // given code point.
-func property(dictionary [][3]int, r rune) int {
-	return propertySearch(dictionary, r)[2]
+func property(dictionary [][3]rune, r rune) int {
+	return int(propertySearch(dictionary, r)[2])
 }
 
 // propertyLineBreak returns the Unicode property value and General Category
@@ -174,7 +174,7 @@ func propertyLineBreak(r rune) (property, generalCategory int) {
 		return prNU, gcNd
 	}
 	entry := propertySearch(lineBreakCodePoints, r)
-	return entry[2], entry[3]
+	return int(entry[2]), int(entry[3])
 }
 
 // propertyGraphemes returns the Unicode grapheme cluster property value of the

@@ -213,7 +213,7 @@ package uniseg
 // ` + propertyURL + emojiComment + `
 // on ` + time.Now().Format("January 2, 2006") + `. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
-var ` + os.Args[3] + ` = [][` + strconv.Itoa(columns) + `]int{
+var ` + os.Args[3] + ` = [][` + strconv.Itoa(columns) + `]rune{
 	`)
 
 	// Properties.

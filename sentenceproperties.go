@@ -7,9 +7,9 @@ package uniseg
 // and
 // https://unicode.org/Public/15.0.0/ucd/emoji/emoji-data.txt
 // ("Extended_Pictographic" only)
-// on September 5, 2023. See https://www.unicode.org/license.html for the Unicode
+// on July 2, 2025. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
-var sentenceBreakCodePoints = [][3]int{
+var sentenceBreakCodePoints = [][3]rune{
 	{0x0009, 0x0009, prSp},        // Cc       <control-0009>
 	{0x000A, 0x000A, prLF},        // Cc       <control-000A>
 	{0x000B, 0x000C, prSp},        // Cc   [2] <control-000B>..<control-000C>
