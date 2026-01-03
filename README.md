@@ -65,8 +65,8 @@ This is the most convenient method of iterating over grapheme clusters:
 
 ```go
 gr := uniseg.NewGraphemes("👍🏼!")
-for gr.Next() {
-	fmt.Printf("%x ", gr.Runes())
+for cluster := range gr.Iterate() {
+	fmt.Printf("%x ", cluster)
 }
 // [1f44d 1f3fc] [21]
 ```

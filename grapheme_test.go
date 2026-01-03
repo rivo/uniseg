@@ -46,8 +46,8 @@ var testCases = []testCase{
 // decomposed returns a grapheme cluster decomposition.
 func decomposed(s string) (runes [][]rune) {
 	gr := NewGraphemes(s)
-	for gr.Next() {
-		runes = append(runes, gr.Runes())
+	for cluster := range gr.Iterate(){
+		runes = append(runes, cluster)
 	}
 	return
 }
@@ -133,7 +133,7 @@ func TestGraphemesClassWord(t *testing.T) {
 			t.Error("Expected initial IsWordBoundary to be true, got false")
 		}
 	GraphemeLoop:
-		for gr.Next() {
+		for c := range gr.Iterate() {
 			if index >= len(testCase.expected) {
 				t.Errorf(`Test case %d %q failed: More words returned than expected %d`,
 					testNum,
@@ -141,7 +141,7 @@ func TestGraphemesClassWord(t *testing.T) {
 					len(testCase.expected))
 				break
 			}
-			cluster = append(cluster, gr.Runes()...)
+			cluster = append(cluster, c...)
 			if gr.IsWordBoundary() {
 				if len(cluster) != len(testCase.expected[index]) {
 					t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
@@ -198,7 +198,7 @@ func TestGraphemesClassSentence(t *testing.T) {
 			t.Error("Expected initial IsSentenceBoundary to be true, got false")
 		}
 	GraphemeLoop:
-		for gr.Next() {
+		for c := range gr.Iterate() {
 			if index >= len(testCase.expected) {
 				t.Errorf(`Test case %d %q failed: More sentences returned than expected %d`,
 					testNum,
@@ -206,7 +206,7 @@ func TestGraphemesClassSentence(t *testing.T) {
 					len(testCase.expected))
 				break
 			}
-			cluster = append(cluster, gr.Runes()...)
+			cluster = append(cluster, c...)
 			if gr.IsSentenceBoundary() {
 				if len(cluster) != len(testCase.expected[index]) {
 					t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,

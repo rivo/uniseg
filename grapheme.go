@@ -2,6 +2,7 @@ package uniseg
 
 import (
 	"fmt"
+	"iter"
 	"unicode/utf8"
 )
 
@@ -74,6 +75,16 @@ func (g *Graphemes) Next() bool {
 	g.offset += len(g.cluster)
 	g.cluster, g.remaining, g.boundaries, g.state = StepString(g.remaining, g.state)
 	return true
+}
+
+func (g *Graphemes) Iterate() iter.Seq[[]rune] {
+	return func(yield func(cluster []rune) bool) {
+		for g.Next() {
+			if !yield(g.Runes()) {
+				break
+			}
+		}
+	}
 }
 
 // Runes returns a slice of runes (code points) which corresponds to the current
