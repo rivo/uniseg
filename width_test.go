@@ -494,3 +494,25 @@ func TestRunesWidth(t *testing.T) {
 		}
 	}
 }
+
+func TestStringWidthThaiSaraAm(t *testing.T) {
+	// Thai SARA AM (U+0E33) is a SpacingMark that visually includes a
+	// spacing Sara Aa. A grapheme of consonant (+ tone) + SARA AM occupies
+	// 2 terminal cells. Standalone SARA AM is width 1. See #63.
+	cases := []struct {
+		in   string
+		want int
+	}{
+		{"นำ", 2},  // NA + SARA AM
+		{"น้ำ", 2}, // NA + MAI THO + SARA AM
+		{"คำ", 2},  // KHO KHWAI + SARA AM
+		{"ค้ำ", 2}, // KHO KHWAI + MAI TRI + SARA AM
+		{"ำ", 1},   // standalone SARA AM
+		{"น", 1},
+	}
+	for _, c := range cases {
+		if got := StringWidth(c.in); got != c.want {
+			t.Errorf("StringWidth(%q) = %d, want %d", c.in, got, c.want)
+		}
+	}
+}
