@@ -3,11 +3,11 @@
 package uniseg
 
 // workBreakCodePoints are taken from
-// https://www.unicode.org/Public/15.0.0/ucd/auxiliary/WordBreakProperty.txt
+// https://www.unicode.org/Public/18.0.0/ucd/auxiliary/WordBreakProperty.txt
 // and
-// https://unicode.org/Public/15.0.0/ucd/emoji/emoji-data.txt
+// https://unicode.org/Public/18.0.0/ucd/emoji/emoji-data.txt
 // ("Extended_Pictographic" only)
-// on September 5, 2023. See https://www.unicode.org/license.html for the Unicode
+// on October 3, 2026. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var workBreakCodePoints = [][3]int{
 	{0x000A, 0x000A, prLF},                     // Cc       <control-000A>
@@ -31,6 +31,7 @@ var workBreakCodePoints = [][3]int{
 	{0x00AE, 0x00AE, prExtendedPictographic},   // E0.6   [1] (®️)       registered
 	{0x00B5, 0x00B5, prALetter},                // L&       MICRO SIGN
 	{0x00B7, 0x00B7, prMidLetter},              // Po       MIDDLE DOT
+	{0x00B8, 0x00B8, prALetter},                // Sk       CEDILLA
 	{0x00BA, 0x00BA, prALetter},                // Lo       MASCULINE ORDINAL INDICATOR
 	{0x00C0, 0x00D6, prALetter},                // L&  [23] LATIN CAPITAL LETTER A WITH GRAVE..LATIN CAPITAL LETTER O WITH DIAERESIS
 	{0x00D8, 0x00F6, prALetter},                // L&  [31] LATIN CAPITAL LETTER O WITH STROKE..LATIN SMALL LETTER O WITH DIAERESIS
@@ -39,8 +40,8 @@ var workBreakCodePoints = [][3]int{
 	{0x01BC, 0x01BF, prALetter},                // L&   [4] LATIN CAPITAL LETTER TONE FIVE..LATIN LETTER WYNN
 	{0x01C0, 0x01C3, prALetter},                // Lo   [4] LATIN LETTER DENTAL CLICK..LATIN LETTER RETROFLEX CLICK
 	{0x01C4, 0x0293, prALetter},                // L& [208] LATIN CAPITAL LETTER DZ WITH CARON..LATIN SMALL LETTER EZH WITH CURL
-	{0x0294, 0x0294, prALetter},                // Lo       LATIN LETTER GLOTTAL STOP
-	{0x0295, 0x02AF, prALetter},                // L&  [27] LATIN LETTER PHARYNGEAL VOICED FRICATIVE..LATIN SMALL LETTER TURNED H WITH FISHHOOK AND TAIL
+	{0x0294, 0x0295, prALetter},                // Lo   [2] LATIN LETTER GLOTTAL STOP..LATIN LETTER PHARYNGEAL VOICED FRICATIVE
+	{0x0296, 0x02AF, prALetter},                // L&  [26] LATIN LETTER INVERTED GLOTTAL STOP..LATIN SMALL LETTER TURNED H WITH FISHHOOK AND TAIL
 	{0x02B0, 0x02C1, prALetter},                // Lm  [18] MODIFIER LETTER SMALL H..MODIFIER LETTER REVERSED GLOTTAL STOP
 	{0x02C2, 0x02C5, prALetter},                // Sk   [4] MODIFIER LETTER LEFT ARROWHEAD..MODIFIER LETTER DOWN ARROWHEAD
 	{0x02C6, 0x02D1, prALetter},                // Lm  [12] MODIFIER LETTER CIRCUMFLEX ACCENT..MODIFIER LETTER HALF TRIANGULAR COLON
@@ -71,23 +72,24 @@ var workBreakCodePoints = [][3]int{
 	{0x0488, 0x0489, prExtend},                 // Me   [2] COMBINING CYRILLIC HUNDRED THOUSANDS SIGN..COMBINING CYRILLIC MILLIONS SIGN
 	{0x048A, 0x052F, prALetter},                // L& [166] CYRILLIC CAPITAL LETTER SHORT I WITH TAIL..CYRILLIC SMALL LETTER EL WITH DESCENDER
 	{0x0531, 0x0556, prALetter},                // L&  [38] ARMENIAN CAPITAL LETTER AYB..ARMENIAN CAPITAL LETTER FEH
-	{0x0559, 0x0559, prALetter},                // Lm       ARMENIAN MODIFIER LETTER LEFT HALF RING
+	{0x0558, 0x0559, prALetter},                // Lm   [2] MODIFIER LETTER ARMENIAN SMALL EH..ARMENIAN MODIFIER LETTER LEFT HALF RING
 	{0x055A, 0x055C, prALetter},                // Po   [3] ARMENIAN APOSTROPHE..ARMENIAN EXCLAMATION MARK
 	{0x055E, 0x055E, prALetter},                // Po       ARMENIAN QUESTION MARK
 	{0x055F, 0x055F, prMidLetter},              // Po       ARMENIAN ABBREVIATION MARK
 	{0x0560, 0x0588, prALetter},                // L&  [41] ARMENIAN SMALL LETTER TURNED AYB..ARMENIAN SMALL LETTER YI WITH STROKE
 	{0x0589, 0x0589, prMidNum},                 // Po       ARMENIAN FULL STOP
 	{0x058A, 0x058A, prALetter},                // Pd       ARMENIAN HYPHEN
+	{0x058B, 0x058C, prALetter},                // Lm   [2] MODIFIER LETTER ARMENIAN SMALL INI..MODIFIER LETTER ARMENIAN SMALL YI
 	{0x0591, 0x05BD, prExtend},                 // Mn  [45] HEBREW ACCENT ETNAHTA..HEBREW POINT METEG
 	{0x05BF, 0x05BF, prExtend},                 // Mn       HEBREW POINT RAFE
 	{0x05C1, 0x05C2, prExtend},                 // Mn   [2] HEBREW POINT SHIN DOT..HEBREW POINT SIN DOT
 	{0x05C4, 0x05C5, prExtend},                 // Mn   [2] HEBREW MARK UPPER DOT..HEBREW MARK LOWER DOT
-	{0x05C7, 0x05C7, prExtend},                 // Mn       HEBREW POINT QAMATS QATAN
+	{0x05C7, 0x05C9, prExtend},                 // Mn   [3] HEBREW POINT QAMATS QATAN..HEBREW POINT DAGESH HAZAQ MUDGASH
 	{0x05D0, 0x05EA, prHebrewLetter},           // Lo  [27] HEBREW LETTER ALEF..HEBREW LETTER TAV
 	{0x05EF, 0x05F2, prHebrewLetter},           // Lo   [4] HEBREW YOD TRIANGLE..HEBREW LIGATURE YIDDISH DOUBLE YOD
 	{0x05F3, 0x05F3, prALetter},                // Po       HEBREW PUNCTUATION GERESH
 	{0x05F4, 0x05F4, prMidLetter},              // Po       HEBREW PUNCTUATION GERSHAYIM
-	{0x0600, 0x0605, prFormat},                 // Cf   [6] ARABIC NUMBER SIGN..ARABIC NUMBER MARK ABOVE
+	{0x0600, 0x0605, prNumeric},                // Cf   [6] ARABIC NUMBER SIGN..ARABIC NUMBER MARK ABOVE
 	{0x060C, 0x060D, prMidNum},                 // Po   [2] ARABIC COMMA..ARABIC DATE SEPARATOR
 	{0x0610, 0x061A, prExtend},                 // Mn  [11] ARABIC SIGN SALLALLAHOU ALAYHE WASSALLAM..ARABIC SMALL KASRA
 	{0x061C, 0x061C, prFormat},                 // Cf       ARABIC LETTER MARK
@@ -103,7 +105,7 @@ var workBreakCodePoints = [][3]int{
 	{0x0671, 0x06D3, prALetter},                // Lo  [99] ARABIC LETTER ALEF WASLA..ARABIC LETTER YEH BARREE WITH HAMZA ABOVE
 	{0x06D5, 0x06D5, prALetter},                // Lo       ARABIC LETTER AE
 	{0x06D6, 0x06DC, prExtend},                 // Mn   [7] ARABIC SMALL HIGH LIGATURE SAD WITH LAM WITH ALEF MAKSURA..ARABIC SMALL HIGH SEEN
-	{0x06DD, 0x06DD, prFormat},                 // Cf       ARABIC END OF AYAH
+	{0x06DD, 0x06DD, prNumeric},                // Cf       ARABIC END OF AYAH
 	{0x06DF, 0x06E4, prExtend},                 // Mn   [6] ARABIC SMALL HIGH ROUNDED ZERO..ARABIC SMALL HIGH MADDA
 	{0x06E5, 0x06E6, prALetter},                // Lm   [2] ARABIC SMALL WAW..ARABIC SMALL YEH
 	{0x06E7, 0x06E8, prExtend},                 // Mn   [2] ARABIC SMALL HIGH YEH..ARABIC SMALL HIGH NOON
@@ -112,7 +114,7 @@ var workBreakCodePoints = [][3]int{
 	{0x06F0, 0x06F9, prNumeric},                // Nd  [10] EXTENDED ARABIC-INDIC DIGIT ZERO..EXTENDED ARABIC-INDIC DIGIT NINE
 	{0x06FA, 0x06FC, prALetter},                // Lo   [3] ARABIC LETTER SHEEN WITH DOT BELOW..ARABIC LETTER GHAIN WITH DOT BELOW
 	{0x06FF, 0x06FF, prALetter},                // Lo       ARABIC LETTER HEH WITH INVERTED V
-	{0x070F, 0x070F, prFormat},                 // Cf       SYRIAC ABBREVIATION MARK
+	{0x070F, 0x070F, prALetter},                // Cf       SYRIAC ABBREVIATION MARK
 	{0x0710, 0x0710, prALetter},                // Lo       SYRIAC LETTER ALAPH
 	{0x0711, 0x0711, prExtend},                 // Mn       SYRIAC LETTER SUPERSCRIPT ALAPH
 	{0x0712, 0x072F, prALetter},                // Lo  [30] SYRIAC LETTER BETH..SYRIAC LETTER PERSIAN DHALATH
@@ -139,13 +141,13 @@ var workBreakCodePoints = [][3]int{
 	{0x0859, 0x085B, prExtend},                 // Mn   [3] MANDAIC AFFRICATION MARK..MANDAIC GEMINATION MARK
 	{0x0860, 0x086A, prALetter},                // Lo  [11] SYRIAC LETTER MALAYALAM NGA..SYRIAC LETTER MALAYALAM SSA
 	{0x0870, 0x0887, prALetter},                // Lo  [24] ARABIC LETTER ALEF WITH ATTACHED FATHA..ARABIC BASELINE ROUND DOT
-	{0x0889, 0x088E, prALetter},                // Lo   [6] ARABIC LETTER NOON WITH INVERTED SMALL V..ARABIC VERTICAL TAIL
-	{0x0890, 0x0891, prFormat},                 // Cf   [2] ARABIC POUND MARK ABOVE..ARABIC PIASTRE MARK ABOVE
-	{0x0898, 0x089F, prExtend},                 // Mn   [8] ARABIC SMALL HIGH WORD AL-JUZ..ARABIC HALF MADDA OVER MADDA
+	{0x0889, 0x088F, prALetter},                // Lo   [7] ARABIC LETTER NOON WITH INVERTED SMALL V..ARABIC LETTER NOON WITH RING ABOVE
+	{0x0890, 0x0891, prNumeric},                // Cf   [2] ARABIC POUND MARK ABOVE..ARABIC PIASTRE MARK ABOVE
+	{0x0897, 0x089F, prExtend},                 // Mn   [9] ARABIC PEPET..ARABIC HALF MADDA OVER MADDA
 	{0x08A0, 0x08C8, prALetter},                // Lo  [41] ARABIC LETTER BEH WITH SMALL V BELOW..ARABIC LETTER GRAF
 	{0x08C9, 0x08C9, prALetter},                // Lm       ARABIC SMALL FARSI YEH
 	{0x08CA, 0x08E1, prExtend},                 // Mn  [24] ARABIC SMALL HIGH FARSI YEH..ARABIC SMALL HIGH SIGN SAFHA
-	{0x08E2, 0x08E2, prFormat},                 // Cf       ARABIC DISPUTED END OF AYAH
+	{0x08E2, 0x08E2, prNumeric},                // Cf       ARABIC DISPUTED END OF AYAH
 	{0x08E3, 0x0902, prExtend},                 // Mn  [32] ARABIC TURNED DAMMA BELOW..DEVANAGARI SIGN ANUSVARA
 	{0x0903, 0x0903, prExtend},                 // Mc       DEVANAGARI SIGN VISARGA
 	{0x0904, 0x0939, prALetter},                // Lo  [54] DEVANAGARI LETTER SHORT A..DEVANAGARI LETTER HA
@@ -249,7 +251,7 @@ var workBreakCodePoints = [][3]int{
 	{0x0B47, 0x0B48, prExtend},                 // Mc   [2] ORIYA VOWEL SIGN E..ORIYA VOWEL SIGN AI
 	{0x0B4B, 0x0B4C, prExtend},                 // Mc   [2] ORIYA VOWEL SIGN O..ORIYA VOWEL SIGN AU
 	{0x0B4D, 0x0B4D, prExtend},                 // Mn       ORIYA SIGN VIRAMA
-	{0x0B55, 0x0B56, prExtend},                 // Mn   [2] ORIYA SIGN OVERLINE..ORIYA AI LENGTH MARK
+	{0x0B53, 0x0B56, prExtend},                 // Mn   [4] ORIYA SIGN DOT ABOVE..ORIYA AI LENGTH MARK
 	{0x0B57, 0x0B57, prExtend},                 // Mc       ORIYA AU LENGTH MARK
 	{0x0B5C, 0x0B5D, prALetter},                // Lo   [2] ORIYA LETTER RRA..ORIYA LETTER RHA
 	{0x0B5F, 0x0B61, prALetter},                // Lo   [3] ORIYA LETTER YYA..ORIYA LETTER VOCALIC LL
@@ -291,7 +293,7 @@ var workBreakCodePoints = [][3]int{
 	{0x0C4A, 0x0C4D, prExtend},                 // Mn   [4] TELUGU VOWEL SIGN O..TELUGU SIGN VIRAMA
 	{0x0C55, 0x0C56, prExtend},                 // Mn   [2] TELUGU LENGTH MARK..TELUGU AI LENGTH MARK
 	{0x0C58, 0x0C5A, prALetter},                // Lo   [3] TELUGU LETTER TSA..TELUGU LETTER RRRA
-	{0x0C5D, 0x0C5D, prALetter},                // Lo       TELUGU LETTER NAKAARA POLLU
+	{0x0C5C, 0x0C5D, prALetter},                // Lo   [2] TELUGU ARCHAIC SHRII..TELUGU LETTER NAKAARA POLLU
 	{0x0C60, 0x0C61, prALetter},                // Lo   [2] TELUGU LETTER VOCALIC RR..TELUGU LETTER VOCALIC LL
 	{0x0C62, 0x0C63, prExtend},                 // Mn   [2] TELUGU VOWEL SIGN VOCALIC L..TELUGU VOWEL SIGN VOCALIC LL
 	{0x0C66, 0x0C6F, prNumeric},                // Nd  [10] TELUGU DIGIT ZERO..TELUGU DIGIT NINE
@@ -313,7 +315,7 @@ var workBreakCodePoints = [][3]int{
 	{0x0CCA, 0x0CCB, prExtend},                 // Mc   [2] KANNADA VOWEL SIGN O..KANNADA VOWEL SIGN OO
 	{0x0CCC, 0x0CCD, prExtend},                 // Mn   [2] KANNADA VOWEL SIGN AU..KANNADA SIGN VIRAMA
 	{0x0CD5, 0x0CD6, prExtend},                 // Mc   [2] KANNADA LENGTH MARK..KANNADA AI LENGTH MARK
-	{0x0CDD, 0x0CDE, prALetter},                // Lo   [2] KANNADA LETTER NAKAARA POLLU..KANNADA LETTER FA
+	{0x0CDC, 0x0CDE, prALetter},                // Lo   [3] KANNADA ARCHAIC SHRII..KANNADA LETTER FA
 	{0x0CE0, 0x0CE1, prALetter},                // Lo   [2] KANNADA LETTER VOCALIC RR..KANNADA LETTER VOCALIC LL
 	{0x0CE2, 0x0CE3, prExtend},                 // Mn   [2] KANNADA VOWEL SIGN VOCALIC L..KANNADA VOWEL SIGN VOCALIC LL
 	{0x0CE6, 0x0CEF, prNumeric},                // Nd  [10] KANNADA DIGIT ZERO..KANNADA DIGIT NINE
@@ -478,6 +480,7 @@ var workBreakCodePoints = [][3]int{
 	{0x1939, 0x193B, prExtend},                 // Mn   [3] LIMBU SIGN MUKPHRENG..LIMBU SIGN SA-I
 	{0x1946, 0x194F, prNumeric},                // Nd  [10] LIMBU DIGIT ZERO..LIMBU DIGIT NINE
 	{0x19D0, 0x19D9, prNumeric},                // Nd  [10] NEW TAI LUE DIGIT ZERO..NEW TAI LUE DIGIT NINE
+	{0x19DA, 0x19DA, prNumeric},                // No       NEW TAI LUE THAM DIGIT ONE
 	{0x1A00, 0x1A16, prALetter},                // Lo  [23] BUGINESE LETTER KA..BUGINESE LETTER HA
 	{0x1A17, 0x1A18, prExtend},                 // Mn   [2] BUGINESE VOWEL SIGN I..BUGINESE VOWEL SIGN U
 	{0x1A19, 0x1A1A, prExtend},                 // Mc   [2] BUGINESE VOWEL SIGN E..BUGINESE VOWEL SIGN O
@@ -498,7 +501,7 @@ var workBreakCodePoints = [][3]int{
 	{0x1A90, 0x1A99, prNumeric},                // Nd  [10] TAI THAM THAM DIGIT ZERO..TAI THAM THAM DIGIT NINE
 	{0x1AB0, 0x1ABD, prExtend},                 // Mn  [14] COMBINING DOUBLED CIRCUMFLEX ACCENT..COMBINING PARENTHESES BELOW
 	{0x1ABE, 0x1ABE, prExtend},                 // Me       COMBINING PARENTHESES OVERLAY
-	{0x1ABF, 0x1ACE, prExtend},                 // Mn  [16] COMBINING LATIN SMALL LETTER W BELOW..COMBINING LATIN SMALL LETTER INSULAR T
+	{0x1ABF, 0x1AF0, prExtend},                 // Mn  [50] COMBINING LATIN SMALL LETTER W BELOW..COMBINING DOUBLE COMMA ABOVE
 	{0x1B00, 0x1B03, prExtend},                 // Mn   [4] BALINESE SIGN ULU RICEM..BALINESE SIGN SURANG
 	{0x1B04, 0x1B04, prExtend},                 // Mc       BALINESE SIGN BISAH
 	{0x1B05, 0x1B33, prALetter},                // Lo  [47] BALINESE LETTER AKARA..BALINESE LETTER HA
@@ -543,7 +546,7 @@ var workBreakCodePoints = [][3]int{
 	{0x1C50, 0x1C59, prNumeric},                // Nd  [10] OL CHIKI DIGIT ZERO..OL CHIKI DIGIT NINE
 	{0x1C5A, 0x1C77, prALetter},                // Lo  [30] OL CHIKI LETTER LA..OL CHIKI LETTER OH
 	{0x1C78, 0x1C7D, prALetter},                // Lm   [6] OL CHIKI MU TTUDDAG..OL CHIKI AHAD
-	{0x1C80, 0x1C88, prALetter},                // L&   [9] CYRILLIC SMALL LETTER ROUNDED VE..CYRILLIC SMALL LETTER UNBLENDED UK
+	{0x1C80, 0x1C8A, prALetter},                // L&  [11] CYRILLIC SMALL LETTER ROUNDED VE..CYRILLIC SMALL LETTER TJE
 	{0x1C90, 0x1CBA, prALetter},                // L&  [43] GEORGIAN MTAVRULI CAPITAL LETTER AN..GEORGIAN MTAVRULI CAPITAL LETTER AIN
 	{0x1CBD, 0x1CBF, prALetter},                // L&   [3] GEORGIAN MTAVRULI CAPITAL LETTER AEN..GEORGIAN MTAVRULI CAPITAL LETTER LABIAL SIGN
 	{0x1CD0, 0x1CD2, prExtend},                 // Mn   [3] VEDIC TONE KARSHANA..VEDIC TONE PRENKHA
@@ -607,7 +610,7 @@ var workBreakCodePoints = [][3]int{
 	{0x2066, 0x206F, prFormat},                 // Cf  [10] LEFT-TO-RIGHT ISOLATE..NOMINAL DIGIT SHAPES
 	{0x2071, 0x2071, prALetter},                // Lm       SUPERSCRIPT LATIN SMALL LETTER I
 	{0x207F, 0x207F, prALetter},                // Lm       SUPERSCRIPT LATIN SMALL LETTER N
-	{0x2090, 0x209C, prALetter},                // Lm  [13] LATIN SUBSCRIPT SMALL LETTER A..LATIN SUBSCRIPT SMALL LETTER T
+	{0x208F, 0x209F, prALetter},                // Lm  [17] MODIFIER LETTER HIGH AND LOW VERTICAL LINE..LATIN SUBSCRIPT SMALL LETTER Z
 	{0x20D0, 0x20DC, prExtend},                 // Mn  [13] COMBINING LEFT HARPOON ABOVE..COMBINING FOUR DOTS ABOVE
 	{0x20DD, 0x20E0, prExtend},                 // Me   [4] COMBINING ENCLOSING CIRCLE..COMBINING ENCLOSING CIRCLE BACKSLASH
 	{0x20E1, 0x20E1, prExtend},                 // Mn       COMBINING LEFT RIGHT ARROW ABOVE
@@ -625,7 +628,6 @@ var workBreakCodePoints = [][3]int{
 	{0x212A, 0x212D, prALetter},                // L&   [4] KELVIN SIGN..BLACK-LETTER CAPITAL C
 	{0x212F, 0x2134, prALetter},                // L&   [6] SCRIPT SMALL E..SCRIPT SMALL O
 	{0x2135, 0x2138, prALetter},                // Lo   [4] ALEF SYMBOL..DALET SYMBOL
-	{0x2139, 0x2139, prExtendedPictographic},   // E0.6   [1] (ℹ️)       information
 	{0x2139, 0x2139, prALetter},                // L&       INFORMATION SOURCE
 	{0x213C, 0x213F, prALetter},                // L&   [4] DOUBLE-STRUCK SMALL PI..DOUBLE-STRUCK CAPITAL PI
 	{0x2145, 0x2149, prALetter},                // L&   [5] DOUBLE-STRUCK ITALIC CAPITAL D..DOUBLE-STRUCK ITALIC SMALL J
@@ -637,7 +639,6 @@ var workBreakCodePoints = [][3]int{
 	{0x21A9, 0x21AA, prExtendedPictographic},   // E0.6   [2] (↩️..↪️)    right arrow curving left..left arrow curving right
 	{0x231A, 0x231B, prExtendedPictographic},   // E0.6   [2] (⌚..⌛)    watch..hourglass done
 	{0x2328, 0x2328, prExtendedPictographic},   // E1.0   [1] (⌨️)       keyboard
-	{0x2388, 0x2388, prExtendedPictographic},   // E0.0   [1] (⎈)       HELM SYMBOL
 	{0x23CF, 0x23CF, prExtendedPictographic},   // E1.0   [1] (⏏️)       eject button
 	{0x23E9, 0x23EC, prExtendedPictographic},   // E0.6   [4] (⏩..⏬)    fast-forward button..fast down button
 	{0x23ED, 0x23EE, prExtendedPictographic},   // E0.7   [2] (⏭️..⏮️)    next track button..last track button
@@ -647,7 +648,6 @@ var workBreakCodePoints = [][3]int{
 	{0x23F3, 0x23F3, prExtendedPictographic},   // E0.6   [1] (⏳)       hourglass not done
 	{0x23F8, 0x23FA, prExtendedPictographic},   // E0.7   [3] (⏸️..⏺️)    pause button..record button
 	{0x24B6, 0x24E9, prALetter},                // So  [52] CIRCLED LATIN CAPITAL LETTER A..CIRCLED LATIN SMALL LETTER Z
-	{0x24C2, 0x24C2, prExtendedPictographic},   // E0.6   [1] (Ⓜ️)       circled M
 	{0x25AA, 0x25AB, prExtendedPictographic},   // E0.6   [2] (▪️..▫️)    black small square..white small square
 	{0x25B6, 0x25B6, prExtendedPictographic},   // E0.6   [1] (▶️)       play button
 	{0x25C0, 0x25C0, prExtendedPictographic},   // E0.6   [1] (◀️)       reverse button
@@ -655,106 +655,63 @@ var workBreakCodePoints = [][3]int{
 	{0x2600, 0x2601, prExtendedPictographic},   // E0.6   [2] (☀️..☁️)    sun..cloud
 	{0x2602, 0x2603, prExtendedPictographic},   // E0.7   [2] (☂️..☃️)    umbrella..snowman
 	{0x2604, 0x2604, prExtendedPictographic},   // E1.0   [1] (☄️)       comet
-	{0x2605, 0x2605, prExtendedPictographic},   // E0.0   [1] (★)       BLACK STAR
-	{0x2607, 0x260D, prExtendedPictographic},   // E0.0   [7] (☇..☍)    LIGHTNING..OPPOSITION
 	{0x260E, 0x260E, prExtendedPictographic},   // E0.6   [1] (☎️)       telephone
-	{0x260F, 0x2610, prExtendedPictographic},   // E0.0   [2] (☏..☐)    WHITE TELEPHONE..BALLOT BOX
 	{0x2611, 0x2611, prExtendedPictographic},   // E0.6   [1] (☑️)       check box with check
-	{0x2612, 0x2612, prExtendedPictographic},   // E0.0   [1] (☒)       BALLOT BOX WITH X
 	{0x2614, 0x2615, prExtendedPictographic},   // E0.6   [2] (☔..☕)    umbrella with rain drops..hot beverage
-	{0x2616, 0x2617, prExtendedPictographic},   // E0.0   [2] (☖..☗)    WHITE SHOGI PIECE..BLACK SHOGI PIECE
 	{0x2618, 0x2618, prExtendedPictographic},   // E1.0   [1] (☘️)       shamrock
-	{0x2619, 0x261C, prExtendedPictographic},   // E0.0   [4] (☙..☜)    REVERSED ROTATED FLORAL HEART BULLET..WHITE LEFT POINTING INDEX
 	{0x261D, 0x261D, prExtendedPictographic},   // E0.6   [1] (☝️)       index pointing up
-	{0x261E, 0x261F, prExtendedPictographic},   // E0.0   [2] (☞..☟)    WHITE RIGHT POINTING INDEX..WHITE DOWN POINTING INDEX
 	{0x2620, 0x2620, prExtendedPictographic},   // E1.0   [1] (☠️)       skull and crossbones
-	{0x2621, 0x2621, prExtendedPictographic},   // E0.0   [1] (☡)       CAUTION SIGN
 	{0x2622, 0x2623, prExtendedPictographic},   // E1.0   [2] (☢️..☣️)    radioactive..biohazard
-	{0x2624, 0x2625, prExtendedPictographic},   // E0.0   [2] (☤..☥)    CADUCEUS..ANKH
 	{0x2626, 0x2626, prExtendedPictographic},   // E1.0   [1] (☦️)       orthodox cross
-	{0x2627, 0x2629, prExtendedPictographic},   // E0.0   [3] (☧..☩)    CHI RHO..CROSS OF JERUSALEM
 	{0x262A, 0x262A, prExtendedPictographic},   // E0.7   [1] (☪️)       star and crescent
-	{0x262B, 0x262D, prExtendedPictographic},   // E0.0   [3] (☫..☭)    FARSI SYMBOL..HAMMER AND SICKLE
 	{0x262E, 0x262E, prExtendedPictographic},   // E1.0   [1] (☮️)       peace symbol
 	{0x262F, 0x262F, prExtendedPictographic},   // E0.7   [1] (☯️)       yin yang
-	{0x2630, 0x2637, prExtendedPictographic},   // E0.0   [8] (☰..☷)    TRIGRAM FOR HEAVEN..TRIGRAM FOR EARTH
 	{0x2638, 0x2639, prExtendedPictographic},   // E0.7   [2] (☸️..☹️)    wheel of dharma..frowning face
 	{0x263A, 0x263A, prExtendedPictographic},   // E0.6   [1] (☺️)       smiling face
-	{0x263B, 0x263F, prExtendedPictographic},   // E0.0   [5] (☻..☿)    BLACK SMILING FACE..MERCURY
 	{0x2640, 0x2640, prExtendedPictographic},   // E4.0   [1] (♀️)       female sign
-	{0x2641, 0x2641, prExtendedPictographic},   // E0.0   [1] (♁)       EARTH
 	{0x2642, 0x2642, prExtendedPictographic},   // E4.0   [1] (♂️)       male sign
-	{0x2643, 0x2647, prExtendedPictographic},   // E0.0   [5] (♃..♇)    JUPITER..PLUTO
 	{0x2648, 0x2653, prExtendedPictographic},   // E0.6  [12] (♈..♓)    Aries..Pisces
-	{0x2654, 0x265E, prExtendedPictographic},   // E0.0  [11] (♔..♞)    WHITE CHESS KING..BLACK CHESS KNIGHT
 	{0x265F, 0x265F, prExtendedPictographic},   // E11.0  [1] (♟️)       chess pawn
 	{0x2660, 0x2660, prExtendedPictographic},   // E0.6   [1] (♠️)       spade suit
-	{0x2661, 0x2662, prExtendedPictographic},   // E0.0   [2] (♡..♢)    WHITE HEART SUIT..WHITE DIAMOND SUIT
 	{0x2663, 0x2663, prExtendedPictographic},   // E0.6   [1] (♣️)       club suit
-	{0x2664, 0x2664, prExtendedPictographic},   // E0.0   [1] (♤)       WHITE SPADE SUIT
 	{0x2665, 0x2666, prExtendedPictographic},   // E0.6   [2] (♥️..♦️)    heart suit..diamond suit
-	{0x2667, 0x2667, prExtendedPictographic},   // E0.0   [1] (♧)       WHITE CLUB SUIT
 	{0x2668, 0x2668, prExtendedPictographic},   // E0.6   [1] (♨️)       hot springs
-	{0x2669, 0x267A, prExtendedPictographic},   // E0.0  [18] (♩..♺)    QUARTER NOTE..RECYCLING SYMBOL FOR GENERIC MATERIALS
 	{0x267B, 0x267B, prExtendedPictographic},   // E0.6   [1] (♻️)       recycling symbol
-	{0x267C, 0x267D, prExtendedPictographic},   // E0.0   [2] (♼..♽)    RECYCLED PAPER SYMBOL..PARTIALLY-RECYCLED PAPER SYMBOL
 	{0x267E, 0x267E, prExtendedPictographic},   // E11.0  [1] (♾️)       infinity
 	{0x267F, 0x267F, prExtendedPictographic},   // E0.6   [1] (♿)       wheelchair symbol
-	{0x2680, 0x2685, prExtendedPictographic},   // E0.0   [6] (⚀..⚅)    DIE FACE-1..DIE FACE-6
-	{0x2690, 0x2691, prExtendedPictographic},   // E0.0   [2] (⚐..⚑)    WHITE FLAG..BLACK FLAG
 	{0x2692, 0x2692, prExtendedPictographic},   // E1.0   [1] (⚒️)       hammer and pick
 	{0x2693, 0x2693, prExtendedPictographic},   // E0.6   [1] (⚓)       anchor
 	{0x2694, 0x2694, prExtendedPictographic},   // E1.0   [1] (⚔️)       crossed swords
 	{0x2695, 0x2695, prExtendedPictographic},   // E4.0   [1] (⚕️)       medical symbol
 	{0x2696, 0x2697, prExtendedPictographic},   // E1.0   [2] (⚖️..⚗️)    balance scale..alembic
-	{0x2698, 0x2698, prExtendedPictographic},   // E0.0   [1] (⚘)       FLOWER
 	{0x2699, 0x2699, prExtendedPictographic},   // E1.0   [1] (⚙️)       gear
-	{0x269A, 0x269A, prExtendedPictographic},   // E0.0   [1] (⚚)       STAFF OF HERMES
 	{0x269B, 0x269C, prExtendedPictographic},   // E1.0   [2] (⚛️..⚜️)    atom symbol..fleur-de-lis
-	{0x269D, 0x269F, prExtendedPictographic},   // E0.0   [3] (⚝..⚟)    OUTLINED WHITE STAR..THREE LINES CONVERGING LEFT
 	{0x26A0, 0x26A1, prExtendedPictographic},   // E0.6   [2] (⚠️..⚡)    warning..high voltage
-	{0x26A2, 0x26A6, prExtendedPictographic},   // E0.0   [5] (⚢..⚦)    DOUBLED FEMALE SIGN..MALE WITH STROKE SIGN
 	{0x26A7, 0x26A7, prExtendedPictographic},   // E13.0  [1] (⚧️)       transgender symbol
-	{0x26A8, 0x26A9, prExtendedPictographic},   // E0.0   [2] (⚨..⚩)    VERTICAL MALE WITH STROKE SIGN..HORIZONTAL MALE WITH STROKE SIGN
 	{0x26AA, 0x26AB, prExtendedPictographic},   // E0.6   [2] (⚪..⚫)    white circle..black circle
-	{0x26AC, 0x26AF, prExtendedPictographic},   // E0.0   [4] (⚬..⚯)    MEDIUM SMALL WHITE CIRCLE..UNMARRIED PARTNERSHIP SYMBOL
 	{0x26B0, 0x26B1, prExtendedPictographic},   // E1.0   [2] (⚰️..⚱️)    coffin..funeral urn
-	{0x26B2, 0x26BC, prExtendedPictographic},   // E0.0  [11] (⚲..⚼)    NEUTER..SESQUIQUADRATE
 	{0x26BD, 0x26BE, prExtendedPictographic},   // E0.6   [2] (⚽..⚾)    soccer ball..baseball
-	{0x26BF, 0x26C3, prExtendedPictographic},   // E0.0   [5] (⚿..⛃)    SQUARED KEY..BLACK DRAUGHTS KING
 	{0x26C4, 0x26C5, prExtendedPictographic},   // E0.6   [2] (⛄..⛅)    snowman without snow..sun behind cloud
-	{0x26C6, 0x26C7, prExtendedPictographic},   // E0.0   [2] (⛆..⛇)    RAIN..BLACK SNOWMAN
 	{0x26C8, 0x26C8, prExtendedPictographic},   // E0.7   [1] (⛈️)       cloud with lightning and rain
-	{0x26C9, 0x26CD, prExtendedPictographic},   // E0.0   [5] (⛉..⛍)    TURNED WHITE SHOGI PIECE..DISABLED CAR
 	{0x26CE, 0x26CE, prExtendedPictographic},   // E0.6   [1] (⛎)       Ophiuchus
 	{0x26CF, 0x26CF, prExtendedPictographic},   // E0.7   [1] (⛏️)       pick
-	{0x26D0, 0x26D0, prExtendedPictographic},   // E0.0   [1] (⛐)       CAR SLIDING
 	{0x26D1, 0x26D1, prExtendedPictographic},   // E0.7   [1] (⛑️)       rescue worker’s helmet
-	{0x26D2, 0x26D2, prExtendedPictographic},   // E0.0   [1] (⛒)       CIRCLED CROSSING LANES
 	{0x26D3, 0x26D3, prExtendedPictographic},   // E0.7   [1] (⛓️)       chains
 	{0x26D4, 0x26D4, prExtendedPictographic},   // E0.6   [1] (⛔)       no entry
-	{0x26D5, 0x26E8, prExtendedPictographic},   // E0.0  [20] (⛕..⛨)    ALTERNATE ONE-WAY LEFT WAY TRAFFIC..BLACK CROSS ON SHIELD
 	{0x26E9, 0x26E9, prExtendedPictographic},   // E0.7   [1] (⛩️)       shinto shrine
 	{0x26EA, 0x26EA, prExtendedPictographic},   // E0.6   [1] (⛪)       church
-	{0x26EB, 0x26EF, prExtendedPictographic},   // E0.0   [5] (⛫..⛯)    CASTLE..MAP SYMBOL FOR LIGHTHOUSE
 	{0x26F0, 0x26F1, prExtendedPictographic},   // E0.7   [2] (⛰️..⛱️)    mountain..umbrella on ground
 	{0x26F2, 0x26F3, prExtendedPictographic},   // E0.6   [2] (⛲..⛳)    fountain..flag in hole
 	{0x26F4, 0x26F4, prExtendedPictographic},   // E0.7   [1] (⛴️)       ferry
 	{0x26F5, 0x26F5, prExtendedPictographic},   // E0.6   [1] (⛵)       sailboat
-	{0x26F6, 0x26F6, prExtendedPictographic},   // E0.0   [1] (⛶)       SQUARE FOUR CORNERS
 	{0x26F7, 0x26F9, prExtendedPictographic},   // E0.7   [3] (⛷️..⛹️)    skier..person bouncing ball
 	{0x26FA, 0x26FA, prExtendedPictographic},   // E0.6   [1] (⛺)       tent
-	{0x26FB, 0x26FC, prExtendedPictographic},   // E0.0   [2] (⛻..⛼)    JAPANESE BANK SYMBOL..HEADSTONE GRAVEYARD SYMBOL
 	{0x26FD, 0x26FD, prExtendedPictographic},   // E0.6   [1] (⛽)       fuel pump
-	{0x26FE, 0x2701, prExtendedPictographic},   // E0.0   [4] (⛾..✁)    CUP ON BLACK SQUARE..UPPER BLADE SCISSORS
 	{0x2702, 0x2702, prExtendedPictographic},   // E0.6   [1] (✂️)       scissors
-	{0x2703, 0x2704, prExtendedPictographic},   // E0.0   [2] (✃..✄)    LOWER BLADE SCISSORS..WHITE SCISSORS
 	{0x2705, 0x2705, prExtendedPictographic},   // E0.6   [1] (✅)       check mark button
 	{0x2708, 0x270C, prExtendedPictographic},   // E0.6   [5] (✈️..✌️)    airplane..victory hand
 	{0x270D, 0x270D, prExtendedPictographic},   // E0.7   [1] (✍️)       writing hand
-	{0x270E, 0x270E, prExtendedPictographic},   // E0.0   [1] (✎)       LOWER RIGHT PENCIL
 	{0x270F, 0x270F, prExtendedPictographic},   // E0.6   [1] (✏️)       pencil
-	{0x2710, 0x2711, prExtendedPictographic},   // E0.0   [2] (✐..✑)    UPPER RIGHT PENCIL..WHITE NIB
 	{0x2712, 0x2712, prExtendedPictographic},   // E0.6   [1] (✒️)       black nib
 	{0x2714, 0x2714, prExtendedPictographic},   // E0.6   [1] (✔️)       check mark
 	{0x2716, 0x2716, prExtendedPictographic},   // E0.6   [1] (✖️)       multiply
@@ -770,7 +727,6 @@ var workBreakCodePoints = [][3]int{
 	{0x2757, 0x2757, prExtendedPictographic},   // E0.6   [1] (❗)       red exclamation mark
 	{0x2763, 0x2763, prExtendedPictographic},   // E1.0   [1] (❣️)       heart exclamation
 	{0x2764, 0x2764, prExtendedPictographic},   // E0.6   [1] (❤️)       red heart
-	{0x2765, 0x2767, prExtendedPictographic},   // E0.0   [3] (❥..❧)    ROTATED HEAVY BLACK HEART BULLET..ROTATED FLORAL HEART BULLET
 	{0x2795, 0x2797, prExtendedPictographic},   // E0.6   [3] (➕..➗)    plus..divide
 	{0x27A1, 0x27A1, prExtendedPictographic},   // E0.6   [1] (➡️)       right arrow
 	{0x27B0, 0x27B0, prExtendedPictographic},   // E0.6   [1] (➰)       curly loop
@@ -858,11 +814,9 @@ var workBreakCodePoints = [][3]int{
 	{0xA789, 0xA78A, prALetter},                // Sk   [2] MODIFIER LETTER COLON..MODIFIER LETTER SHORT EQUALS SIGN
 	{0xA78B, 0xA78E, prALetter},                // L&   [4] LATIN CAPITAL LETTER SALTILLO..LATIN SMALL LETTER L WITH RETROFLEX HOOK AND BELT
 	{0xA78F, 0xA78F, prALetter},                // Lo       LATIN LETTER SINOLOGICAL DOT
-	{0xA790, 0xA7CA, prALetter},                // L&  [59] LATIN CAPITAL LETTER N WITH DESCENDER..LATIN SMALL LETTER S WITH SHORT STROKE OVERLAY
-	{0xA7D0, 0xA7D1, prALetter},                // L&   [2] LATIN CAPITAL LETTER CLOSED INSULAR G..LATIN SMALL LETTER CLOSED INSULAR G
-	{0xA7D3, 0xA7D3, prALetter},                // L&       LATIN SMALL LETTER DOUBLE THORN
-	{0xA7D5, 0xA7D9, prALetter},                // L&   [5] LATIN SMALL LETTER DOUBLE WYNN..LATIN SMALL LETTER SIGMOID S
-	{0xA7F2, 0xA7F4, prALetter},                // Lm   [3] MODIFIER LETTER CAPITAL C..MODIFIER LETTER CAPITAL Q
+	{0xA790, 0xA7DD, prALetter},                // L&  [78] LATIN CAPITAL LETTER N WITH DESCENDER..LATIN CAPITAL LETTER CLOSED OMEGA
+	{0xA7E2, 0xA7E2, prALetter},                // L&       LATIN CAPITAL LETTER R WITH LONG LEG
+	{0xA7F1, 0xA7F4, prALetter},                // Lm   [4] MODIFIER LETTER CAPITAL S..MODIFIER LETTER CAPITAL Q
 	{0xA7F5, 0xA7F6, prALetter},                // L&   [2] LATIN CAPITAL LETTER REVERSED HALF H..LATIN SMALL LETTER REVERSED HALF H
 	{0xA7F7, 0xA7F7, prALetter},                // Lo       LATIN EPIGRAPHIC LETTER SIDEWAYS I
 	{0xA7F8, 0xA7F9, prALetter},                // Lm   [2] MODIFIER LETTER CAPITAL H WITH STROKE..MODIFIER LETTER SMALL LIGATURE OE
@@ -947,6 +901,7 @@ var workBreakCodePoints = [][3]int{
 	{0xAB5C, 0xAB5F, prALetter},                // Lm   [4] MODIFIER LETTER SMALL HENG..MODIFIER LETTER SMALL U WITH LEFT HOOK
 	{0xAB60, 0xAB68, prALetter},                // L&   [9] LATIN SMALL LETTER SAKHA YAT..LATIN SMALL LETTER TURNED R WITH MIDDLE TILDE
 	{0xAB69, 0xAB69, prALetter},                // Lm       MODIFIER LETTER SMALL TURNED W
+	{0xAB6C, 0xAB6D, prALetter},                // L&   [2] LATIN CAPITAL LETTER SCRIPT R..LATIN CAPITAL LETTER SCRIPT R WITH RING
 	{0xAB70, 0xABBF, prALetter},                // L&  [80] CHEROKEE SMALL LETTER A..CHEROKEE SMALL LETTER YA
 	{0xABC0, 0xABE2, prALetter},                // Lo  [35] MEETEI MAYEK LETTER KOK..MEETEI MAYEK LETTER I LONSUM
 	{0xABE3, 0xABE4, prExtend},                 // Mc   [2] MEETEI MAYEK VOWEL SIGN ONAP..MEETEI MAYEK VOWEL SIGN INAP
@@ -977,9 +932,7 @@ var workBreakCodePoints = [][3]int{
 	{0xFD92, 0xFDC7, prALetter},                // Lo  [54] ARABIC LIGATURE MEEM WITH JEEM WITH KHAH INITIAL FORM..ARABIC LIGATURE NOON WITH JEEM WITH YEH FINAL FORM
 	{0xFDF0, 0xFDFB, prALetter},                // Lo  [12] ARABIC LIGATURE SALLA USED AS KORANIC STOP SIGN ISOLATED FORM..ARABIC LIGATURE JALLAJALALOUHOU
 	{0xFE00, 0xFE0F, prExtend},                 // Mn  [16] VARIATION SELECTOR-1..VARIATION SELECTOR-16
-	{0xFE10, 0xFE10, prMidNum},                 // Po       PRESENTATION FORM FOR VERTICAL COMMA
 	{0xFE13, 0xFE13, prMidLetter},              // Po       PRESENTATION FORM FOR VERTICAL COLON
-	{0xFE14, 0xFE14, prMidNum},                 // Po       PRESENTATION FORM FOR VERTICAL SEMICOLON
 	{0xFE20, 0xFE2F, prExtend},                 // Mn  [16] COMBINING LIGATURE LEFT HALF..COMBINING CYRILLIC TITLO RIGHT HALF
 	{0xFE33, 0xFE34, prExtendNumLet},           // Pc   [2] PRESENTATION FORM FOR VERTICAL LOW LINE..PRESENTATION FORM FOR VERTICAL WAVY LOW LINE
 	{0xFE4D, 0xFE4F, prExtendNumLet},           // Pc   [3] DASHED LOW LINE..WAVY LOW LINE
@@ -1047,12 +1000,13 @@ var workBreakCodePoints = [][3]int{
 	{0x105A3, 0x105B1, prALetter},              // L&  [15] VITHKUQI SMALL LETTER HA..VITHKUQI SMALL LETTER RE
 	{0x105B3, 0x105B9, prALetter},              // L&   [7] VITHKUQI SMALL LETTER SE..VITHKUQI SMALL LETTER XE
 	{0x105BB, 0x105BC, prALetter},              // L&   [2] VITHKUQI SMALL LETTER Y..VITHKUQI SMALL LETTER ZE
+	{0x105C0, 0x105F3, prALetter},              // Lo  [52] TODHRI LETTER A..TODHRI LETTER OO
 	{0x10600, 0x10736, prALetter},              // Lo [311] LINEAR A SIGN AB001..LINEAR A SIGN A664
 	{0x10740, 0x10755, prALetter},              // Lo  [22] LINEAR A SIGN A701 A..LINEAR A SIGN A732 JE
 	{0x10760, 0x10767, prALetter},              // Lo   [8] LINEAR A SIGN A800..LINEAR A SIGN A807
 	{0x10780, 0x10785, prALetter},              // Lm   [6] MODIFIER LETTER SMALL CAPITAL AA..MODIFIER LETTER SMALL B WITH HOOK
 	{0x10787, 0x107B0, prALetter},              // Lm  [42] MODIFIER LETTER SMALL DZ DIGRAPH..MODIFIER LETTER SMALL V WITH RIGHT HOOK
-	{0x107B2, 0x107BA, prALetter},              // Lm   [9] MODIFIER LETTER SMALL CAPITAL Y..MODIFIER LETTER SMALL S WITH CURL
+	{0x107B2, 0x107BF, prALetter},              // Lm  [14] MODIFIER LETTER SMALL CAPITAL Y..MODIFIER LETTER SMALL ESH WITH DOUBLE BAR
 	{0x10800, 0x10805, prALetter},              // Lo   [6] CYPRIOT SYLLABLE A..CYPRIOT SYLLABLE JA
 	{0x10808, 0x10808, prALetter},              // Lo       CYPRIOT SYLLABLE JO
 	{0x1080A, 0x10835, prALetter},              // Lo  [44] CYPRIOT SYLLABLE KA..CYPRIOT SYLLABLE WO
@@ -1065,6 +1019,7 @@ var workBreakCodePoints = [][3]int{
 	{0x108F4, 0x108F5, prALetter},              // Lo   [2] HATRAN LETTER SHIN..HATRAN LETTER TAW
 	{0x10900, 0x10915, prALetter},              // Lo  [22] PHOENICIAN LETTER ALF..PHOENICIAN LETTER TAU
 	{0x10920, 0x10939, prALetter},              // Lo  [26] LYDIAN LETTER A..LYDIAN LETTER C
+	{0x10940, 0x10959, prALetter},              // Lo  [26] SIDETIC LETTER N01..SIDETIC LETTER N26
 	{0x10980, 0x109B7, prALetter},              // Lo  [56] MEROITIC HIEROGLYPHIC LETTER A..MEROITIC CURSIVE LETTER DA
 	{0x109BE, 0x109BF, prALetter},              // Lo   [2] MEROITIC CURSIVE LOGOGRAM RMT..MEROITIC CURSIVE LOGOGRAM IMN
 	{0x10A00, 0x10A00, prALetter},              // Lo       KHAROSHTHI LETTER A
@@ -1091,10 +1046,23 @@ var workBreakCodePoints = [][3]int{
 	{0x10D00, 0x10D23, prALetter},              // Lo  [36] HANIFI ROHINGYA LETTER A..HANIFI ROHINGYA MARK NA KHONNA
 	{0x10D24, 0x10D27, prExtend},               // Mn   [4] HANIFI ROHINGYA SIGN HARBAHAY..HANIFI ROHINGYA SIGN TASSI
 	{0x10D30, 0x10D39, prNumeric},              // Nd  [10] HANIFI ROHINGYA DIGIT ZERO..HANIFI ROHINGYA DIGIT NINE
+	{0x10D40, 0x10D49, prNumeric},              // Nd  [10] GARAY DIGIT ZERO..GARAY DIGIT NINE
+	{0x10D4A, 0x10D4D, prALetter},              // Lo   [4] GARAY VOWEL SIGN A..GARAY VOWEL SIGN EE
+	{0x10D4E, 0x10D4E, prALetter},              // Lm       GARAY VOWEL LENGTH MARK
+	{0x10D4F, 0x10D4F, prALetter},              // Lo       GARAY SUKUN
+	{0x10D50, 0x10D65, prALetter},              // L&  [22] GARAY CAPITAL LETTER A..GARAY CAPITAL LETTER OLD NA
+	{0x10D69, 0x10D6D, prExtend},               // Mn   [5] GARAY VOWEL SIGN E..GARAY CONSONANT NASALIZATION MARK
+	{0x10D6F, 0x10D6F, prALetter},              // Lm       GARAY REDUPLICATION MARK
+	{0x10D70, 0x10D85, prALetter},              // L&  [22] GARAY SMALL LETTER A..GARAY SMALL LETTER OLD NA
 	{0x10E80, 0x10EA9, prALetter},              // Lo  [42] YEZIDI LETTER ELIF..YEZIDI LETTER ET
 	{0x10EAB, 0x10EAC, prExtend},               // Mn   [2] YEZIDI COMBINING HAMZA MARK..YEZIDI COMBINING MADDA MARK
 	{0x10EB0, 0x10EB1, prALetter},              // Lo   [2] YEZIDI LETTER LAM WITH DOT ABOVE..YEZIDI LETTER YOT WITH CIRCUMFLEX ABOVE
-	{0x10EFD, 0x10EFF, prExtend},               // Mn   [3] ARABIC SMALL LOW WORD SAKTA..ARABIC SMALL LOW WORD MADDA
+	{0x10EC2, 0x10EC4, prALetter},              // Lo   [3] ARABIC LETTER DAL WITH TWO DOTS VERTICALLY BELOW..ARABIC LETTER KAF WITH TWO DOTS VERTICALLY BELOW
+	{0x10EC5, 0x10EC5, prALetter},              // Lm       ARABIC SMALL YEH BARREE WITH TWO DOTS BELOW
+	{0x10EC6, 0x10EC7, prALetter},              // Lo   [2] ARABIC LETTER THIN NOON..ARABIC LETTER YEH WITH FOUR DOTS BELOW
+	{0x10ECB, 0x10ECF, prExtend},               // Mn   [5] ARABIC NORTHEAST POINTING ARROWHEAD ABOVE..ARABIC LARGE CIRCLE ABOVE
+	{0x10ED9, 0x10EEE, prALetter},              // Lo  [22] ARABIC CROWN LETTER BEH..ARABIC CROWN LETTER YEH
+	{0x10EF0, 0x10EFF, prExtend},               // Mn  [16] ARABIC SMALL LOW UPRIGHT RECTANGULAR ZERO..ARABIC SMALL LOW WORD MADDA
 	{0x10F00, 0x10F1C, prALetter},              // Lo  [29] OLD SOGDIAN LETTER ALEPH..OLD SOGDIAN LETTER FINAL TAW WITH VERTICAL TAIL
 	{0x10F27, 0x10F27, prALetter},              // Lo       OLD SOGDIAN LIGATURE AYIN-DALETH
 	{0x10F30, 0x10F45, prALetter},              // Lo  [22] SOGDIAN LETTER ALEPH..SOGDIAN INDEPENDENT SHIN
@@ -1120,9 +1088,9 @@ var workBreakCodePoints = [][3]int{
 	{0x110B3, 0x110B6, prExtend},               // Mn   [4] KAITHI VOWEL SIGN U..KAITHI VOWEL SIGN AI
 	{0x110B7, 0x110B8, prExtend},               // Mc   [2] KAITHI VOWEL SIGN O..KAITHI VOWEL SIGN AU
 	{0x110B9, 0x110BA, prExtend},               // Mn   [2] KAITHI SIGN VIRAMA..KAITHI SIGN NUKTA
-	{0x110BD, 0x110BD, prFormat},               // Cf       KAITHI NUMBER SIGN
+	{0x110BD, 0x110BD, prNumeric},              // Cf       KAITHI NUMBER SIGN
 	{0x110C2, 0x110C2, prExtend},               // Mn       KAITHI VOWEL SIGN VOCALIC R
-	{0x110CD, 0x110CD, prFormat},               // Cf       KAITHI NUMBER SIGN ABOVE
+	{0x110CD, 0x110CD, prNumeric},              // Cf       KAITHI NUMBER SIGN ABOVE
 	{0x110D0, 0x110E8, prALetter},              // Lo  [25] SORA SOMPENG LETTER SAH..SORA SOMPENG LETTER MAE
 	{0x110F0, 0x110F9, prNumeric},              // Nd  [10] SORA SOMPENG DIGIT ZERO..SORA SOMPENG DIGIT NINE
 	{0x11100, 0x11102, prExtend},               // Mn   [3] CHAKMA SIGN CANDRABINDU..CHAKMA SIGN VISARGA
@@ -1192,6 +1160,24 @@ var workBreakCodePoints = [][3]int{
 	{0x11362, 0x11363, prExtend},               // Mc   [2] GRANTHA VOWEL SIGN VOCALIC L..GRANTHA VOWEL SIGN VOCALIC LL
 	{0x11366, 0x1136C, prExtend},               // Mn   [7] COMBINING GRANTHA DIGIT ZERO..COMBINING GRANTHA DIGIT SIX
 	{0x11370, 0x11374, prExtend},               // Mn   [5] COMBINING GRANTHA LETTER A..COMBINING GRANTHA LETTER PA
+	{0x11380, 0x11389, prALetter},              // Lo  [10] TULU-TIGALARI LETTER A..TULU-TIGALARI LETTER VOCALIC LL
+	{0x1138B, 0x1138B, prALetter},              // Lo       TULU-TIGALARI LETTER EE
+	{0x1138E, 0x1138E, prALetter},              // Lo       TULU-TIGALARI LETTER AI
+	{0x11390, 0x113B5, prALetter},              // Lo  [38] TULU-TIGALARI LETTER OO..TULU-TIGALARI LETTER LLLA
+	{0x113B7, 0x113B7, prALetter},              // Lo       TULU-TIGALARI SIGN AVAGRAHA
+	{0x113B8, 0x113BA, prExtend},               // Mc   [3] TULU-TIGALARI VOWEL SIGN AA..TULU-TIGALARI VOWEL SIGN II
+	{0x113BB, 0x113C0, prExtend},               // Mn   [6] TULU-TIGALARI VOWEL SIGN U..TULU-TIGALARI VOWEL SIGN VOCALIC LL
+	{0x113C2, 0x113C2, prExtend},               // Mc       TULU-TIGALARI VOWEL SIGN EE
+	{0x113C5, 0x113C5, prExtend},               // Mc       TULU-TIGALARI VOWEL SIGN AI
+	{0x113C7, 0x113CA, prExtend},               // Mc   [4] TULU-TIGALARI VOWEL SIGN OO..TULU-TIGALARI SIGN CANDRA ANUNASIKA
+	{0x113CC, 0x113CD, prExtend},               // Mc   [2] TULU-TIGALARI SIGN ANUSVARA..TULU-TIGALARI SIGN VISARGA
+	{0x113CE, 0x113CE, prExtend},               // Mn       TULU-TIGALARI SIGN VIRAMA
+	{0x113CF, 0x113CF, prExtend},               // Mc       TULU-TIGALARI SIGN LOOPED VIRAMA
+	{0x113D0, 0x113D0, prExtend},               // Mn       TULU-TIGALARI CONJOINER
+	{0x113D1, 0x113D1, prALetter},              // Lo       TULU-TIGALARI REPHA
+	{0x113D2, 0x113D2, prExtend},               // Mn       TULU-TIGALARI GEMINATION MARK
+	{0x113D3, 0x113D3, prALetter},              // Lo       TULU-TIGALARI SIGN PLUTA
+	{0x113E1, 0x113E2, prExtend},               // Mn   [2] TULU-TIGALARI VEDIC TONE SVARITA..TULU-TIGALARI VEDIC TONE ANUDATTA
 	{0x11400, 0x11434, prALetter},              // Lo  [53] NEWA LETTER A..NEWA LETTER HA
 	{0x11435, 0x11437, prExtend},               // Mc   [3] NEWA VOWEL SIGN AA..NEWA VOWEL SIGN II
 	{0x11438, 0x1143F, prExtend},               // Mn   [8] NEWA VOWEL SIGN U..NEWA VOWEL SIGN AI
@@ -1243,7 +1229,10 @@ var workBreakCodePoints = [][3]int{
 	{0x116B7, 0x116B7, prExtend},               // Mn       TAKRI SIGN NUKTA
 	{0x116B8, 0x116B8, prALetter},              // Lo       TAKRI LETTER ARCHAIC KHA
 	{0x116C0, 0x116C9, prNumeric},              // Nd  [10] TAKRI DIGIT ZERO..TAKRI DIGIT NINE
-	{0x1171D, 0x1171F, prExtend},               // Mn   [3] AHOM CONSONANT SIGN MEDIAL LA..AHOM CONSONANT SIGN MEDIAL LIGATING RA
+	{0x116D0, 0x116E3, prNumeric},              // Nd  [20] MYANMAR PAO DIGIT ZERO..MYANMAR EASTERN PWO KAREN DIGIT NINE
+	{0x1171D, 0x1171D, prExtend},               // Mn       AHOM CONSONANT SIGN MEDIAL LA
+	{0x1171E, 0x1171E, prExtend},               // Mc       AHOM CONSONANT SIGN MEDIAL RA
+	{0x1171F, 0x1171F, prExtend},               // Mn       AHOM CONSONANT SIGN MEDIAL LIGATING RA
 	{0x11720, 0x11721, prExtend},               // Mc   [2] AHOM VOWEL SIGN A..AHOM VOWEL SIGN AA
 	{0x11722, 0x11725, prExtend},               // Mn   [4] AHOM VOWEL SIGN I..AHOM VOWEL SIGN UU
 	{0x11726, 0x11726, prExtend},               // Mc       AHOM VOWEL SIGN E
@@ -1300,6 +1289,15 @@ var workBreakCodePoints = [][3]int{
 	{0x11A98, 0x11A99, prExtend},               // Mn   [2] SOYOMBO GEMINATION MARK..SOYOMBO SUBJOINER
 	{0x11A9D, 0x11A9D, prALetter},              // Lo       SOYOMBO MARK PLUTA
 	{0x11AB0, 0x11AF8, prALetter},              // Lo  [73] CANADIAN SYLLABICS NATTILIK HI..PAU CIN HAU GLOTTAL STOP FINAL
+	{0x11B0A, 0x11B0A, prALetter},              // Lo       DEVANAGARI LETTER ALTERNATE DDDA
+	{0x11B60, 0x11B60, prExtend},               // Mn       SHARADA VOWEL SIGN OE
+	{0x11B61, 0x11B61, prExtend},               // Mc       SHARADA VOWEL SIGN OOE
+	{0x11B62, 0x11B64, prExtend},               // Mn   [3] SHARADA VOWEL SIGN UE..SHARADA VOWEL SIGN SHORT E
+	{0x11B65, 0x11B65, prExtend},               // Mc       SHARADA VOWEL SIGN SHORT O
+	{0x11B66, 0x11B66, prExtend},               // Mn       SHARADA VOWEL SIGN CANDRA E
+	{0x11B67, 0x11B67, prExtend},               // Mc       SHARADA VOWEL SIGN CANDRA O
+	{0x11BC0, 0x11BE0, prALetter},              // Lo  [33] SUNUWAR LETTER DEVI..SUNUWAR LETTER KLOKO
+	{0x11BF0, 0x11BF9, prNumeric},              // Nd  [10] SUNUWAR DIGIT ZERO..SUNUWAR DIGIT NINE
 	{0x11C00, 0x11C08, prALetter},              // Lo   [9] BHAIKSUKI LETTER A..BHAIKSUKI LETTER VOCALIC L
 	{0x11C0A, 0x11C2E, prALetter},              // Lo  [37] BHAIKSUKI LETTER E..BHAIKSUKI LETTER HA
 	{0x11C2F, 0x11C2F, prExtend},               // Mc       BHAIKSUKI VOWEL SIGN AA
@@ -1338,6 +1336,12 @@ var workBreakCodePoints = [][3]int{
 	{0x11D97, 0x11D97, prExtend},               // Mn       GUNJALA GONDI VIRAMA
 	{0x11D98, 0x11D98, prALetter},              // Lo       GUNJALA GONDI OM
 	{0x11DA0, 0x11DA9, prNumeric},              // Nd  [10] GUNJALA GONDI DIGIT ZERO..GUNJALA GONDI DIGIT NINE
+	{0x11DB0, 0x11DD8, prALetter},              // Lo  [41] TOLONG SIKI LETTER I..TOLONG SIKI LETTER RRH
+	{0x11DD9, 0x11DD9, prALetter},              // Lm       TOLONG SIKI SIGN SELA
+	{0x11DDA, 0x11DDB, prALetter},              // Lo   [2] TOLONG SIKI SIGN HECAKA..TOLONG SIKI UNGGA
+	{0x11DE0, 0x11DE9, prNumeric},              // Nd  [10] TOLONG SIKI DIGIT ZERO..TOLONG SIKI DIGIT NINE
+	{0x11DF0, 0x11DF0, prExtend},               // Mn       BENGALI SIGN COMBINING ANUSVARA ABOVE
+	{0x11DF1, 0x11DF1, prALetter},              // Lo       BENGALI LETTER ALTERNATE BARGIYA BA
 	{0x11EE0, 0x11EF2, prALetter},              // Lo  [19] MAKASAR LETTER KA..MAKASAR ANGKA
 	{0x11EF3, 0x11EF4, prExtend},               // Mn   [2] MAKASAR VOWEL SIGN I..MAKASAR VOWEL SIGN U
 	{0x11EF5, 0x11EF6, prExtend},               // Mc   [2] MAKASAR VOWEL SIGN E..MAKASAR VOWEL SIGN O
@@ -1353,17 +1357,26 @@ var workBreakCodePoints = [][3]int{
 	{0x11F41, 0x11F41, prExtend},               // Mc       KAWI SIGN KILLER
 	{0x11F42, 0x11F42, prExtend},               // Mn       KAWI CONJOINER
 	{0x11F50, 0x11F59, prNumeric},              // Nd  [10] KAWI DIGIT ZERO..KAWI DIGIT NINE
+	{0x11F5A, 0x11F5A, prExtend},               // Mn       KAWI SIGN NUKTA
 	{0x11FB0, 0x11FB0, prALetter},              // Lo       LISU LETTER YHA
 	{0x12000, 0x12399, prALetter},              // Lo [922] CUNEIFORM SIGN A..CUNEIFORM SIGN U U
-	{0x12400, 0x1246E, prALetter},              // Nl [111] CUNEIFORM NUMERIC SIGN TWO ASH..CUNEIFORM NUMERIC SIGN NINE U VARIANT FORM
+	{0x12400, 0x1246F, prALetter},              // Nl [112] CUNEIFORM NUMERIC SIGN TWO ASH..CUNEIFORM NUMERIC SIGN SEVEN ASH TENU
+	{0x12475, 0x1247F, prALetter},              // Nl  [11] CUNEIFORM NUMERIC SIGN EIGHT ASH TENU..CUNEIFORM NUMERIC SIGN ASH TIMES NINE DISH TENU
 	{0x12480, 0x12543, prALetter},              // Lo [196] CUNEIFORM SIGN AB TIMES NUN TENU..CUNEIFORM SIGN ZU5 TIMES THREE DISH TENU
+	{0x12550, 0x12686, prALetter},              // Nl [311] CUNEIFORM NUMERIC SIGN ONE N01..CUNEIFORM NUMERIC SIGN ONE N36 FLAT
 	{0x12F90, 0x12FF0, prALetter},              // Lo  [97] CYPRO-MINOAN SIGN CM001..CYPRO-MINOAN SIGN CM114
 	{0x13000, 0x1342F, prALetter},              // Lo [1072] EGYPTIAN HIEROGLYPH A001..EGYPTIAN HIEROGLYPH V011D
 	{0x13430, 0x1343F, prFormat},               // Cf  [16] EGYPTIAN HIEROGLYPH VERTICAL JOINER..EGYPTIAN HIEROGLYPH END WALLED ENCLOSURE
 	{0x13440, 0x13440, prExtend},               // Mn       EGYPTIAN HIEROGLYPH MIRROR HORIZONTALLY
 	{0x13441, 0x13446, prALetter},              // Lo   [6] EGYPTIAN HIEROGLYPH FULL BLANK..EGYPTIAN HIEROGLYPH WIDE LOST SIGN
 	{0x13447, 0x13455, prExtend},               // Mn  [15] EGYPTIAN HIEROGLYPH MODIFIER DAMAGED AT TOP START..EGYPTIAN HIEROGLYPH MODIFIER DAMAGED
+	{0x13460, 0x143FA, prALetter},              // Lo [3995] EGYPTIAN HIEROGLYPH-13460..EGYPTIAN HIEROGLYPH-143FA
 	{0x14400, 0x14646, prALetter},              // Lo [583] ANATOLIAN HIEROGLYPH A001..ANATOLIAN HIEROGLYPH A530
+	{0x16100, 0x1611D, prALetter},              // Lo  [30] GURUNG KHEMA LETTER A..GURUNG KHEMA LETTER SA
+	{0x1611E, 0x16129, prExtend},               // Mn  [12] GURUNG KHEMA VOWEL SIGN AA..GURUNG KHEMA VOWEL LENGTH MARK
+	{0x1612A, 0x1612C, prExtend},               // Mc   [3] GURUNG KHEMA CONSONANT SIGN MEDIAL YA..GURUNG KHEMA CONSONANT SIGN MEDIAL HA
+	{0x1612D, 0x1612F, prExtend},               // Mn   [3] GURUNG KHEMA SIGN ANUSVARA..GURUNG KHEMA SIGN THOLHOMA
+	{0x16130, 0x16139, prNumeric},              // Nd  [10] GURUNG KHEMA DIGIT ZERO..GURUNG KHEMA DIGIT NINE
 	{0x16800, 0x16A38, prALetter},              // Lo [569] BAMUM LETTER PHASE-A NGKUE MFON..BAMUM LETTER PHASE-F VUEQ
 	{0x16A40, 0x16A5E, prALetter},              // Lo  [31] MRO LETTER TA..MRO LETTER TEK
 	{0x16A60, 0x16A69, prNumeric},              // Nd  [10] MRO DIGIT ZERO..MRO DIGIT NINE
@@ -1377,7 +1390,13 @@ var workBreakCodePoints = [][3]int{
 	{0x16B50, 0x16B59, prNumeric},              // Nd  [10] PAHAWH HMONG DIGIT ZERO..PAHAWH HMONG DIGIT NINE
 	{0x16B63, 0x16B77, prALetter},              // Lo  [21] PAHAWH HMONG SIGN VOS LUB..PAHAWH HMONG SIGN CIM NRES TOS
 	{0x16B7D, 0x16B8F, prALetter},              // Lo  [19] PAHAWH HMONG CLAN SIGN TSHEEJ..PAHAWH HMONG CLAN SIGN VWJ
+	{0x16D40, 0x16D42, prALetter},              // Lm   [3] KIRAT RAI SIGN ANUSVARA..KIRAT RAI SIGN VISARGA
+	{0x16D43, 0x16D6A, prALetter},              // Lo  [40] KIRAT RAI LETTER A..KIRAT RAI VOWEL SIGN AU
+	{0x16D6B, 0x16D6C, prALetter},              // Lm   [2] KIRAT RAI SIGN VIRAMA..KIRAT RAI SIGN SAAT
+	{0x16D70, 0x16D79, prNumeric},              // Nd  [10] KIRAT RAI DIGIT ZERO..KIRAT RAI DIGIT NINE
 	{0x16E40, 0x16E7F, prALetter},              // L&  [64] MEDEFAIDRIN CAPITAL LETTER M..MEDEFAIDRIN SMALL LETTER Y
+	{0x16EA0, 0x16EB8, prALetter},              // L&  [25] BERIA ERFE CAPITAL LETTER ARKAB..BERIA ERFE CAPITAL LETTER AY
+	{0x16EBB, 0x16ED3, prALetter},              // L&  [25] BERIA ERFE SMALL LETTER ARKAB..BERIA ERFE SMALL LETTER AY
 	{0x16F00, 0x16F4A, prALetter},              // Lo  [75] MIAO LETTER PA..MIAO LETTER RTE
 	{0x16F4F, 0x16F4F, prExtend},               // Mn       MIAO SIGN CONSONANT MODIFIER BAR
 	{0x16F50, 0x16F50, prALetter},              // Lo       MIAO LETTER NASALIZATION
@@ -1393,16 +1412,19 @@ var workBreakCodePoints = [][3]int{
 	{0x1AFFD, 0x1AFFE, prKatakana},             // Lm   [2] KATAKANA LETTER MINNAN NASALIZED TONE-7..KATAKANA LETTER MINNAN NASALIZED TONE-8
 	{0x1B000, 0x1B000, prKatakana},             // Lo       KATAKANA LETTER ARCHAIC E
 	{0x1B120, 0x1B122, prKatakana},             // Lo   [3] KATAKANA LETTER ARCHAIC YI..KATAKANA LETTER ARCHAIC WU
+	{0x1B124, 0x1B128, prKatakana},             // Lo   [5] KATAKANA DIGRAPH TOKI..KATAKANA LETTER ALTERNATE WI
 	{0x1B155, 0x1B155, prKatakana},             // Lo       KATAKANA LETTER SMALL KO
-	{0x1B164, 0x1B167, prKatakana},             // Lo   [4] KATAKANA LETTER SMALL WI..KATAKANA LETTER SMALL N
+	{0x1B164, 0x1B168, prKatakana},             // Lo   [5] KATAKANA LETTER SMALL WI..KATAKANA LETTER SMALL ARCHAIC YE
 	{0x1BC00, 0x1BC6A, prALetter},              // Lo [107] DUPLOYAN LETTER H..DUPLOYAN LETTER VOCALIC M
 	{0x1BC70, 0x1BC7C, prALetter},              // Lo  [13] DUPLOYAN AFFIX LEFT HORIZONTAL SECANT..DUPLOYAN AFFIX ATTACHED TANGENT HOOK
 	{0x1BC80, 0x1BC88, prALetter},              // Lo   [9] DUPLOYAN AFFIX HIGH ACUTE..DUPLOYAN AFFIX HIGH VERTICAL
 	{0x1BC90, 0x1BC99, prALetter},              // Lo  [10] DUPLOYAN AFFIX LOW ACUTE..DUPLOYAN AFFIX LOW ARROW
 	{0x1BC9D, 0x1BC9E, prExtend},               // Mn   [2] DUPLOYAN THICK LETTER SELECTOR..DUPLOYAN DOUBLE MARK
 	{0x1BCA0, 0x1BCA3, prFormat},               // Cf   [4] SHORTHAND FORMAT LETTER OVERLAP..SHORTHAND FORMAT UP STEP
+	{0x1CCF0, 0x1CCF9, prNumeric},              // Nd  [10] OUTLINED DIGIT ZERO..OUTLINED DIGIT NINE
 	{0x1CF00, 0x1CF2D, prExtend},               // Mn  [46] ZNAMENNY COMBINING MARK GORAZDO NIZKO S KRYZHEM ON LEFT..ZNAMENNY COMBINING MARK KRYZH ON LEFT
 	{0x1CF30, 0x1CF46, prExtend},               // Mn  [23] ZNAMENNY COMBINING TONAL RANGE MARK MRACHNO..ZNAMENNY PRIZNAK MODIFIER ROG
+	{0x1D127, 0x1D128, prExtend},               // Mn   [2] MUSICAL SYMBOL COMBINING STRESS..MUSICAL SYMBOL COMBINING UNSTRESS
 	{0x1D165, 0x1D166, prExtend},               // Mc   [2] MUSICAL SYMBOL COMBINING STEM..MUSICAL SYMBOL COMBINING SPRECHGESANG STEM
 	{0x1D167, 0x1D169, prExtend},               // Mn   [3] MUSICAL SYMBOL COMBINING TREMOLO-1..MUSICAL SYMBOL COMBINING TREMOLO-3
 	{0x1D16D, 0x1D172, prExtend},               // Mc   [6] MUSICAL SYMBOL COMBINING AUGMENTATION DOT..MUSICAL SYMBOL COMBINING FLAG-5
@@ -1411,6 +1433,10 @@ var workBreakCodePoints = [][3]int{
 	{0x1D185, 0x1D18B, prExtend},               // Mn   [7] MUSICAL SYMBOL COMBINING DOIT..MUSICAL SYMBOL COMBINING TRIPLE TONGUE
 	{0x1D1AA, 0x1D1AD, prExtend},               // Mn   [4] MUSICAL SYMBOL COMBINING DOWN BOW..MUSICAL SYMBOL COMBINING SNAP PIZZICATO
 	{0x1D242, 0x1D244, prExtend},               // Mn   [3] COMBINING GREEK MUSICAL TRISEME..COMBINING GREEK MUSICAL PENTASEME
+	{0x1D250, 0x1D252, prExtend},               // Mc   [3] MUSICAL SYMBOL COMBINING FLAG-6..MUSICAL SYMBOL COMBINING FLAG-8
+	{0x1D25B, 0x1D25C, prExtend},               // Mn   [2] MUSICAL SYMBOL COMBINING TREMOLO-4..MUSICAL SYMBOL COMBINING TREMOLO-5
+	{0x1D25F, 0x1D25F, prExtend},               // Mc       MUSICAL SYMBOL COMBINING BUZZ ROLL STEM
+	{0x1D280, 0x1D281, prExtend},               // Mc   [2] MUSICAL SYMBOL COMBINING STEM BOW BEHIND BRIDGE..MUSICAL SYMBOL COMBINING STEM BOW ON TOP OF BRIDGE
 	{0x1D400, 0x1D454, prALetter},              // L&  [85] MATHEMATICAL BOLD CAPITAL A..MATHEMATICAL ITALIC SMALL G
 	{0x1D456, 0x1D49C, prALetter},              // L&  [71] MATHEMATICAL ITALIC SMALL I..MATHEMATICAL SCRIPT CAPITAL A
 	{0x1D49E, 0x1D49F, prALetter},              // L&   [2] MATHEMATICAL SCRIPT CAPITAL C..MATHEMATICAL SCRIPT CAPITAL D
@@ -1429,7 +1455,7 @@ var workBreakCodePoints = [][3]int{
 	{0x1D540, 0x1D544, prALetter},              // L&   [5] MATHEMATICAL DOUBLE-STRUCK CAPITAL I..MATHEMATICAL DOUBLE-STRUCK CAPITAL M
 	{0x1D546, 0x1D546, prALetter},              // L&       MATHEMATICAL DOUBLE-STRUCK CAPITAL O
 	{0x1D54A, 0x1D550, prALetter},              // L&   [7] MATHEMATICAL DOUBLE-STRUCK CAPITAL S..MATHEMATICAL DOUBLE-STRUCK CAPITAL Y
-	{0x1D552, 0x1D6A5, prALetter},              // L& [340] MATHEMATICAL DOUBLE-STRUCK SMALL A..MATHEMATICAL ITALIC SMALL DOTLESS J
+	{0x1D552, 0x1D6A6, prALetter},              // L& [341] MATHEMATICAL DOUBLE-STRUCK SMALL A..MATHEMATICAL ITALIC SMALL LIGATURE LONG S WITH DESCENDER S
 	{0x1D6A8, 0x1D6C0, prALetter},              // L&  [25] MATHEMATICAL BOLD CAPITAL ALPHA..MATHEMATICAL BOLD CAPITAL OMEGA
 	{0x1D6C2, 0x1D6DA, prALetter},              // L&  [25] MATHEMATICAL BOLD SMALL ALPHA..MATHEMATICAL BOLD SMALL OMEGA
 	{0x1D6DC, 0x1D6FA, prALetter},              // L&  [31] MATHEMATICAL BOLD EPSILON SYMBOL..MATHEMATICAL ITALIC CAPITAL OMEGA
@@ -1450,8 +1476,10 @@ var workBreakCodePoints = [][3]int{
 	{0x1DAA1, 0x1DAAF, prExtend},               // Mn  [15] SIGNWRITING ROTATION MODIFIER-2..SIGNWRITING ROTATION MODIFIER-16
 	{0x1DF00, 0x1DF09, prALetter},              // L&  [10] LATIN SMALL LETTER FENG DIGRAPH WITH TRILL..LATIN SMALL LETTER T WITH HOOK AND RETROFLEX HOOK
 	{0x1DF0A, 0x1DF0A, prALetter},              // Lo       LATIN LETTER RETROFLEX CLICK WITH RETROFLEX HOOK
-	{0x1DF0B, 0x1DF1E, prALetter},              // L&  [20] LATIN SMALL LETTER ESH WITH DOUBLE BAR..LATIN SMALL LETTER S WITH CURL
-	{0x1DF25, 0x1DF2A, prALetter},              // L&   [6] LATIN SMALL LETTER D WITH MID-HEIGHT LEFT HOOK..LATIN SMALL LETTER T WITH MID-HEIGHT LEFT HOOK
+	{0x1DF0B, 0x1DF7F, prALetter},              // L& [117] LATIN SMALL LETTER ESH WITH DOUBLE BAR..LATIN SMALL LETTER REVERSED U
+	{0x1DF80, 0x1DF81, prALetter},              // Lo   [2] LATIN CAPITAL LETTER A WITH TOPBAR..LATIN CAPITAL LETTER E WITH BENT TOPBAR
+	{0x1DF90, 0x1DF96, prALetter},              // L&   [7] LATIN SMALL LETTER C WITH LOW SLASH..LATIN SMALL LETTER LONG S WITH TOP LOOP
+	{0x1DFCD, 0x1DFFF, prALetter},              // Lm  [51] MODIFIER LETTER SMALL TURNED R WITH MID-HEIGHT LEFT HOOK..MODIFIER LETTER SMALL T WITH HOOK AND RETROFLEX HOOK
 	{0x1E000, 0x1E006, prExtend},               // Mn   [7] COMBINING GLAGOLITIC LETTER AZU..COMBINING GLAGOLITIC LETTER ZHIVETE
 	{0x1E008, 0x1E018, prExtend},               // Mn  [17] COMBINING GLAGOLITIC LETTER ZEMLJA..COMBINING GLAGOLITIC LETTER HERU
 	{0x1E01B, 0x1E021, prExtend},               // Mn   [7] COMBINING GLAGOLITIC LETTER SHTA..COMBINING GLAGOLITIC LETTER YATI
@@ -1473,6 +1501,21 @@ var workBreakCodePoints = [][3]int{
 	{0x1E4EB, 0x1E4EB, prALetter},              // Lm       NAG MUNDARI SIGN OJOD
 	{0x1E4EC, 0x1E4EF, prExtend},               // Mn   [4] NAG MUNDARI SIGN MUHOR..NAG MUNDARI SIGN SUTUH
 	{0x1E4F0, 0x1E4F9, prNumeric},              // Nd  [10] NAG MUNDARI DIGIT ZERO..NAG MUNDARI DIGIT NINE
+	{0x1E5D0, 0x1E5ED, prALetter},              // Lo  [30] OL ONAL LETTER O..OL ONAL LETTER EG
+	{0x1E5EE, 0x1E5EF, prExtend},               // Mn   [2] OL ONAL SIGN MU..OL ONAL SIGN IKIR
+	{0x1E5F0, 0x1E5F0, prALetter},              // Lo       OL ONAL SIGN HODDOND
+	{0x1E5F1, 0x1E5FA, prNumeric},              // Nd  [10] OL ONAL DIGIT ZERO..OL ONAL DIGIT NINE
+	{0x1E6C0, 0x1E6DE, prALetter},              // Lo  [31] TAI YO LETTER LOW KO..TAI YO LETTER HIGH KVO
+	{0x1E6E0, 0x1E6E2, prALetter},              // Lo   [3] TAI YO LETTER AA..TAI YO LETTER UE
+	{0x1E6E3, 0x1E6E3, prExtend},               // Mn       TAI YO SIGN UE
+	{0x1E6E4, 0x1E6E5, prALetter},              // Lo   [2] TAI YO LETTER U..TAI YO LETTER AE
+	{0x1E6E6, 0x1E6E6, prExtend},               // Mn       TAI YO SIGN AU
+	{0x1E6E7, 0x1E6ED, prALetter},              // Lo   [7] TAI YO LETTER O..TAI YO LETTER AUE
+	{0x1E6EE, 0x1E6EF, prExtend},               // Mn   [2] TAI YO SIGN AY..TAI YO SIGN ANG
+	{0x1E6F0, 0x1E6F4, prALetter},              // Lo   [5] TAI YO LETTER AN..TAI YO LETTER AP
+	{0x1E6F5, 0x1E6F5, prExtend},               // Mn       TAI YO SIGN OM
+	{0x1E6FE, 0x1E6FE, prALetter},              // Lo       TAI YO SYMBOL MUEANG
+	{0x1E6FF, 0x1E6FF, prALetter},              // Lm       TAI YO XAM LAI
 	{0x1E7E0, 0x1E7E6, prALetter},              // Lo   [7] ETHIOPIC SYLLABLE HHYA..ETHIOPIC SYLLABLE HHYO
 	{0x1E7E8, 0x1E7EB, prALetter},              // Lo   [4] ETHIOPIC SYLLABLE GURAGE HHWA..ETHIOPIC SYLLABLE HHWE
 	{0x1E7ED, 0x1E7EE, prALetter},              // Lo   [2] ETHIOPIC SYLLABLE GURAGE MWI..ETHIOPIC SYLLABLE GURAGE MWEE
@@ -1516,22 +1559,20 @@ var workBreakCodePoints = [][3]int{
 	{0x1EEA1, 0x1EEA3, prALetter},              // Lo   [3] ARABIC MATHEMATICAL DOUBLE-STRUCK BEH..ARABIC MATHEMATICAL DOUBLE-STRUCK DAL
 	{0x1EEA5, 0x1EEA9, prALetter},              // Lo   [5] ARABIC MATHEMATICAL DOUBLE-STRUCK WAW..ARABIC MATHEMATICAL DOUBLE-STRUCK YEH
 	{0x1EEAB, 0x1EEBB, prALetter},              // Lo  [17] ARABIC MATHEMATICAL DOUBLE-STRUCK LAM..ARABIC MATHEMATICAL DOUBLE-STRUCK GHAIN
-	{0x1F000, 0x1F003, prExtendedPictographic}, // E0.0   [4] (🀀..🀃)    MAHJONG TILE EAST WIND..MAHJONG TILE NORTH WIND
 	{0x1F004, 0x1F004, prExtendedPictographic}, // E0.6   [1] (🀄)       mahjong red dragon
-	{0x1F005, 0x1F0CE, prExtendedPictographic}, // E0.0 [202] (🀅..🃎)    MAHJONG TILE GREEN DRAGON..PLAYING CARD KING OF DIAMONDS
+	{0x1F02C, 0x1F02F, prExtendedPictographic}, // E0.0   [4] (🀬..🀯)    <reserved-1F02C>..<reserved-1F02F>
+	{0x1F094, 0x1F09F, prExtendedPictographic}, // E0.0  [12] (🂔..🂟)    <reserved-1F094>..<reserved-1F09F>
+	{0x1F0AF, 0x1F0B0, prExtendedPictographic}, // E0.0   [2] (🂯..🂰)    <reserved-1F0AF>..<reserved-1F0B0>
+	{0x1F0C0, 0x1F0C0, prExtendedPictographic}, // E0.0   [1] (🃀)       <reserved-1F0C0>
 	{0x1F0CF, 0x1F0CF, prExtendedPictographic}, // E0.6   [1] (🃏)       joker
-	{0x1F0D0, 0x1F0FF, prExtendedPictographic}, // E0.0  [48] (🃐..🃿)    <reserved-1F0D0>..<reserved-1F0FF>
-	{0x1F10D, 0x1F10F, prExtendedPictographic}, // E0.0   [3] (🄍..🄏)    CIRCLED ZERO WITH SLASH..CIRCLED DOLLAR SIGN WITH OVERLAID BACKSLASH
-	{0x1F12F, 0x1F12F, prExtendedPictographic}, // E0.0   [1] (🄯)       COPYLEFT SYMBOL
+	{0x1F0D0, 0x1F0D0, prExtendedPictographic}, // E0.0   [1] (🃐)       <reserved-1F0D0>
+	{0x1F0F6, 0x1F0FF, prExtendedPictographic}, // E0.0  [10] (🃶..🃿)    <reserved-1F0F6>..<reserved-1F0FF>
 	{0x1F130, 0x1F149, prALetter},              // So  [26] SQUARED LATIN CAPITAL LETTER A..SQUARED LATIN CAPITAL LETTER Z
 	{0x1F150, 0x1F169, prALetter},              // So  [26] NEGATIVE CIRCLED LATIN CAPITAL LETTER A..NEGATIVE CIRCLED LATIN CAPITAL LETTER Z
-	{0x1F16C, 0x1F16F, prExtendedPictographic}, // E0.0   [4] (🅬..🅯)    RAISED MR SIGN..CIRCLED HUMAN FIGURE
 	{0x1F170, 0x1F189, prALetter},              // So  [26] NEGATIVE SQUARED LATIN CAPITAL LETTER A..NEGATIVE SQUARED LATIN CAPITAL LETTER Z
-	{0x1F170, 0x1F171, prExtendedPictographic}, // E0.6   [2] (🅰️..🅱️)    A button (blood type)..B button (blood type)
-	{0x1F17E, 0x1F17F, prExtendedPictographic}, // E0.6   [2] (🅾️..🅿️)    O button (blood type)..P button
 	{0x1F18E, 0x1F18E, prExtendedPictographic}, // E0.6   [1] (🆎)       AB button (blood type)
 	{0x1F191, 0x1F19A, prExtendedPictographic}, // E0.6  [10] (🆑..🆚)    CL button..VS button
-	{0x1F1AD, 0x1F1E5, prExtendedPictographic}, // E0.0  [57] (🆭..🇥)    MASK WORK SYMBOL..<reserved-1F1E5>
+	{0x1F1AF, 0x1F1E5, prExtendedPictographic}, // E0.0  [55] (🆯..🇥)    <reserved-1F1AF>..<reserved-1F1E5>
 	{0x1F1E6, 0x1F1FF, prRegionalIndicator},    // So  [26] REGIONAL INDICATOR SYMBOL LETTER A..REGIONAL INDICATOR SYMBOL LETTER Z
 	{0x1F201, 0x1F202, prExtendedPictographic}, // E0.6   [2] (🈁..🈂️)    Japanese “here” button..Japanese “service charge” button
 	{0x1F203, 0x1F20F, prExtendedPictographic}, // E0.0  [13] (🈃..🈏)    <reserved-1F203>..<reserved-1F20F>
@@ -1541,7 +1582,8 @@ var workBreakCodePoints = [][3]int{
 	{0x1F23C, 0x1F23F, prExtendedPictographic}, // E0.0   [4] (🈼..🈿)    <reserved-1F23C>..<reserved-1F23F>
 	{0x1F249, 0x1F24F, prExtendedPictographic}, // E0.0   [7] (🉉..🉏)    <reserved-1F249>..<reserved-1F24F>
 	{0x1F250, 0x1F251, prExtendedPictographic}, // E0.6   [2] (🉐..🉑)    Japanese “bargain” button..Japanese “acceptable” button
-	{0x1F252, 0x1F2FF, prExtendedPictographic}, // E0.0 [174] (🉒..🋿)    <reserved-1F252>..<reserved-1F2FF>
+	{0x1F252, 0x1F25F, prExtendedPictographic}, // E0.0  [14] (🉒..🉟)    <reserved-1F252>..<reserved-1F25F>
+	{0x1F266, 0x1F2FF, prExtendedPictographic}, // E0.0 [154] (🉦..🋿)    <reserved-1F266>..<reserved-1F2FF>
 	{0x1F300, 0x1F30C, prExtendedPictographic}, // E0.6  [13] (🌀..🌌)    cyclone..milky way
 	{0x1F30D, 0x1F30E, prExtendedPictographic}, // E0.7   [2] (🌍..🌎)    globe showing Europe-Africa..globe showing Americas
 	{0x1F30F, 0x1F30F, prExtendedPictographic}, // E0.6   [1] (🌏)       globe showing Asia-Australia
@@ -1557,7 +1599,6 @@ var workBreakCodePoints = [][3]int{
 	{0x1F31D, 0x1F31E, prExtendedPictographic}, // E1.0   [2] (🌝..🌞)    full moon face..sun with face
 	{0x1F31F, 0x1F320, prExtendedPictographic}, // E0.6   [2] (🌟..🌠)    glowing star..shooting star
 	{0x1F321, 0x1F321, prExtendedPictographic}, // E0.7   [1] (🌡️)       thermometer
-	{0x1F322, 0x1F323, prExtendedPictographic}, // E0.0   [2] (🌢..🌣)    BLACK DROPLET..WHITE SUN
 	{0x1F324, 0x1F32C, prExtendedPictographic}, // E0.7   [9] (🌤️..🌬️)    sun behind small cloud..wind face
 	{0x1F32D, 0x1F32F, prExtendedPictographic}, // E1.0   [3] (🌭..🌯)    hot dog..burrito
 	{0x1F330, 0x1F331, prExtendedPictographic}, // E0.6   [2] (🌰..🌱)    chestnut..seedling
@@ -1573,11 +1614,8 @@ var workBreakCodePoints = [][3]int{
 	{0x1F37D, 0x1F37D, prExtendedPictographic}, // E0.7   [1] (🍽️)       fork and knife with plate
 	{0x1F37E, 0x1F37F, prExtendedPictographic}, // E1.0   [2] (🍾..🍿)    bottle with popping cork..popcorn
 	{0x1F380, 0x1F393, prExtendedPictographic}, // E0.6  [20] (🎀..🎓)    ribbon..graduation cap
-	{0x1F394, 0x1F395, prExtendedPictographic}, // E0.0   [2] (🎔..🎕)    HEART WITH TIP ON THE LEFT..BOUQUET OF FLOWERS
 	{0x1F396, 0x1F397, prExtendedPictographic}, // E0.7   [2] (🎖️..🎗️)    military medal..reminder ribbon
-	{0x1F398, 0x1F398, prExtendedPictographic}, // E0.0   [1] (🎘)       MUSICAL KEYBOARD WITH JACKS
 	{0x1F399, 0x1F39B, prExtendedPictographic}, // E0.7   [3] (🎙️..🎛️)    studio microphone..control knobs
-	{0x1F39C, 0x1F39D, prExtendedPictographic}, // E0.0   [2] (🎜..🎝)    BEAMED ASCENDING MUSICAL NOTES..BEAMED DESCENDING MUSICAL NOTES
 	{0x1F39E, 0x1F39F, prExtendedPictographic}, // E0.7   [2] (🎞️..🎟️)    film frames..admission tickets
 	{0x1F3A0, 0x1F3C4, prExtendedPictographic}, // E0.6  [37] (🎠..🏄)    carousel horse..person surfing
 	{0x1F3C5, 0x1F3C5, prExtendedPictographic}, // E1.0   [1] (🏅)       sports medal
@@ -1592,11 +1630,9 @@ var workBreakCodePoints = [][3]int{
 	{0x1F3E0, 0x1F3E3, prExtendedPictographic}, // E0.6   [4] (🏠..🏣)    house..Japanese post office
 	{0x1F3E4, 0x1F3E4, prExtendedPictographic}, // E1.0   [1] (🏤)       post office
 	{0x1F3E5, 0x1F3F0, prExtendedPictographic}, // E0.6  [12] (🏥..🏰)    hospital..castle
-	{0x1F3F1, 0x1F3F2, prExtendedPictographic}, // E0.0   [2] (🏱..🏲)    WHITE PENNANT..BLACK PENNANT
 	{0x1F3F3, 0x1F3F3, prExtendedPictographic}, // E0.7   [1] (🏳️)       white flag
 	{0x1F3F4, 0x1F3F4, prExtendedPictographic}, // E1.0   [1] (🏴)       black flag
 	{0x1F3F5, 0x1F3F5, prExtendedPictographic}, // E0.7   [1] (🏵️)       rosette
-	{0x1F3F6, 0x1F3F6, prExtendedPictographic}, // E0.0   [1] (🏶)       BLACK ROSETTE
 	{0x1F3F7, 0x1F3F7, prExtendedPictographic}, // E0.7   [1] (🏷️)       label
 	{0x1F3F8, 0x1F3FA, prExtendedPictographic}, // E1.0   [3] (🏸..🏺)    badminton..amphora
 	{0x1F3FB, 0x1F3FF, prExtend},               // Sk   [5] EMOJI MODIFIER FITZPATRICK TYPE-1-2..EMOJI MODIFIER FITZPATRICK TYPE-6
@@ -1634,7 +1670,6 @@ var workBreakCodePoints = [][3]int{
 	{0x1F4F8, 0x1F4F8, prExtendedPictographic}, // E1.0   [1] (📸)       camera with flash
 	{0x1F4F9, 0x1F4FC, prExtendedPictographic}, // E0.6   [4] (📹..📼)    video camera..videocassette
 	{0x1F4FD, 0x1F4FD, prExtendedPictographic}, // E0.7   [1] (📽️)       film projector
-	{0x1F4FE, 0x1F4FE, prExtendedPictographic}, // E0.0   [1] (📾)       PORTABLE STEREO
 	{0x1F4FF, 0x1F502, prExtendedPictographic}, // E1.0   [4] (📿..🔂)    prayer beads..repeat single button
 	{0x1F503, 0x1F503, prExtendedPictographic}, // E0.6   [1] (🔃)       clockwise vertical arrows
 	{0x1F504, 0x1F507, prExtendedPictographic}, // E1.0   [4] (🔄..🔇)    counterclockwise arrows button..muted speaker
@@ -1645,51 +1680,30 @@ var workBreakCodePoints = [][3]int{
 	{0x1F516, 0x1F52B, prExtendedPictographic}, // E0.6  [22] (🔖..🔫)    bookmark..water pistol
 	{0x1F52C, 0x1F52D, prExtendedPictographic}, // E1.0   [2] (🔬..🔭)    microscope..telescope
 	{0x1F52E, 0x1F53D, prExtendedPictographic}, // E0.6  [16] (🔮..🔽)    crystal ball..downwards button
-	{0x1F546, 0x1F548, prExtendedPictographic}, // E0.0   [3] (🕆..🕈)    WHITE LATIN CROSS..CELTIC CROSS
 	{0x1F549, 0x1F54A, prExtendedPictographic}, // E0.7   [2] (🕉️..🕊️)    om..dove
 	{0x1F54B, 0x1F54E, prExtendedPictographic}, // E1.0   [4] (🕋..🕎)    kaaba..menorah
-	{0x1F54F, 0x1F54F, prExtendedPictographic}, // E0.0   [1] (🕏)       BOWL OF HYGIEIA
 	{0x1F550, 0x1F55B, prExtendedPictographic}, // E0.6  [12] (🕐..🕛)    one o’clock..twelve o’clock
 	{0x1F55C, 0x1F567, prExtendedPictographic}, // E0.7  [12] (🕜..🕧)    one-thirty..twelve-thirty
-	{0x1F568, 0x1F56E, prExtendedPictographic}, // E0.0   [7] (🕨..🕮)    RIGHT SPEAKER..BOOK
 	{0x1F56F, 0x1F570, prExtendedPictographic}, // E0.7   [2] (🕯️..🕰️)    candle..mantelpiece clock
-	{0x1F571, 0x1F572, prExtendedPictographic}, // E0.0   [2] (🕱..🕲)    BLACK SKULL AND CROSSBONES..NO PIRACY
 	{0x1F573, 0x1F579, prExtendedPictographic}, // E0.7   [7] (🕳️..🕹️)    hole..joystick
 	{0x1F57A, 0x1F57A, prExtendedPictographic}, // E3.0   [1] (🕺)       man dancing
-	{0x1F57B, 0x1F586, prExtendedPictographic}, // E0.0  [12] (🕻..🖆)    LEFT HAND TELEPHONE RECEIVER..PEN OVER STAMPED ENVELOPE
 	{0x1F587, 0x1F587, prExtendedPictographic}, // E0.7   [1] (🖇️)       linked paperclips
-	{0x1F588, 0x1F589, prExtendedPictographic}, // E0.0   [2] (🖈..🖉)    BLACK PUSHPIN..LOWER LEFT PENCIL
 	{0x1F58A, 0x1F58D, prExtendedPictographic}, // E0.7   [4] (🖊️..🖍️)    pen..crayon
-	{0x1F58E, 0x1F58F, prExtendedPictographic}, // E0.0   [2] (🖎..🖏)    LEFT WRITING HAND..TURNED OK HAND SIGN
 	{0x1F590, 0x1F590, prExtendedPictographic}, // E0.7   [1] (🖐️)       hand with fingers splayed
-	{0x1F591, 0x1F594, prExtendedPictographic}, // E0.0   [4] (🖑..🖔)    REVERSED RAISED HAND WITH FINGERS SPLAYED..REVERSED VICTORY HAND
 	{0x1F595, 0x1F596, prExtendedPictographic}, // E1.0   [2] (🖕..🖖)    middle finger..vulcan salute
-	{0x1F597, 0x1F5A3, prExtendedPictographic}, // E0.0  [13] (🖗..🖣)    WHITE DOWN POINTING LEFT HAND INDEX..BLACK DOWN POINTING BACKHAND INDEX
 	{0x1F5A4, 0x1F5A4, prExtendedPictographic}, // E3.0   [1] (🖤)       black heart
 	{0x1F5A5, 0x1F5A5, prExtendedPictographic}, // E0.7   [1] (🖥️)       desktop computer
-	{0x1F5A6, 0x1F5A7, prExtendedPictographic}, // E0.0   [2] (🖦..🖧)    KEYBOARD AND MOUSE..THREE NETWORKED COMPUTERS
 	{0x1F5A8, 0x1F5A8, prExtendedPictographic}, // E0.7   [1] (🖨️)       printer
-	{0x1F5A9, 0x1F5B0, prExtendedPictographic}, // E0.0   [8] (🖩..🖰)    POCKET CALCULATOR..TWO BUTTON MOUSE
 	{0x1F5B1, 0x1F5B2, prExtendedPictographic}, // E0.7   [2] (🖱️..🖲️)    computer mouse..trackball
-	{0x1F5B3, 0x1F5BB, prExtendedPictographic}, // E0.0   [9] (🖳..🖻)    OLD PERSONAL COMPUTER..DOCUMENT WITH PICTURE
 	{0x1F5BC, 0x1F5BC, prExtendedPictographic}, // E0.7   [1] (🖼️)       framed picture
-	{0x1F5BD, 0x1F5C1, prExtendedPictographic}, // E0.0   [5] (🖽..🗁)    FRAME WITH TILES..OPEN FOLDER
 	{0x1F5C2, 0x1F5C4, prExtendedPictographic}, // E0.7   [3] (🗂️..🗄️)    card index dividers..file cabinet
-	{0x1F5C5, 0x1F5D0, prExtendedPictographic}, // E0.0  [12] (🗅..🗐)    EMPTY NOTE..PAGES
 	{0x1F5D1, 0x1F5D3, prExtendedPictographic}, // E0.7   [3] (🗑️..🗓️)    wastebasket..spiral calendar
-	{0x1F5D4, 0x1F5DB, prExtendedPictographic}, // E0.0   [8] (🗔..🗛)    DESKTOP WINDOW..DECREASE FONT SIZE SYMBOL
 	{0x1F5DC, 0x1F5DE, prExtendedPictographic}, // E0.7   [3] (🗜️..🗞️)    clamp..rolled-up newspaper
-	{0x1F5DF, 0x1F5E0, prExtendedPictographic}, // E0.0   [2] (🗟..🗠)    PAGE WITH CIRCLED TEXT..STOCK CHART
 	{0x1F5E1, 0x1F5E1, prExtendedPictographic}, // E0.7   [1] (🗡️)       dagger
-	{0x1F5E2, 0x1F5E2, prExtendedPictographic}, // E0.0   [1] (🗢)       LIPS
 	{0x1F5E3, 0x1F5E3, prExtendedPictographic}, // E0.7   [1] (🗣️)       speaking head
-	{0x1F5E4, 0x1F5E7, prExtendedPictographic}, // E0.0   [4] (🗤..🗧)    THREE RAYS ABOVE..THREE RAYS RIGHT
 	{0x1F5E8, 0x1F5E8, prExtendedPictographic}, // E2.0   [1] (🗨️)       left speech bubble
-	{0x1F5E9, 0x1F5EE, prExtendedPictographic}, // E0.0   [6] (🗩..🗮)    RIGHT SPEECH BUBBLE..LEFT ANGER BUBBLE
 	{0x1F5EF, 0x1F5EF, prExtendedPictographic}, // E0.7   [1] (🗯️)       right anger bubble
-	{0x1F5F0, 0x1F5F2, prExtendedPictographic}, // E0.0   [3] (🗰..🗲)    MOOD BUBBLE..LIGHTNING MOOD
 	{0x1F5F3, 0x1F5F3, prExtendedPictographic}, // E0.7   [1] (🗳️)       ballot box with ballot
-	{0x1F5F4, 0x1F5F9, prExtendedPictographic}, // E0.0   [6] (🗴..🗹)    BALLOT SCRIPT X..BALLOT BOX WITH BOLD CHECK
 	{0x1F5FA, 0x1F5FA, prExtendedPictographic}, // E0.7   [1] (🗺️)       world map
 	{0x1F5FB, 0x1F5FF, prExtendedPictographic}, // E0.6   [5] (🗻..🗿)    mount fuji..moai
 	{0x1F600, 0x1F600, prExtendedPictographic}, // E1.0   [1] (😀)       grinning face
@@ -1758,26 +1772,23 @@ var workBreakCodePoints = [][3]int{
 	{0x1F6BF, 0x1F6BF, prExtendedPictographic}, // E1.0   [1] (🚿)       shower
 	{0x1F6C0, 0x1F6C0, prExtendedPictographic}, // E0.6   [1] (🛀)       person taking bath
 	{0x1F6C1, 0x1F6C5, prExtendedPictographic}, // E1.0   [5] (🛁..🛅)    bathtub..left luggage
-	{0x1F6C6, 0x1F6CA, prExtendedPictographic}, // E0.0   [5] (🛆..🛊)    TRIANGLE WITH ROUNDED CORNERS..GIRLS SYMBOL
 	{0x1F6CB, 0x1F6CB, prExtendedPictographic}, // E0.7   [1] (🛋️)       couch and lamp
 	{0x1F6CC, 0x1F6CC, prExtendedPictographic}, // E1.0   [1] (🛌)       person in bed
 	{0x1F6CD, 0x1F6CF, prExtendedPictographic}, // E0.7   [3] (🛍️..🛏️)    shopping bags..bed
 	{0x1F6D0, 0x1F6D0, prExtendedPictographic}, // E1.0   [1] (🛐)       place of worship
 	{0x1F6D1, 0x1F6D2, prExtendedPictographic}, // E3.0   [2] (🛑..🛒)    stop sign..shopping cart
-	{0x1F6D3, 0x1F6D4, prExtendedPictographic}, // E0.0   [2] (🛓..🛔)    STUPA..PAGODA
 	{0x1F6D5, 0x1F6D5, prExtendedPictographic}, // E12.0  [1] (🛕)       hindu temple
 	{0x1F6D6, 0x1F6D7, prExtendedPictographic}, // E13.0  [2] (🛖..🛗)    hut..elevator
-	{0x1F6D8, 0x1F6DB, prExtendedPictographic}, // E0.0   [4] (🛘..🛛)    <reserved-1F6D8>..<reserved-1F6DB>
+	{0x1F6D8, 0x1F6D8, prExtendedPictographic}, // E17.0  [1] (🛘)       landslide
+	{0x1F6D9, 0x1F6D9, prExtendedPictographic}, // E18.0  [1] (🛙)       lighthouse
+	{0x1F6DA, 0x1F6DB, prExtendedPictographic}, // E0.0   [2] (🛚..🛛)    <reserved-1F6DA>..<reserved-1F6DB>
 	{0x1F6DC, 0x1F6DC, prExtendedPictographic}, // E15.0  [1] (🛜)       wireless
 	{0x1F6DD, 0x1F6DF, prExtendedPictographic}, // E14.0  [3] (🛝..🛟)    playground slide..ring buoy
 	{0x1F6E0, 0x1F6E5, prExtendedPictographic}, // E0.7   [6] (🛠️..🛥️)    hammer and wrench..motor boat
-	{0x1F6E6, 0x1F6E8, prExtendedPictographic}, // E0.0   [3] (🛦..🛨)    UP-POINTING MILITARY AIRPLANE..UP-POINTING SMALL AIRPLANE
 	{0x1F6E9, 0x1F6E9, prExtendedPictographic}, // E0.7   [1] (🛩️)       small airplane
-	{0x1F6EA, 0x1F6EA, prExtendedPictographic}, // E0.0   [1] (🛪)       NORTHEAST-POINTING AIRPLANE
 	{0x1F6EB, 0x1F6EC, prExtendedPictographic}, // E1.0   [2] (🛫..🛬)    airplane departure..airplane arrival
 	{0x1F6ED, 0x1F6EF, prExtendedPictographic}, // E0.0   [3] (🛭..🛯)    <reserved-1F6ED>..<reserved-1F6EF>
 	{0x1F6F0, 0x1F6F0, prExtendedPictographic}, // E0.7   [1] (🛰️)       satellite
-	{0x1F6F1, 0x1F6F2, prExtendedPictographic}, // E0.0   [2] (🛱..🛲)    ONCOMING FIRE ENGINE..DIESEL LOCOMOTIVE
 	{0x1F6F3, 0x1F6F3, prExtendedPictographic}, // E0.7   [1] (🛳️)       passenger ship
 	{0x1F6F4, 0x1F6F6, prExtendedPictographic}, // E3.0   [3] (🛴..🛶)    kick scooter..canoe
 	{0x1F6F7, 0x1F6F8, prExtendedPictographic}, // E5.0   [2] (🛷..🛸)    sled..flying saucer
@@ -1785,17 +1796,18 @@ var workBreakCodePoints = [][3]int{
 	{0x1F6FA, 0x1F6FA, prExtendedPictographic}, // E12.0  [1] (🛺)       auto rickshaw
 	{0x1F6FB, 0x1F6FC, prExtendedPictographic}, // E13.0  [2] (🛻..🛼)    pickup truck..roller skate
 	{0x1F6FD, 0x1F6FF, prExtendedPictographic}, // E0.0   [3] (🛽..🛿)    <reserved-1F6FD>..<reserved-1F6FF>
-	{0x1F774, 0x1F77F, prExtendedPictographic}, // E0.0  [12] (🝴..🝿)    LOT OF FORTUNE..ORCUS
-	{0x1F7D5, 0x1F7DF, prExtendedPictographic}, // E0.0  [11] (🟕..🟟)    CIRCLED TRIANGLE..<reserved-1F7DF>
+	{0x1F7DC, 0x1F7DF, prExtendedPictographic}, // E0.0   [4] (🟜..🟟)    <reserved-1F7DC>..<reserved-1F7DF>
 	{0x1F7E0, 0x1F7EB, prExtendedPictographic}, // E12.0 [12] (🟠..🟫)    orange circle..brown square
 	{0x1F7EC, 0x1F7EF, prExtendedPictographic}, // E0.0   [4] (🟬..🟯)    <reserved-1F7EC>..<reserved-1F7EF>
 	{0x1F7F0, 0x1F7F0, prExtendedPictographic}, // E14.0  [1] (🟰)       heavy equals sign
-	{0x1F7F1, 0x1F7FF, prExtendedPictographic}, // E0.0  [15] (🟱..🟿)    <reserved-1F7F1>..<reserved-1F7FF>
 	{0x1F80C, 0x1F80F, prExtendedPictographic}, // E0.0   [4] (🠌..🠏)    <reserved-1F80C>..<reserved-1F80F>
 	{0x1F848, 0x1F84F, prExtendedPictographic}, // E0.0   [8] (🡈..🡏)    <reserved-1F848>..<reserved-1F84F>
 	{0x1F85A, 0x1F85F, prExtendedPictographic}, // E0.0   [6] (🡚..🡟)    <reserved-1F85A>..<reserved-1F85F>
 	{0x1F888, 0x1F88F, prExtendedPictographic}, // E0.0   [8] (🢈..🢏)    <reserved-1F888>..<reserved-1F88F>
-	{0x1F8AE, 0x1F8FF, prExtendedPictographic}, // E0.0  [82] (🢮..🣿)    <reserved-1F8AE>..<reserved-1F8FF>
+	{0x1F8AE, 0x1F8AF, prExtendedPictographic}, // E0.0   [2] (🢮..🢯)    <reserved-1F8AE>..<reserved-1F8AF>
+	{0x1F8BC, 0x1F8BF, prExtendedPictographic}, // E0.0   [4] (🢼..🢿)    <reserved-1F8BC>..<reserved-1F8BF>
+	{0x1F8C2, 0x1F8CF, prExtendedPictographic}, // E0.0  [14] (🣂..🣏)    <reserved-1F8C2>..<reserved-1F8CF>
+	{0x1F8D9, 0x1F8FF, prExtendedPictographic}, // E0.0  [39] (🣙..🣿)    <reserved-1F8D9>..<reserved-1F8FF>
 	{0x1F90C, 0x1F90C, prExtendedPictographic}, // E13.0  [1] (🤌)       pinched fingers
 	{0x1F90D, 0x1F90F, prExtendedPictographic}, // E12.0  [3] (🤍..🤏)    white heart..pinching hand
 	{0x1F910, 0x1F918, prExtendedPictographic}, // E1.0   [9] (🤐..🤘)    zipper-mouth face..sign of the horns
@@ -1841,7 +1853,8 @@ var workBreakCodePoints = [][3]int{
 	{0x1F9CD, 0x1F9CF, prExtendedPictographic}, // E12.0  [3] (🧍..🧏)    person standing..deaf person
 	{0x1F9D0, 0x1F9E6, prExtendedPictographic}, // E5.0  [23] (🧐..🧦)    face with monocle..socks
 	{0x1F9E7, 0x1F9FF, prExtendedPictographic}, // E11.0 [25] (🧧..🧿)    red envelope..nazar amulet
-	{0x1FA00, 0x1FA6F, prExtendedPictographic}, // E0.0 [112] (🨀..🩯)    NEUTRAL CHESS KING..<reserved-1FA6F>
+	{0x1FA58, 0x1FA5F, prExtendedPictographic}, // E0.0   [8] (🩘..🩟)    <reserved-1FA58>..<reserved-1FA5F>
+	{0x1FA6E, 0x1FA6F, prExtendedPictographic}, // E0.0   [2] (🩮..🩯)    <reserved-1FA6E>..<reserved-1FA6F>
 	{0x1FA70, 0x1FA73, prExtendedPictographic}, // E12.0  [4] (🩰..🩳)    ballet shoes..shorts
 	{0x1FA74, 0x1FA74, prExtendedPictographic}, // E13.0  [1] (🩴)       thong sandal
 	{0x1FA75, 0x1FA77, prExtendedPictographic}, // E15.0  [3] (🩵..🩷)    light blue heart..pink heart
@@ -1851,7 +1864,11 @@ var workBreakCodePoints = [][3]int{
 	{0x1FA80, 0x1FA82, prExtendedPictographic}, // E12.0  [3] (🪀..🪂)    yo-yo..parachute
 	{0x1FA83, 0x1FA86, prExtendedPictographic}, // E13.0  [4] (🪃..🪆)    boomerang..nesting dolls
 	{0x1FA87, 0x1FA88, prExtendedPictographic}, // E15.0  [2] (🪇..🪈)    maracas..flute
-	{0x1FA89, 0x1FA8F, prExtendedPictographic}, // E0.0   [7] (🪉..🪏)    <reserved-1FA89>..<reserved-1FA8F>
+	{0x1FA89, 0x1FA89, prExtendedPictographic}, // E16.0  [1] (🪉)       harp
+	{0x1FA8A, 0x1FA8A, prExtendedPictographic}, // E17.0  [1] (🪊)       trombone
+	{0x1FA8B, 0x1FA8D, prExtendedPictographic}, // E18.0  [3] (🪋..🪍)    meteor..net with handle
+	{0x1FA8E, 0x1FA8E, prExtendedPictographic}, // E17.0  [1] (🪎)       treasure chest
+	{0x1FA8F, 0x1FA8F, prExtendedPictographic}, // E16.0  [1] (🪏)       shovel
 	{0x1FA90, 0x1FA95, prExtendedPictographic}, // E12.0  [6] (🪐..🪕)    ringed planet..banjo
 	{0x1FA96, 0x1FAA8, prExtendedPictographic}, // E13.0 [19] (🪖..🪨)    military helmet..rock
 	{0x1FAA9, 0x1FAAC, prExtendedPictographic}, // E14.0  [4] (🪩..🪬)    mirror ball..hamsa
@@ -1859,22 +1876,35 @@ var workBreakCodePoints = [][3]int{
 	{0x1FAB0, 0x1FAB6, prExtendedPictographic}, // E13.0  [7] (🪰..🪶)    fly..feather
 	{0x1FAB7, 0x1FABA, prExtendedPictographic}, // E14.0  [4] (🪷..🪺)    lotus..nest with eggs
 	{0x1FABB, 0x1FABD, prExtendedPictographic}, // E15.0  [3] (🪻..🪽)    hyacinth..wing
-	{0x1FABE, 0x1FABE, prExtendedPictographic}, // E0.0   [1] (🪾)       <reserved-1FABE>
+	{0x1FABE, 0x1FABE, prExtendedPictographic}, // E16.0  [1] (🪾)       leafless tree
 	{0x1FABF, 0x1FABF, prExtendedPictographic}, // E15.0  [1] (🪿)       goose
 	{0x1FAC0, 0x1FAC2, prExtendedPictographic}, // E13.0  [3] (🫀..🫂)    anatomical heart..people hugging
 	{0x1FAC3, 0x1FAC5, prExtendedPictographic}, // E14.0  [3] (🫃..🫅)    pregnant man..person with crown
-	{0x1FAC6, 0x1FACD, prExtendedPictographic}, // E0.0   [8] (🫆..🫍)    <reserved-1FAC6>..<reserved-1FACD>
+	{0x1FAC6, 0x1FAC6, prExtendedPictographic}, // E16.0  [1] (🫆)       fingerprint
+	{0x1FAC7, 0x1FAC7, prExtendedPictographic}, // E0.0   [1] (🫇)       <reserved-1FAC7>
+	{0x1FAC8, 0x1FAC8, prExtendedPictographic}, // E17.0  [1] (🫈)       hairy creature
+	{0x1FAC9, 0x1FACB, prExtendedPictographic}, // E0.0   [3] (🫉..🫋)    <reserved-1FAC9>..<reserved-1FACB>
+	{0x1FACC, 0x1FACC, prExtendedPictographic}, // E18.0  [1] (🫌)       monarch butterfly
+	{0x1FACD, 0x1FACD, prExtendedPictographic}, // E17.0  [1] (🫍)       orca
 	{0x1FACE, 0x1FACF, prExtendedPictographic}, // E15.0  [2] (🫎..🫏)    moose..donkey
 	{0x1FAD0, 0x1FAD6, prExtendedPictographic}, // E13.0  [7] (🫐..🫖)    blueberries..teapot
 	{0x1FAD7, 0x1FAD9, prExtendedPictographic}, // E14.0  [3] (🫗..🫙)    pouring liquid..jar
 	{0x1FADA, 0x1FADB, prExtendedPictographic}, // E15.0  [2] (🫚..🫛)    ginger root..pea pod
-	{0x1FADC, 0x1FADF, prExtendedPictographic}, // E0.0   [4] (🫜..🫟)    <reserved-1FADC>..<reserved-1FADF>
+	{0x1FADC, 0x1FADC, prExtendedPictographic}, // E16.0  [1] (🫜)       root vegetable
+	{0x1FADD, 0x1FADD, prExtendedPictographic}, // E18.0  [1] (🫝)       pickle
+	{0x1FADE, 0x1FADE, prExtendedPictographic}, // E0.0   [1] (🫞)       <reserved-1FADE>
+	{0x1FADF, 0x1FADF, prExtendedPictographic}, // E16.0  [1] (🫟)       splatter
 	{0x1FAE0, 0x1FAE7, prExtendedPictographic}, // E14.0  [8] (🫠..🫧)    melting face..bubbles
 	{0x1FAE8, 0x1FAE8, prExtendedPictographic}, // E15.0  [1] (🫨)       shaking face
-	{0x1FAE9, 0x1FAEF, prExtendedPictographic}, // E0.0   [7] (🫩..🫯)    <reserved-1FAE9>..<reserved-1FAEF>
+	{0x1FAE9, 0x1FAE9, prExtendedPictographic}, // E16.0  [1] (🫩)       face with bags under eyes
+	{0x1FAEA, 0x1FAEA, prExtendedPictographic}, // E17.0  [1] (🫪)       distorted face
+	{0x1FAEB, 0x1FAEB, prExtendedPictographic}, // E18.0  [1] (🫫)       cracking face
+	{0x1FAEC, 0x1FAEE, prExtendedPictographic}, // E0.0   [3] (🫬..🫮)    <reserved-1FAEC>..<reserved-1FAEE>
+	{0x1FAEF, 0x1FAEF, prExtendedPictographic}, // E17.0  [1] (🫯)       fight cloud
 	{0x1FAF0, 0x1FAF6, prExtendedPictographic}, // E14.0  [7] (🫰..🫶)    hand with index finger and thumb crossed..heart hands
 	{0x1FAF7, 0x1FAF8, prExtendedPictographic}, // E15.0  [2] (🫷..🫸)    leftwards pushing hand..rightwards pushing hand
-	{0x1FAF9, 0x1FAFF, prExtendedPictographic}, // E0.0   [7] (🫹..🫿)    <reserved-1FAF9>..<reserved-1FAFF>
+	{0x1FAF9, 0x1FAFA, prExtendedPictographic}, // E18.0  [2] (🫹..🫺)    leftwards thumb sign..rightwards thumb sign
+	{0x1FAFB, 0x1FAFF, prExtendedPictographic}, // E0.0   [5] (🫻..🫿)    <reserved-1FAFB>..<reserved-1FAFF>
 	{0x1FBF0, 0x1FBF9, prNumeric},              // Nd  [10] SEGMENTED DIGIT ZERO..SEGMENTED DIGIT NINE
 	{0x1FC00, 0x1FFFD, prExtendedPictographic}, // E0.0[1022] (🰀..🿽)    <reserved-1FC00>..<reserved-1FFFD>
 	{0xE0001, 0xE0001, prFormat},               // Cf       LANGUAGE TAG

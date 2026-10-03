@@ -109,9 +109,15 @@ func TestGraphemesClass(t *testing.T) {
 
 // Run the standard Unicode test cases for word boundaries using the Graphemes
 // class.
+// wordBreakRIZWJInconsistency is a word break test case which reveals an
+// inconsistency in the Unicode rule set, namely the handling of ZWJ within two
+// RI graphemes. (Grapheme rules will restart the RI count, word rules will
+// ignore the ZWJ.) It is skipped in tests which combine both rule sets.
+const wordBreakRIZWJInconsistency = "a\U0001F1E6\u200d\U0001F1E7\U0001F1E8b"
+
 func TestGraphemesClassWord(t *testing.T) {
 	for testNum, testCase := range wordBreakTestCases {
-		if testNum == 1700 {
+		if testCase.original == wordBreakRIZWJInconsistency {
 			// This test case reveals an inconsistency in the Unicode rule set,
 			// namely the handling of ZWJ within two RI graphemes. (Grapheme
 			// rules will restart the RI count, word rules will ignore the ZWJ.)

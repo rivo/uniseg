@@ -26,16 +26,16 @@ const (
 // don't overlap (and that they all still fit in a single int). These must
 // correspond to the Mask constants.
 const (
-	shiftWordState     = 4
-	shiftSentenceState = 9
-	shiftLineState     = 13
-	shiftPropState     = 21 // No mask as these are always the remaining bits.
+	shiftWordState     = 5
+	shiftSentenceState = 10
+	shiftLineState     = 14
+	shiftPropState     = 22 // No mask as these are always the remaining bits.
 )
 
 // The bit mask used to extract the state returned by the [Step] function, after
 // shifting. These values must correspond to the shift constants.
 const (
-	maskGraphemeState = 0xf
+	maskGraphemeState = 0x1f
 	maskWordState     = 0x1f
 	maskSentenceState = 0xf
 	maskLineState     = 0xff

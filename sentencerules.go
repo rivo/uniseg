@@ -21,7 +21,7 @@ const (
 // sbTransitions implements the sentence break parser's state transitions. It's
 // anologous to [grTransitions], see comments there for details.
 //
-// Unicode version 15.0.0.
+// Unicode version 18.0.0.
 func sbTransitions(state, prop int) (newState int, sentenceBreak bool, rule int) {
 	switch uint64(state) | uint64(prop)<<32 {
 	// SB3.
@@ -130,31 +130,31 @@ func sbTransitions(state, prop int) (newState int, sentenceBreak bool, rule int)
 	case sbATerm | prSep<<32:
 		return sbParaSep, false, 90
 	case sbATerm | prCR<<32:
-		return sbParaSep, false, 90
+		return sbCR, false, 90
 	case sbATerm | prLF<<32:
 		return sbParaSep, false, 90
 	case sbSB7 | prSep<<32:
 		return sbParaSep, false, 90
 	case sbSB7 | prCR<<32:
-		return sbParaSep, false, 90
+		return sbCR, false, 90
 	case sbSB7 | prLF<<32:
 		return sbParaSep, false, 90
 	case sbSB8Close | prSep<<32:
 		return sbParaSep, false, 90
 	case sbSB8Close | prCR<<32:
-		return sbParaSep, false, 90
+		return sbCR, false, 90
 	case sbSB8Close | prLF<<32:
 		return sbParaSep, false, 90
 	case sbSTerm | prSep<<32:
 		return sbParaSep, false, 90
 	case sbSTerm | prCR<<32:
-		return sbParaSep, false, 90
+		return sbCR, false, 90
 	case sbSTerm | prLF<<32:
 		return sbParaSep, false, 90
 	case sbSB8aClose | prSep<<32:
 		return sbParaSep, false, 90
 	case sbSB8aClose | prCR<<32:
-		return sbParaSep, false, 90
+		return sbCR, false, 90
 	case sbSB8aClose | prLF<<32:
 		return sbParaSep, false, 90
 
@@ -166,7 +166,7 @@ func sbTransitions(state, prop int) (newState int, sentenceBreak bool, rule int)
 	case sbSB8Sp | prSep<<32:
 		return sbParaSep, false, 100
 	case sbSB8Sp | prCR<<32:
-		return sbParaSep, false, 100
+		return sbCR, false, 100
 	case sbSB8Sp | prLF<<32:
 		return sbParaSep, false, 100
 

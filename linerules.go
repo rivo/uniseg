@@ -22,7 +22,7 @@ const (
 	lbSY
 	lbOP
 	lbQU
-	lbQUSP
+	lbQUSP // lbQUPi followed by at least one SP (LB15a).
 	lbNS
 	lbCLCPSP
 	lbB2
@@ -49,9 +49,22 @@ const (
 	lbH3
 	lbOddRI
 	lbEvenRI
-	lbExtPicCn
-	lbZWJBit     = 64
-	lbCPeaFWHBit = 128
+	lbExtPicCn     // An unassigned Extended_Pictographic with class ID (LB30b).
+	lbExtPicCnAL   // An unassigned Extended_Pictographic with class AL (LB30b).
+	lbQUPi         // An initial punctuation QU in the context of LB15a.
+	lbQUPf         // A final punctuation QU preceded by an East Asian character (LB19a).
+	lbOPSP         // OP followed by at least one SP (LB14).
+	lbHH           // Unambiguous hyphen.
+	lbHYStart      // A word-initial HY (LB20a).
+	lbHHStart      // A word-initial HH (LB20a).
+	lbAK           // AK or AS (LB28a).
+	lbDottedCircle // U+25CC DOTTED CIRCLE, an AL which is also used in LB28a.
+	lbAP           // Aksara prebase (LB28a).
+	lbAKVI         // (AK | ◌ | AS) VI (LB28a).
+
+	// Bits which may be combined with the states above.
+	lbZWJBit       = 64  // The last character was a zero width joiner (LB8a).
+	lbEastAsianBit = 128 // The last base character's East_Asian_Width is F, W, or H.
 )
 
 // These constants define whether a given text may be broken into the next line.
@@ -67,7 +80,7 @@ const (
 // lbTransitions implements the line break parser's state transitions. It's
 // anologous to [grTransitions], see comments there for details.
 //
-// Unicode version 15.0.0.
+// Unicode version 18.0.0.
 func lbTransitions(state, prop int) (newState, lineBreak, rule int) {
 	switch uint64(state) | uint64(prop)<<32 {
 	// LB4.
@@ -118,33 +131,41 @@ func lbTransitions(state, prop int) (newState, lineBreak, rule int) {
 	case lbGL | prAny<<32:
 		return lbAny, LineDontBreak, 120
 
-	// LB13 (simple transitions).
+	// LB13.
 	case lbAny | prCL<<32:
-		return lbCL, LineCanBreak, 310
+		return lbCL, LineDontBreak, 130
 	case lbAny | prCP<<32:
-		return lbCP, LineCanBreak, 310
+		return lbCP, LineDontBreak, 130
 	case lbAny | prEX<<32:
 		return lbEX, LineDontBreak, 130
-	case lbAny | prIS<<32:
-		return lbIS, LineCanBreak, 310
 	case lbAny | prSY<<32:
-		return lbSY, LineCanBreak, 310
+		return lbSY, LineDontBreak, 130
 
 	// LB14.
 	case lbAny | prOP<<32:
 		return lbOP, LineCanBreak, 310
 	case lbOP | prSP<<32:
-		return lbOP, LineDontBreak, 70
+		return lbOPSP, LineDontBreak, 70
+	case lbOPSP | prSP<<32:
+		return lbOPSP, LineDontBreak, 70
 	case lbOP | prAny<<32:
 		return lbAny, LineDontBreak, 140
+	case lbOPSP | prAny<<32:
+		return lbAny, LineDontBreak, 140
 
-	// LB15.
-	case lbQU | prSP<<32:
+	// LB15a (the QU states are determined in transitionLineBreakState).
+	case lbQUPi | prSP<<32:
 		return lbQUSP, LineDontBreak, 70
-	case lbQU | prOP<<32:
-		return lbOP, LineDontBreak, 150
-	case lbQUSP | prOP<<32:
-		return lbOP, LineDontBreak, 150
+	case lbQUSP | prSP<<32:
+		return lbQUSP, LineDontBreak, 70
+	case lbQUPi | prAny<<32:
+		return lbAny, LineDontBreak, 151
+	case lbQUSP | prAny<<32:
+		return lbAny, LineDontBreak, 151
+
+	// LB15d.
+	case lbAny | prIS<<32:
+		return lbIS, LineDontBreak, 154
 
 	// LB16.
 	case lbCL | prSP<<32:
@@ -179,16 +200,15 @@ func lbTransitions(state, prop int) (newState, lineBreak, rule int) {
 	// LB18.
 	case lbSP | prAny<<32:
 		return lbAny, LineCanBreak, 180
-	case lbQUSP | prAny<<32:
-		return lbAny, LineCanBreak, 180
 	case lbCLCPSP | prAny<<32:
 		return lbAny, LineCanBreak, 180
 	case lbB2SP | prAny<<32:
 		return lbAny, LineCanBreak, 180
 
-	// LB19.
+	// LB19 and LB19a (the remaining cases are handled in
+	// transitionLineBreakState).
 	case lbAny | prQU<<32:
-		return lbQU, LineDontBreak, 190
+		return lbQU, LineCanBreak, 310
 	case lbQU | prAny<<32:
 		return lbAny, LineDontBreak, 190
 
@@ -198,11 +218,24 @@ func lbTransitions(state, prop int) (newState, lineBreak, rule int) {
 	case lbCB | prAny<<32:
 		return lbAny, LineCanBreak, 200
 
+	// LB20a (the HY and HH start states are determined in
+	// transitionLineBreakState).
+	case lbHYStart | prAL<<32:
+		return lbAL, LineDontBreak, 201
+	case lbHYStart | prHL<<32:
+		return lbHL, LineDontBreak, 201
+	case lbHHStart | prAL<<32:
+		return lbAL, LineDontBreak, 201
+	case lbHHStart | prHL<<32:
+		return lbHL, LineDontBreak, 201
+
 	// LB21.
 	case lbAny | prBA<<32:
 		return lbBA, LineDontBreak, 210
 	case lbAny | prHY<<32:
 		return lbHY, LineDontBreak, 210
+	case lbAny | prHH<<32:
+		return lbHH, LineDontBreak, 210
 	case lbAny | prNS<<32:
 		return lbNS, LineDontBreak, 210
 	case lbAny | prBB<<32:
@@ -215,10 +248,12 @@ func lbTransitions(state, prop int) (newState, lineBreak, rule int) {
 		return lbHL, LineCanBreak, 310
 	case lbHL | prHY<<32:
 		return lbLB21a, LineDontBreak, 210
-	case lbHL | prBA<<32:
+	case lbHL | prHH<<32:
 		return lbLB21a, LineDontBreak, 210
 	case lbLB21a | prAny<<32:
 		return lbAny, LineDontBreak, 211
+	case lbLB21a | prHL<<32:
+		return lbHL, LineCanBreak, 310
 
 	// LB21b.
 	case lbSY | prHL<<32:
@@ -296,6 +331,10 @@ func lbTransitions(state, prop int) (newState, lineBreak, rule int) {
 	case lbOP | prNU<<32:
 		return lbNU, LineDontBreak, 250
 	case lbHY | prNU<<32:
+		return lbNU, LineDontBreak, 250
+	case lbHYStart | prNU<<32:
+		return lbNU, LineDontBreak, 250
+	case lbIS | prNU<<32:
 		return lbNU, LineDontBreak, 250
 	case lbNU | prNU<<32:
 		return lbNUNU, LineDontBreak, 250
@@ -426,6 +465,14 @@ func lbTransitions(state, prop int) (newState, lineBreak, rule int) {
 	case lbHL | prHL<<32:
 		return lbHL, LineDontBreak, 280
 
+	// LB28a (the remaining cases are handled in transitionLineBreakState).
+	case lbAny | prAK<<32:
+		return lbAK, LineCanBreak, 310
+	case lbAny | prAS<<32:
+		return lbAK, LineCanBreak, 310
+	case lbAny | prAP<<32:
+		return lbAP, LineCanBreak, 310
+
 	// LB29.
 	case lbIS | prAL<<32:
 		return lbAL, LineDontBreak, 290
@@ -452,62 +499,48 @@ func transitionLineBreakState(state int, r rune, b []byte, str string) (newState
 	nextProperty, generalCategory := propertyLineBreak(r)
 
 	// Prepare.
-	var forceNoBreak, isCPeaFWH bool
-	if state >= 0 && state&lbCPeaFWHBit != 0 {
-		isCPeaFWH = true // LB30: CP but ea is not F, W, or H.
-		state = state &^ lbCPeaFWHBit
+	var forceNoBreak, isEastAsian bool
+	if state >= 0 {
+		forceNoBreak = state&lbZWJBit != 0 // LB8a.
+		isEastAsian = state&lbEastAsianBit != 0
+		state &^= lbZWJBit | lbEastAsianBit
 	}
-	if state >= 0 && state&lbZWJBit != 0 {
-		state = state &^ lbZWJBit // Extract zero-width joiner bit.
-		forceNoBreak = true       // LB8a.
-	}
-
-	defer func() {
-		// Transition into LB30.
-		if newState == lbCP || newState == lbNUCP {
-			ea := propertyEastAsianWidth(r)
-			if ea != prF && ea != prW && ea != prH {
-				newState |= lbCPeaFWHBit
-			}
-		}
-
-		// Override break.
-		if forceNoBreak {
-			lineBreak = LineDontBreak
-		}
-	}()
 
 	// LB1.
-	if nextProperty == prAI || nextProperty == prSG || nextProperty == prXX {
-		nextProperty = prAL
-	} else if nextProperty == prSA {
-		if generalCategory == gcMn || generalCategory == gcMc {
-			nextProperty = prCM
-		} else {
-			nextProperty = prAL
-		}
-	} else if nextProperty == prCJ {
-		nextProperty = prNS
-	}
+	nextProperty = resolveLineBreakClass(nextProperty, generalCategory)
 
 	// Combining marks.
+	var zwjBit int
 	if nextProperty == prZWJ || nextProperty == prCM {
-		var bit int
 		if nextProperty == prZWJ {
-			bit = lbZWJBit
+			zwjBit = lbZWJBit
 		}
-		mustBreakState := state < 0 || state == lbBK || state == lbCR || state == lbLF || state == lbNL
-		if !mustBreakState && state != lbSP && state != lbZW && state != lbQUSP && state != lbCLCPSP && state != lbB2SP {
+		if state >= 0 && !lbIsSpaceOrMandatoryBreak(state) {
 			// LB9.
-			return state | bit, LineDontBreak
-		} else {
-			// LB10.
-			if mustBreakState {
-				return lbAL | bit, LineMustBreak
+			if isEastAsian {
+				return state | zwjBit | lbEastAsianBit, LineDontBreak
 			}
-			return lbAL | bit, LineCanBreak
+			return state | zwjBit, LineDontBreak
 		}
+
+		// LB10. Treat it as if it were U+0041 LATIN CAPITAL LETTER A.
+		r, nextProperty, generalCategory = 'A', prAL, gcLu
 	}
+
+	// The following rules need to know whether the next character is East
+	// Asian (LB19a, LB30).
+	ea := propertyEastAsianWidth(r)
+	nextIsEastAsian := ea == prF || ea == prW || ea == prH
+
+	// Some states behave like other states except for specific rules.
+	prevState := state
+	switch state {
+	case lbDottedCircle, lbExtPicCnAL:
+		state = lbAL
+	case lbExtPicCn:
+		state = lbIDEM
+	}
+	afterDottedCircle := prevState == lbDottedCircle
 
 	// Find the applicable transition in the table.
 	var rule int
@@ -541,86 +574,230 @@ func transitionLineBreakState(state int, r rune, b []byte, str string) (newState
 	// LB12a.
 	if rule > 121 &&
 		nextProperty == prGL &&
-		(state != lbSP && state != lbBA && state != lbHY && state != lbLB21a && state != lbQUSP && state != lbCLCPSP && state != lbB2SP) {
-		return lbGL, LineDontBreak
+		!lbIsSpace(state) && state != lbHY && state != lbHYStart && state != lbHH && state != lbHHStart && state != lbLB21a {
+		newState, lineBreak, rule = lbGL, LineDontBreak, 121
 	}
 
-	// LB13.
-	if rule > 130 && state != lbNU && state != lbNUNU {
-		switch nextProperty {
-		case prCL:
-			return lbCL, LineDontBreak
-		case prCP:
-			return lbCP, LineDontBreak
-		case prIS:
-			return lbIS, LineDontBreak
-		case prSY:
-			return lbSY, LineDontBreak
+	// LB15b.
+	if rule > 152 && nextProperty == prQU && generalCategory == gcPf {
+		switch lbLookAhead(b, str) {
+		case prSP, prGL, prWJ, prCL, prQU, prCP, prEX, prIS, prSY, prBK, prCR, prLF, prNL, prZW, -1:
+			lineBreak, rule = LineDontBreak, 152
 		}
+	}
+
+	// LB15c.
+	if rule > 153 &&
+		nextProperty == prIS &&
+		(state == lbSP || state == lbCLCPSP || state == lbB2SP) &&
+		lbLookAhead(b, str) == prNU {
+		newState, lineBreak, rule = lbIS, LineCanBreak, 153
+	}
+
+	// LB19 and LB19a (before QU).
+	if rule > 191 && nextProperty == prQU {
+		if generalCategory != gcPi || !isEastAsian || !lbLookAheadIsEastAsian(b, str) {
+			lineBreak, rule = LineDontBreak, 190
+		}
+	}
+
+	// LB19a (after QU).
+	if rule > 191 && state == lbQUPf && !nextIsEastAsian {
+		lineBreak, rule = LineDontBreak, 191
 	}
 
 	// LB25 (look ahead).
-	if rule > 250 &&
-		(state == lbPR || state == lbPO) &&
-		nextProperty == prOP || nextProperty == prHY {
-		var r rune
-		if b != nil { // Byte slice version.
-			r, _ = utf8.DecodeRune(b)
-		} else { // String version.
-			r, _ = utf8.DecodeRuneInString(str)
+	if rule > 250 && (state == lbPR || state == lbPO) && nextProperty == prOP {
+		pr, _, rb, rs := lbLookAheadRest(b, str)
+		if pr == prIS {
+			pr, _, _, _ = lbLookAheadRest(rb, rs)
 		}
-		if r != utf8.RuneError {
-			pr, _ := propertyLineBreak(r)
-			if pr == prNU {
-				return lbNU, LineDontBreak
+		if pr == prNU {
+			newState, lineBreak, rule = lbOP, LineDontBreak, 250
+		}
+	}
+
+	// LB28a.
+	if rule > 285 {
+		nextIsAK := nextProperty == prAK || r == 0x25cc || nextProperty == prAS
+		afterAK := state == lbAK || afterDottedCircle
+		if state == lbAP && nextIsAK ||
+			afterAK && (nextProperty == prVF || nextProperty == prVI) ||
+			state == lbAKVI && (nextProperty == prAK || r == 0x25cc) {
+			lineBreak, rule = LineDontBreak, 285
+		} else if afterAK && nextIsAK {
+			if lbLookAhead(b, str) == prVF {
+				lineBreak, rule = LineDontBreak, 285
 			}
 		}
 	}
 
-	// LB30 (part one).
+	// LB30.
 	if rule > 300 {
-		if (state == lbAL || state == lbHL || state == lbNU || state == lbNUNU) && nextProperty == prOP {
-			ea := propertyEastAsianWidth(r)
-			if ea != prF && ea != prW && ea != prH {
-				return lbOP, LineDontBreak
-			}
-		} else if isCPeaFWH {
-			switch nextProperty {
-			case prAL:
-				return lbAL, LineDontBreak
-			case prHL:
-				return lbHL, LineDontBreak
-			case prNU:
-				return lbNU, LineDontBreak
-			}
+		if (state == lbAL || state == lbHL || state == lbNU || state == lbNUNU) && nextProperty == prOP && !nextIsEastAsian {
+			newState, lineBreak, rule = lbOP, LineDontBreak, 300
+		} else if (state == lbCP || state == lbNUCP) && !isEastAsian &&
+			(nextProperty == prAL || nextProperty == prHL || nextProperty == prNU) {
+			lineBreak, rule = LineDontBreak, 300
 		}
 	}
 
 	// LB30a.
-	if newState == lbAny && nextProperty == prRI {
-		if state != lbOddRI && state != lbEvenRI { // Includes state == -1.
-			// Transition into the first RI.
-			return lbOddRI, lineBreak
-		}
+	if nextProperty == prRI {
 		if state == lbOddRI {
 			// Don't break pairs of Regional Indicators.
-			return lbEvenRI, LineDontBreak
+			newState, lineBreak = lbEvenRI, LineDontBreak
+		} else {
+			newState = lbOddRI
 		}
-		return lbOddRI, lineBreak
 	}
 
 	// LB30b.
-	if rule > 302 {
-		if nextProperty == prEM {
-			if state == lbEB || state == lbExtPicCn {
-				return prAny, LineDontBreak
-			}
+	if rule > 302 && nextProperty == prEM &&
+		(state == lbEB || prevState == lbExtPicCn || prevState == lbExtPicCnAL) {
+		lineBreak, rule = LineDontBreak, 302
+	}
+
+	// Determine the states which depend on more context.
+	switch {
+	case nextProperty == prQU:
+		if generalCategory == gcPi && lbIsLB15aContext(state) {
+			newState = lbQUPi
+		} else if generalCategory == gcPf && isEastAsian {
+			newState = lbQUPf
 		}
-		graphemeProperty := propertyGraphemes(r)
-		if graphemeProperty == prExtendedPictographic && generalCategory == gcCn {
-			return lbExtPicCn, LineCanBreak
+	case newState == lbHY && lbIsLB20aContext(state):
+		newState = lbHYStart
+	case newState == lbHH && lbIsLB20aContext(state):
+		newState = lbHHStart
+	case nextProperty == prVI && (state == lbAK || afterDottedCircle):
+		newState = lbAKVI
+	case r == 0x25cc && newState == lbAL:
+		newState = lbDottedCircle
+	case (generalCategory == gcCn || generalCategory == gcNone) && propertyGraphemes(r) == prExtendedPictographic:
+		// Remember this for LB30b. (Code points without a general category
+		// are not listed in the line break table and are unassigned.)
+		switch newState {
+		case lbIDEM:
+			newState = lbExtPicCn
+		case lbAL:
+			newState = lbExtPicCnAL
 		}
 	}
 
+	// Add bits.
+	newState |= zwjBit
+	if nextIsEastAsian {
+		newState |= lbEastAsianBit
+	}
+
+	// LB8a.
+	if forceNoBreak {
+		lineBreak = LineDontBreak
+	}
+
 	return
+}
+
+// resolveLineBreakClass resolves the line breaking classes AI, CJ, SA, SG, and
+// XX according to LB1.
+func resolveLineBreakClass(property, generalCategory int) int {
+	switch property {
+	case prAI, prSG, prXX:
+		return prAL
+	case prSA:
+		if generalCategory == gcMn || generalCategory == gcMc {
+			return prCM
+		}
+		return prAL
+	case prCJ:
+		return prNS
+	}
+	return property
+}
+
+// lbIsSpace returns true if the given line break state (without bits) follows
+// a space character.
+func lbIsSpace(state int) bool {
+	switch state {
+	case lbSP, lbQUSP, lbCLCPSP, lbB2SP, lbOPSP:
+		return true
+	}
+	return false
+}
+
+// lbIsSpaceOrMandatoryBreak returns true if the given line break state (without
+// bits) follows one of the classes BK, CR, LF, NL, SP, or ZW, i.e. the states
+// to which LB9 does not apply.
+func lbIsSpaceOrMandatoryBreak(state int) bool {
+	switch state {
+	case lbBK, lbCR, lbLF, lbNL, lbZW:
+		return true
+	}
+	return lbIsSpace(state)
+}
+
+// lbIsLB15aContext returns true if the given line break state (without bits)
+// matches the left side of LB15a: (sot | BK | CR | LF | NL | OP | QU | GL | SP |
+// ZW).
+func lbIsLB15aContext(state int) bool {
+	switch state {
+	case lbOP, lbQU, lbQUPi, lbQUPf, lbGL:
+		return true
+	}
+	return state < 0 || lbIsSpaceOrMandatoryBreak(state)
+}
+
+// lbIsLB20aContext returns true if the given line break state (without bits)
+// matches the left side of LB20a: (sot | BK | CR | LF | NL | SP | ZW | CB |
+// GL).
+func lbIsLB20aContext(state int) bool {
+	switch state {
+	case lbCB, lbGL:
+		return true
+	}
+	return state < 0 || lbIsSpaceOrMandatoryBreak(state)
+}
+
+// lbLookAhead returns the resolved line breaking class (see LB1) of the first
+// character in the byte slice "b" (if not nil) or the string "str", skipping
+// over leading combining marks and zero width joiners which belong to the
+// preceding character (LB9). It returns -1 if there is no such character.
+func lbLookAhead(b []byte, str string) int {
+	property, _, _, _ := lbLookAheadRest(b, str)
+	return property
+}
+
+// lbLookAheadIsEastAsian is like [lbLookAhead] but returns whether the found
+// character's East_Asian_Width is F, W, or H.
+func lbLookAheadIsEastAsian(b []byte, str string) bool {
+	property, r, _, _ := lbLookAheadRest(b, str)
+	if property < 0 {
+		return false
+	}
+	ea := propertyEastAsianWidth(r)
+	return ea == prF || ea == prW || ea == prH
+}
+
+// lbLookAheadRest is like [lbLookAhead] but also returns the found character
+// and the remaining byte slice or string after it.
+func lbLookAheadRest(b []byte, str string) (property int, r rune, restB []byte, restStr string) {
+	for {
+		var length int
+		if b != nil { // Byte slice version.
+			r, length = utf8.DecodeRune(b)
+			b = b[length:]
+		} else { // String version.
+			r, length = utf8.DecodeRuneInString(str)
+			str = str[length:]
+		}
+		if length == 0 {
+			return -1, 0, b, str
+		}
+		pr, gc := propertyLineBreak(r)
+		property = resolveLineBreakClass(pr, gc)
+		if property != prCM && property != prZWJ {
+			return property, r, b, str
+		}
+	}
 }

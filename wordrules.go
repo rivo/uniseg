@@ -25,7 +25,7 @@ const (
 // wbTransitions implements the word break parser's state transitions. It's
 // anologous to [grTransitions], see comments there for details.
 //
-// Unicode version 15.0.0.
+// Unicode version 18.0.0.
 func wbTransitions(state, prop int) (newState int, wordBreak bool, rule int) {
 	switch uint64(state) | uint64(prop)<<32 {
 	// WB3b.
@@ -148,6 +148,23 @@ func transitionWordBreakState(state int, r rune, b []byte, str string) (newState
 	// Determine the property of the next character.
 	nextProperty := property(workBreakCodePoints, r)
 
+	// WB3c. Some code points (e.g. U+24C2) are Extended_Pictographic but have
+	// a different word break property, so we only override the break and keep
+	// evaluating the remaining rules for the new state.
+	if state >= 0 && state&wbZWJBit != 0 && nextProperty != prZWJ && nextProperty != prExtend && nextProperty != prFormat &&
+		(nextProperty == prExtendedPictographic || propertyGraphemes(r) == prExtendedPictographic) {
+		newState, _ = transitionWordBreakProperty(state&^wbZWJBit, nextProperty, b, str)
+		return newState, false
+	}
+
+	return transitionWordBreakProperty(state, nextProperty, b, str)
+}
+
+// transitionWordBreakProperty is like [transitionWordBreakState] but takes the
+// word break property of the next code point instead of the code point itself.
+// WB3c is not handled here.
+func transitionWordBreakProperty(state, nextProperty int, b []byte, str string) (newState int, wordBreak bool) {
+
 	// "Replacing Ignore Rules".
 	if nextProperty == prZWJ {
 		// WB4 (for zero-width joiners).
@@ -170,9 +187,6 @@ func transitionWordBreakState(state int, r rune, b []byte, str string) (newState
 			return wbAny, false
 		}
 		return state, false
-	} else if nextProperty == prExtendedPictographic && state >= 0 && state&wbZWJBit != 0 {
-		// WB3c.
-		return wbAny, false
 	}
 	if state >= 0 {
 		state = state &^ wbZWJBit
