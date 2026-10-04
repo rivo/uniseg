@@ -67,17 +67,19 @@ func TestGraphemesClass(t *testing.T) {
 	GraphemeLoop:
 		for index = 0; gr.Next(); index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q %04x failed: More grapheme clusters returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					len(testCase.expected))
 				break
 			}
 			cluster := gr.Runes()
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %04x failed: Grapheme cluster at index %d has %d codepoints %04x, %d expected %04x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -87,9 +89,10 @@ func TestGraphemesClass(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %04x failed: Grapheme cluster at index %d is %04x, expected %04x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -98,9 +101,10 @@ func TestGraphemesClass(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %04x failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}

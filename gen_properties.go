@@ -12,6 +12,9 @@
 //     - "emojis=<property>": include the specified emoji properties (e.g.
 //     "Extended_Pictographic").
 //     - "gencat": include general category properties.
+//     - "sections=<sections>": include only sections with the given strings
+//     (comma-separated) found in the section header (must be a comment).
+//     Sections end with a blank line.
 //
 //go:generate go run gen_properties.go auxiliary/GraphemeBreakProperty graphemeproperties.go graphemeCodePoints graphemes emojis=Extended_Pictographic
 //go:generate go run gen_properties.go auxiliary/WordBreakProperty wordproperties.go workBreakCodePoints words emojis=Extended_Pictographic
@@ -19,6 +22,7 @@
 //go:generate go run gen_properties.go LineBreak lineproperties.go lineBreakCodePoints lines gencat
 //go:generate go run gen_properties.go EastAsianWidth eastasianwidth.go eastAsianWidth eastasianwidth
 //go:generate go run gen_properties.go - emojipresentation.go emojiPresentation emojipresentation emojis=Emoji_Presentation
+//go:generate go run gen_properties.go DerivedCoreProperties indicconjunct.go indicConjunct indicconjunct sections=Indic_Conjunct_Break
 package main
 
 import (
@@ -32,6 +36,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -41,12 +46,12 @@ import (
 // We want to test against a specific version rather than the latest. When the
 // package is upgraded to a new version, change these to generate new tests.
 const (
-	propertyURL = `https://www.unicode.org/Public/15.0.0/ucd/%s.txt`
-	emojiURL    = `https://unicode.org/Public/15.0.0/ucd/emoji/emoji-data.txt`
+	propertyURL = `https://www.unicode.org/Public/18.0.0/ucd/%s.txt`
+	emojiURL    = `https://unicode.org/Public/18.0.0/ucd/emoji/emoji-data.txt`
 )
 
 // The regular expression for a line containing a code point range property.
-var propertyPattern = regexp.MustCompile(`^([0-9A-F]{4,6})(\.\.([0-9A-F]{4,6}))?\s*;\s*([A-Za-z0-9_]+)\s*#\s(.+)$`)
+var propertyPattern = regexp.MustCompile(`^([0-9A-F]{4,6})(\.\.([0-9A-F]{4,6}))?\s*;\s*([A-Za-z0-9_]+)(; ([A-Za-z0-9_]+))?\s*#\s(.+)$`)
 
 func main() {
 	if len(os.Args) < 5 {
@@ -71,12 +76,16 @@ func main() {
 	}
 
 	// Parse the text file and generate Go source code from it.
+	var sections []string
+	if s := flags["sections"]; s != "" {
+		sections = strings.Split(s, ",")
+	}
 	_, includeGeneralCategory := flags["gencat"]
 	var mainURL string
 	if os.Args[1] != "-" {
 		mainURL = fmt.Sprintf(propertyURL, os.Args[1])
 	}
-	src, err := parse(mainURL, flags["emojis"], includeGeneralCategory)
+	src, err := parse(mainURL, flags["emojis"], includeGeneralCategory, sections)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,8 +109,10 @@ func main() {
 // property (e.g. "Extended_Pictographic") will be included. In those cases, you
 // may pass an empty "propertyURL" to skip parsing the main properties file. If
 // "includeGeneralCategory" is true, the Unicode General Category property will
-// be extracted from the comments and included in the output.
-func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (string, error) {
+// be extracted from the comments and included in the output. If "sections" is
+// not empty, only the specified sections will be included (see flags for
+// details)
+func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, sections []string) (string, error) {
 	if propertyURL == "" && emojiProperty == "" {
 		return "", errors.New("no properties to parse")
 	}
@@ -122,12 +133,31 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 		// Parse it.
 		scanner := bufio.NewScanner(in1)
 		num := 0
+		var propertyFound bool
+		inSection := len(sections) == 0
 		for scanner.Scan() {
 			num++
 			line := strings.TrimSpace(scanner.Text())
 
-			// Skip comments and empty lines.
-			if strings.HasPrefix(line, "#") || line == "" {
+			if strings.HasPrefix(line, "#") {
+				// Comments.
+				if slices.ContainsFunc(sections, func(s string) bool { return strings.Contains(line, s) }) {
+					// We're starting a new (included) section.
+					inSection = true
+					propertyFound = false
+				}
+				continue // Comments do not get parsed.
+			} else if line == "" {
+				// Blank line.
+				if len(sections) > 0 && inSection && propertyFound {
+					// End of an (included) section.
+					inSection = false
+				}
+				continue // Blank lines do not get parsed.
+			}
+
+			// Skip sections that are not included.
+			if !inSection {
 				continue
 			}
 
@@ -137,6 +167,7 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 				return "", fmt.Errorf("%s line %d: %v", os.Args[4], num, err)
 			}
 			properties = append(properties, [4]string{from, to, property, comment})
+			propertyFound = true
 		}
 		if err := scanner.Err(); err != nil {
 			return "", err
@@ -199,7 +230,7 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 	if includeGeneralCategory {
 		columns = 4
 	}
-	if emojiURL != "" {
+	if emojiProperty != "" {
 		emojiComment = `
 // and
 // ` + emojiURL + `
@@ -250,7 +281,10 @@ func parseProperty(line string) (from, to, property, comment string, err error) 
 		to = from
 	}
 	property = fields[4]
-	comment = fields[5]
+	if second := fields[6]; second != "" {
+		property += second
+	}
+	comment = fields[7]
 	return
 }
 
