@@ -62,9 +62,8 @@ func grTransitions(state, prop int) (found bool, newState int, isBoundary bool, 
 		}
 	}()
 
-	// It turns out that using a big switch statement is much faster than using
-	// a map.
-
+	// Check all rules except for GB9c. It turns out that using a big switch
+	// statement is much faster than using a map.
 	switch uint64(state)&^uint64(grInCBLinkerExtend) | (uint64(prop)&^uint64(prInCBMask))<<32 {
 	// GB5
 	case grAny | prCR<<32:

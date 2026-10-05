@@ -516,7 +516,7 @@ func TestGraphemesFunctionString(t *testing.T) {
 
 // Benchmark the use of the Graphemes class.
 func BenchmarkGraphemesClass(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		g := NewGraphemes(benchmarkStr)
 		for g.Next() {
 			resultRunes = g.Runes()
@@ -526,7 +526,7 @@ func BenchmarkGraphemesClass(b *testing.B) {
 
 // Benchmark the use of the Graphemes function for byte slices.
 func BenchmarkGraphemesFunctionBytes(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var c []byte
 		state := -1
 		str := benchmarkBytes
@@ -539,7 +539,7 @@ func BenchmarkGraphemesFunctionBytes(b *testing.B) {
 
 // Benchmark the use of the Graphemes function for strings.
 func BenchmarkGraphemesFunctionString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var c string
 		state := -1
 		str := benchmarkStr

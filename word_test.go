@@ -146,7 +146,7 @@ func TestWordCasesString(t *testing.T) {
 
 // Benchmark the use of the word break function for byte slices.
 func BenchmarkWordFunctionBytes(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var c []byte
 		state := -1
 		str := benchmarkBytes
@@ -159,7 +159,7 @@ func BenchmarkWordFunctionBytes(b *testing.B) {
 
 // Benchmark the use of the word break function for strings.
 func BenchmarkWordFunctionString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var c string
 		state := -1
 		str := benchmarkStr
