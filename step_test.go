@@ -462,7 +462,7 @@ func TestStepStringSentence(t *testing.T) {
 
 // Benchmark the use of the [Step] function.
 func BenchmarkStepBytes(b *testing.B) {
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		var c []byte
 		state := -1
 		str := benchmarkBytes
@@ -475,7 +475,7 @@ func BenchmarkStepBytes(b *testing.B) {
 
 // Benchmark the use of the StepString() function.
 func BenchmarkStepString(b *testing.B) {
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		var c string
 		state := -1
 		str := benchmarkStr
