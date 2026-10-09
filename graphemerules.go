@@ -13,6 +13,11 @@ const (
 	grExtendedPictographicZWJ
 	grRIOdd
 	grRIEven
+
+	// grLinkerBit is set when the last code point was InCB=Linker, possibly
+	// followed by InCB=Extend code points (GB9c). It is combined with the
+	// states above.
+	grLinkerBit = 16
 )
 
 // The grapheme cluster parser's breaking instructions.
@@ -137,11 +142,29 @@ func transitionGraphemeState(state int, r rune) (newState, prop int, boundary bo
 	// Determine the property of the next character.
 	prop = propertyGraphemes(r)
 
+	// GB9c. All preceding rules which may result in a boundary (GB4, GB5) don't
+	// apply here because neither linkers nor consonants are controls.
+	var (
+		linkerBit int
+		gb9c      bool
+	)
+	if state >= 0 && state&grLinkerBit != 0 {
+		state &^= grLinkerBit
+		switch propertyInCB(r) {
+		case prInCBConsonant:
+			gb9c = true
+		case prInCBExtend, prInCBLinker:
+			linkerBit = grLinkerBit
+		}
+	} else if r >= incbMinLinker && isInCBLinker(r) {
+		linkerBit = grLinkerBit
+	}
+
 	// Find the applicable transition.
 	nextState, nextProp, _ := grTransitions(state, prop)
 	if nextState >= 0 {
 		// We have a specific transition. We'll use it.
-		return nextState, prop, nextProp == grBoundary
+		return nextState | linkerBit, prop, nextProp == grBoundary && !gb9c
 	}
 
 	// No specific transition found. Try the less specific ones.
@@ -149,17 +172,18 @@ func transitionGraphemeState(state int, r rune) (newState, prop int, boundary bo
 	anyStateState, anyStateProp, anyStateRule := grTransitions(grAny, prop)
 	if anyPropState >= 0 && anyStateState >= 0 {
 		// Both apply. We'll use a mix (see comments for grTransitions).
-		newState = anyStateState
+		newState = anyStateState | linkerBit
 		boundary = anyStateProp == grBoundary
 		if anyPropRule < anyStateRule {
 			boundary = anyPropProp == grBoundary
 		}
+		boundary = boundary && !gb9c
 		return
 	}
 
 	if anyPropState >= 0 {
 		// We only have a specific state.
-		return anyPropState, prop, anyPropProp == grBoundary
+		return anyPropState | linkerBit, prop, anyPropProp == grBoundary && !gb9c
 		// This branch will probably never be reached because okAnyState will
 		// always be true given the current transition map. But we keep it here
 		// for future modifications to the transition map where this may not be
@@ -168,9 +192,9 @@ func transitionGraphemeState(state int, r rune) (newState, prop int, boundary bo
 
 	if anyStateState >= 0 {
 		// We only have a specific property.
-		return anyStateState, prop, anyStateProp == grBoundary
+		return anyStateState | linkerBit, prop, anyStateProp == grBoundary && !gb9c
 	}
 
 	// No known transition. GB999: Any ÷ Any.
-	return grAny, prop, true
+	return grAny | linkerBit, prop, !gb9c
 }

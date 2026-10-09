@@ -89,6 +89,15 @@ const (
 	prEmojiPresentation
 )
 
+// Indic_Conjunct_Break property values. These are stored in a separate table
+// so their values may overlap with the properties above.
+const (
+	prInCBNone = iota // prInCBNone must be 0.
+	prInCBConsonant
+	prInCBExtend
+	prInCBLinker
+)
+
 // Unicode General Categories. Only the ones needed in the context of this
 // package are included.
 const (
@@ -193,6 +202,36 @@ func propertyGraphemes(r rune) int {
 		return prControl
 	}
 	return property(graphemeCodePoints, r)
+}
+
+// propertyInCB returns the Indic_Conjunct_Break property value of the given
+// code point while fast tracking code points below U+0300, none of which have
+// such a property.
+func propertyInCB(r rune) int {
+	if r < 0x300 {
+		return prInCBNone
+	}
+	return property(incbCodePoints, r)
+}
+
+// incbLinkers contains only the InCB=Linker entries of [incbCodePoints].
+var incbLinkers = func() (linkers [][3]int) {
+	for _, entry := range incbCodePoints {
+		if entry[2] == prInCBLinker {
+			linkers = append(linkers, entry)
+		}
+	}
+	return
+}()
+
+// incbMinLinker is the smallest code point with InCB=Linker.
+var incbMinLinker = rune(incbLinkers[0][0])
+
+// isInCBLinker returns true if the given code point has the
+// Indic_Conjunct_Break property value Linker. It is faster than
+// [propertyInCB].
+func isInCBLinker(r rune) bool {
+	return property(incbLinkers, r) == prInCBLinker
 }
 
 // propertyEastAsianWidth returns the Unicode East Asian Width property value of

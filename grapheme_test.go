@@ -41,6 +41,11 @@ var testCases = []testCase{
 	{original: "\t🏳️‍🌈", expected: [][]rune{{0x9}, {0x1f3f3, 0xfe0f, 0x200d, 0x1f308}}},
 	{original: "\t🏳️‍🌈\t", expected: [][]rune{{0x9}, {0x1f3f3, 0xfe0f, 0x200d, 0x1f308}, {0x9}}},
 	{original: "\r\n\uFE0E", expected: [][]rune{{13, 10}, {0xfe0e}}},
+	{original: "\u0915\u094d\u200d\u0937", expected: [][]rune{{0x0915, 0x094d, 0x200d, 0x0937}}},
+	{original: "\u0915\u094d\u0937", expected: [][]rune{{0x0915, 0x094d, 0x0937}}},
+	{original: "\u0915\u094d\u200d\u0937\u0915\u094d\u0937", expected: [][]rune{{0x0915, 0x094d, 0x200d, 0x0937}, {0x0915, 0x094d, 0x0937}}},
+	{original: "\u0915\u0937", expected: [][]rune{{0x0915}, {0x0937}}},
+	{original: "\u0995\u09cd\u09b7", expected: [][]rune{{0x0995, 0x09cd, 0x09b7}}},
 }
 
 // decomposed returns a grapheme cluster decomposition.
@@ -543,5 +548,119 @@ func BenchmarkGraphemesFunctionString(b *testing.B) {
 			c, str, _, state = FirstGraphemeClusterInString(str, state)
 			resultRunes = []rune(c)
 		}
+	}
+}
+
+// TestIssue60 tests the grapheme cluster segmentation of Indic conjunct sequences
+// (Unicode rule GB9c) as reported in issue #60.
+func TestIssue60(t *testing.T) {
+	tests := []struct {
+		name         string
+		input        string
+		wantCount    int
+		wantClusters []string
+	}{
+		{
+			name:         "Devanagari conjunct with ZWJ (issue #60 reproduction)",
+			input:        "\u0915\u094d\u200d\u0937",
+			wantCount:    1,
+			wantClusters: []string{"\u0915\u094d\u200d\u0937"},
+		},
+		{
+			name:         "Devanagari conjunct without ZWJ",
+			input:        "\u0915\u094d\u0937",
+			wantCount:    1,
+			wantClusters: []string{"\u0915\u094d\u0937"},
+		},
+		{
+			name:         "Two Devanagari conjuncts in sequence",
+			input:        "\u0915\u094d\u200d\u0937\u0915\u094d\u0937",
+			wantCount:    2,
+			wantClusters: []string{"\u0915\u094d\u200d\u0937", "\u0915\u094d\u0937"},
+		},
+		{
+			name:         "Devanagari consonants without virama linker",
+			input:        "\u0915\u0937",
+			wantCount:    2,
+			wantClusters: []string{"\u0915", "\u0937"},
+		},
+		{
+			name:         "Bengali conjunct",
+			input:        "\u0995\u09cd\u09b7",
+			wantCount:    1,
+			wantClusters: []string{"\u0995\u09cd\u09b7"},
+		},
+		{
+			name:         "Devanagari conjunct with trailing text",
+			input:        "\u0915\u094d\u200d\u0937 text",
+			wantCount:    6,
+			wantClusters: []string{"\u0915\u094d\u200d\u0937", " ", "t", "e", "x", "t"},
+		},
+		{
+			name:         "Devanagari triple consonant conjunct",
+			input:        "\u0938\u094d\u0924\u094d\u0930",
+			wantCount:    1,
+			wantClusters: []string{"\u0938\u094d\u0924\u094d\u0930"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCount := GraphemeClusterCount(tt.input)
+			if gotCount != tt.wantCount {
+				t.Errorf("GraphemeClusterCount(%q) = %d, want %d", tt.input, gotCount, tt.wantCount)
+			}
+
+			// Verify via Graphemes iterator
+			var clusters []string
+			g := NewGraphemes(tt.input)
+			for g.Next() {
+				clusters = append(clusters, g.Str())
+			}
+			if len(clusters) != len(tt.wantClusters) {
+				t.Fatalf("Graphemes iterator returned %d clusters, want %d: %q", len(clusters), len(tt.wantClusters), clusters)
+			}
+			for i, cluster := range clusters {
+				if cluster != tt.wantClusters[i] {
+					t.Errorf("Cluster[%d] = %q, want %q", i, cluster, tt.wantClusters[i])
+				}
+			}
+
+			// Verify via FirstGraphemeClusterInString
+			var firstClusters []string
+			str := tt.input
+			state := -1
+			for len(str) > 0 {
+				var cluster string
+				cluster, str, _, state = FirstGraphemeClusterInString(str, state)
+				firstClusters = append(firstClusters, cluster)
+			}
+			if len(firstClusters) != len(tt.wantClusters) {
+				t.Fatalf("FirstGraphemeClusterInString returned %d clusters, want %d: %q", len(firstClusters), len(tt.wantClusters), firstClusters)
+			}
+			for i, cluster := range firstClusters {
+				if cluster != tt.wantClusters[i] {
+					t.Errorf("FirstGraphemeClusterInString cluster[%d] = %q, want %q", i, cluster, tt.wantClusters[i])
+				}
+			}
+
+			// Verify via StepString
+			var stepClusters []string
+			str = tt.input
+			state = -1
+			for len(str) > 0 {
+				var cluster string
+				cluster, str, _, state = StepString(str, state)
+				stepClusters = append(stepClusters, cluster)
+			}
+			if len(stepClusters) != len(tt.wantClusters) {
+				t.Fatalf("StepString returned %d clusters, want %d: %q", len(stepClusters), len(tt.wantClusters), stepClusters)
+			}
+			for i, cluster := range stepClusters {
+				if cluster != tt.wantClusters[i] {
+					t.Errorf("StepString cluster[%d] = %q, want %q", i, cluster, tt.wantClusters[i])
+				}
+			}
+		})
 	}
 }

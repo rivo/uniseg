@@ -12,11 +12,14 @@
 //     - "emojis=<property>": include the specified emoji properties (e.g.
 //     "Extended_Pictographic").
 //     - "gencat": include general category properties.
+//     - "incb": only include the Indic_Conjunct_Break properties (the data
+//     file must be "DerivedCoreProperties").
 //
 //go:generate go run gen_properties.go auxiliary/GraphemeBreakProperty graphemeproperties.go graphemeCodePoints graphemes emojis=Extended_Pictographic
 //go:generate go run gen_properties.go auxiliary/WordBreakProperty wordproperties.go workBreakCodePoints words emojis=Extended_Pictographic
 //go:generate go run gen_properties.go auxiliary/SentenceBreakProperty sentenceproperties.go sentenceBreakCodePoints sentences
 //go:generate go run gen_properties.go LineBreak lineproperties.go lineBreakCodePoints lines gencat
+//go:generate go run gen_properties.go DerivedCoreProperties incbproperties.go incbCodePoints incb incb
 //go:generate go run gen_properties.go EastAsianWidth eastasianwidth.go eastAsianWidth eastasianwidth
 //go:generate go run gen_properties.go - emojipresentation.go emojiPresentation emojipresentation emojis=Emoji_Presentation
 package main
@@ -43,10 +46,18 @@ import (
 const (
 	propertyURL = `https://www.unicode.org/Public/15.0.0/ucd/%s.txt`
 	emojiURL    = `https://unicode.org/Public/15.0.0/ucd/emoji/emoji-data.txt`
+	incbURL     = `https://www.unicode.org/Public/18.0.0/ucd/%s.txt`
 )
 
 // The regular expression for a line containing a code point range property.
 var propertyPattern = regexp.MustCompile(`^([0-9A-F]{4,6})(\.\.([0-9A-F]{4,6}))?\s*;\s*([A-Za-z0-9_]+)\s*#\s(.+)$`)
+
+// The regular expression for a line containing an Indic_Conjunct_Break property
+// in DerivedCoreProperties.txt.
+var incbPattern = regexp.MustCompile(`^([0-9A-F]{4,6})(\.\.([0-9A-F]{4,6}))?\s*;\s*InCB\s*;\s*([A-Za-z]+)\s*#\s(.+)$`)
+
+// incb is true if only the Indic_Conjunct_Break properties should be extracted.
+var incb bool
 
 func main() {
 	if len(os.Args) < 5 {
@@ -72,8 +83,11 @@ func main() {
 
 	// Parse the text file and generate Go source code from it.
 	_, includeGeneralCategory := flags["gencat"]
+	_, incb = flags["incb"]
 	var mainURL string
-	if os.Args[1] != "-" {
+	if incb {
+		mainURL = fmt.Sprintf(incbURL, os.Args[1])
+	} else if os.Args[1] != "-" {
 		mainURL = fmt.Sprintf(propertyURL, os.Args[1])
 	}
 	src, err := parse(mainURL, flags["emojis"], includeGeneralCategory)
@@ -132,7 +146,18 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool) (stri
 			}
 
 			// Everything else must be a code point range, a property and a comment.
-			from, to, property, comment, err := parseProperty(line)
+			var (
+				from, to, property, comment string
+				err                         error
+			)
+			if incb {
+				if !strings.Contains(line, "; InCB;") {
+					continue
+				}
+				from, to, property, comment, err = parseIncbProperty(line)
+			} else {
+				from, to, property, comment, err = parseProperty(line)
+			}
 			if err != nil {
 				return "", fmt.Errorf("%s line %d: %v", os.Args[4], num, err)
 			}
@@ -250,6 +275,25 @@ func parseProperty(line string) (from, to, property, comment string, err error) 
 		to = from
 	}
 	property = fields[4]
+	comment = fields[5]
+	return
+}
+
+// parseIncbProperty parses a line of DerivedCoreProperties.txt containing an
+// Indic_Conjunct_Break property for a code point range and returns it along
+// with its comment.
+func parseIncbProperty(line string) (from, to, property, comment string, err error) {
+	fields := incbPattern.FindStringSubmatch(line)
+	if fields == nil {
+		err = errors.New("no InCB property found")
+		return
+	}
+	from = fields[1]
+	to = fields[3]
+	if to == "" {
+		to = from
+	}
+	property = "InCB" + fields[4]
 	comment = fields[5]
 	return
 }
