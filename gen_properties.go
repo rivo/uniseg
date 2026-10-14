@@ -106,8 +106,9 @@ func main() {
 // parse parses the Unicode Properties text files located at the given URLs and
 // returns their equivalent Go source code to be used in the uniseg package. If
 // "emojiProperty" is not an empty string, emoji code points for that emoji
-// property (e.g. "Extended_Pictographic") will be included. In those cases, you
-// may pass an empty "propertyURL" to skip parsing the main properties file. If
+// property (e.g. "Extended_Pictographic") will be included, adding to existing
+// properties where they overlap. In those cases, you may pass an empty
+// "propertyURL" to skip parsing the main properties file. If
 // "includeGeneralCategory" is true, the Unicode General Category property will
 // be extracted from the comments and included in the output. If "sections" is
 // not empty, only the specified sections will be included (see flags for
@@ -184,6 +185,13 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, secti
 		in2 := res.Body
 		defer in2.Close()
 
+		// Sort existing properties first to aid in determining overlaps.
+		sort.Slice(properties, func(i, j int) bool {
+			left, _ := strconv.ParseUint(properties[i][0], 16, 64)
+			right, _ := strconv.ParseUint(properties[j][0], 16, 64)
+			return left < right
+		})
+
 		// Parse it.
 		scanner := bufio.NewScanner(in2)
 		num := 0
@@ -198,11 +206,60 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, secti
 			}
 
 			// Everything else must be a code point range, a property and a comment.
-			from, to, property, comment, err := parseProperty(line)
+			fromStr, toStr, property, comment, err := parseProperty(line)
 			if err != nil {
 				return "", fmt.Errorf("emojis line %d: %v", num, err)
 			}
-			properties = append(properties, [4]string{from, to, property, comment})
+
+			// Determine overlaps with existing properties.
+			from, _ := strconv.ParseUint(fromStr, 16, 64)
+			to, _ := strconv.ParseUint(toStr, 16, 64)
+			var (
+				overlapping bool
+				offset      int
+			)
+			for index := range len(properties) {
+				prop := properties[index+offset]
+				existingFrom, _ := strconv.ParseUint(prop[0], 16, 64)
+				existingTo, _ := strconv.ParseUint(prop[1], 16, 64)
+				if to < existingFrom {
+					break
+				}
+				if from > existingTo {
+					continue
+				}
+				overlapping = true
+				insert := make([][4]string, 0, 3)
+				if from < existingFrom {
+					// The beginning of the new range extending before the
+					// existing range.
+					insert = append(insert, [4]string{fmt.Sprintf("%04X", from), fmt.Sprintf("%04X", existingFrom-1), property, comment})
+				}
+				if from > existingFrom {
+					// The beginning of the existing range extending before the
+					// new range.
+					insert = append(insert, [4]string{fmt.Sprintf("%04X", existingFrom), fmt.Sprintf("%04X", from-1), prop[2], prop[3]})
+				}
+				// Both ranges.
+				insert = append(insert, [4]string{fmt.Sprintf("%04X", max(from, existingFrom)), fmt.Sprintf("%04X", min(to, existingTo)), prop[2] + property, prop[3] + " + " + comment})
+				if to < existingTo {
+					// The end of the existing range extending beyond the new
+					// range.
+					insert = append(insert, [4]string{fmt.Sprintf("%04X", to+1), fmt.Sprintf("%04X", existingTo), prop[2], prop[3]})
+				}
+				if to > existingTo {
+					// The end of the new range extending beyond the existing
+					// range.
+					insert = append(insert, [4]string{fmt.Sprintf("%04X", existingTo+1), fmt.Sprintf("%04X", to), property, comment})
+				}
+				properties = append(properties[:index], append(insert, properties[index+1:]...)...)
+				offset += len(insert) - 1
+			}
+
+			if !overlapping {
+				// No overlaps. Just add the entire thing.
+				properties = append(properties, [4]string{fromStr, toStr, property, comment})
+			}
 		}
 		if err := scanner.Err(); err != nil {
 			return "", err

@@ -478,15 +478,16 @@ func transitionLineBreakState(state int, r rune, b []byte, str string) (newState
 	}()
 
 	// LB1.
-	if nextProperty == prAI || nextProperty == prSG || nextProperty == prXX {
+	switch nextProperty {
+	case prAI, prSG, prXX:
 		nextProperty = prAL
-	} else if nextProperty == prSA {
+	case prSA:
 		if generalCategory == gcMn || generalCategory == gcMc {
 			nextProperty = prCM
 		} else {
 			nextProperty = prAL
 		}
-	} else if nextProperty == prCJ {
+	case prCJ:
 		nextProperty = prNS
 	}
 

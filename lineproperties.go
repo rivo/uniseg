@@ -4,7 +4,7 @@ package uniseg
 
 // lineBreakCodePoints are taken from
 // https://www.unicode.org/Public/18.0.0/ucd/LineBreak.txt
-// on October 3, 2026. See https://www.unicode.org/license.html for the Unicode
+// on October 9, 2026. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var lineBreakCodePoints = [][4]int{
 	{0x0000, 0x0008, prCM, gcCc},     //     [9] <control-0000>..<control-0008>

@@ -115,11 +115,12 @@ func TestGraphemesClass(t *testing.T) {
 // class.
 func TestGraphemesClassWord(t *testing.T) {
 	for testNum, testCase := range wordBreakTestCases {
-		if testNum == 1700 {
-			// This test case reveals an inconsistency in the Unicode rule set,
-			// namely the handling of ZWJ within two RI graphemes. (Grapheme
-			// rules will restart the RI count, word rules will ignore the ZWJ.)
-			// An error has been reported.
+		if testNum == 1821 {
+			// We skip this test case because the grapheme cluster boundary does
+			// not line up with the word boundary. The spec specifically says:
+			// "Word boundaries, line boundaries, and sentence boundaries should
+			// not occur within a grapheme cluster" so I would say this is a
+			// bug.
 			continue
 		}
 		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,
@@ -139,18 +140,20 @@ func TestGraphemesClassWord(t *testing.T) {
 	GraphemeLoop:
 		for gr.Next() {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More words returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More words returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					len(testCase.expected))
 				break
 			}
 			cluster = append(cluster, gr.Runes()...)
 			if gr.IsWordBoundary() {
 				if len(cluster) != len(testCase.expected[index]) {
-					t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Word at index %d has %d codepoints %x, %d expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						len(cluster),
 						cluster,
@@ -160,9 +163,10 @@ func TestGraphemesClassWord(t *testing.T) {
 				}
 				for i, r := range cluster {
 					if r != testCase.expected[index][i] {
-						t.Errorf(`Test case %d %q failed: Word at index %d is %x, expected %x`,
+						t.Errorf(`Test case %d %q %x failed: Word at index %d is %x, expected %x`,
 							testNum,
 							testCase.original,
+							[]rune(testCase.original),
 							index,
 							cluster,
 							testCase.expected[index])
@@ -174,9 +178,10 @@ func TestGraphemesClassWord(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer words returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer words returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}
@@ -394,18 +399,20 @@ func TestGraphemesFunctionBytes(t *testing.T) {
 			c, b, _, state = FirstGraphemeCluster(b, state)
 
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More grapheme clusters returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					len(testCase.expected))
 				break
 			}
 
 			cluster := []rune(string(c))
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -415,9 +422,10 @@ func TestGraphemesFunctionBytes(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Grapheme cluster at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -471,18 +479,20 @@ func TestGraphemesFunctionString(t *testing.T) {
 			c, str, _, state = FirstGraphemeClusterInString(str, state)
 
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More grapheme clusters returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More grapheme clusters returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					len(testCase.expected))
 				break
 			}
 
 			cluster := []rune(c)
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Grapheme cluster at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -492,9 +502,10 @@ func TestGraphemesFunctionString(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Grapheme cluster at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Grapheme cluster at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -505,9 +516,10 @@ func TestGraphemesFunctionString(t *testing.T) {
 			index++
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer grapheme clusters returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}

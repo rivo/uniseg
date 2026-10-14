@@ -85,11 +85,12 @@ func TestStepBytesGrapheme(t *testing.T) {
 // the [Step] function.
 func TestStepBytesWord(t *testing.T) {
 	for testNum, testCase := range wordBreakTestCases {
-		if testNum == 1700 {
-			// This test case reveals an inconsistency in the Unicode rule set,
-			// namely the handling of ZWJ within two RI graphemes. (Grapheme
-			// rules will restart the RI count, word rules will ignore the ZWJ.)
-			// An error has been reported.
+		if testNum == 1821 {
+			// We skip this test case because the grapheme cluster boundary does
+			// not line up with the word boundary. The spec specifically says:
+			// "Word boundaries, line boundaries, and sentence boundaries should
+			// not occur within a grapheme cluster" so I would say this is a
+			// bug.
 			continue
 		}
 		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,
@@ -315,11 +316,12 @@ func TestStepStringGrapheme(t *testing.T) {
 // the StepString() function.
 func TestStepStringWord(t *testing.T) {
 	for testNum, testCase := range wordBreakTestCases {
-		if testNum == 1700 {
-			// This test case reveals an inconsistency in the Unicode rule set,
-			// namely the handling of ZWJ within two RI graphemes. (Grapheme
-			// rules will restart the RI count, word rules will ignore the ZWJ.)
-			// An error has been reported.
+		if testNum == 1821 {
+			// We skip this test case because the grapheme cluster boundary does
+			// not line up with the word boundary. The spec specifically says:
+			// "Word boundaries, line boundaries, and sentence boundaries should
+			// not occur within a grapheme cluster" so I would say this is a
+			// bug.
 			continue
 		}
 		/*t.Logf(`Test case %d %q: Expecting %x, getting %x, code points %x"`,

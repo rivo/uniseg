@@ -29,6 +29,7 @@ const (
 	prMidNum
 	prExtendNumLet
 	prALetter
+	prALetterExtendedPictographic
 	prFormat
 	prHebrewLetter
 	prKatakana

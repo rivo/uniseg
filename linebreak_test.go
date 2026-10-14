@@ -4,7 +4,7 @@ package uniseg
 
 // lineBreakTestCases are Grapheme testcases taken from
 // https://www.unicode.org/Public/18.0.0/ucd/auxiliary/LineBreakTest.txt
-// on October 3, 2026. See
+// on October 9, 2026. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
 var lineBreakTestCases = []testCase{
 	{original: "\u2757\u2757", expected: [][]rune{{0x2757, 0x2757}}},                                                                                                                               // × [2.0] HEAVY EXCLAMATION MARK SYMBOL (AI_EastAsian) × [28.0] HEAVY EXCLAMATION MARK SYMBOL (AI_EastAsian) ÷ [3.0]

@@ -7,7 +7,7 @@ package uniseg
 // and
 // https://unicode.org/Public/18.0.0/ucd/emoji/emoji-data.txt
 // ("Extended_Pictographic" only)
-// on October 3, 2026. See https://www.unicode.org/license.html for the Unicode
+// on October 9, 2026. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var emojiPresentation = [][3]int{
 	{0x231A, 0x231B, prEmojiPresentation},   // E0.6   [2] (⌚..⌛)    watch..hourglass done

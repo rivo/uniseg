@@ -4,7 +4,7 @@ package uniseg
 
 // sentenceBreakCodePoints are taken from
 // https://www.unicode.org/Public/18.0.0/ucd/auxiliary/SentenceBreakProperty.txt
-// on October 3, 2026. See https://www.unicode.org/license.html for the Unicode
+// on October 9, 2026. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var sentenceBreakCodePoints = [][3]int{
 	{0x0009, 0x0009, prSp},        // Cc       <control-0009>

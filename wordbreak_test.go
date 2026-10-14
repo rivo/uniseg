@@ -4,7 +4,7 @@ package uniseg
 
 // wordBreakTestCases are Grapheme testcases taken from
 // https://www.unicode.org/Public/18.0.0/ucd/auxiliary/WordBreakTest.txt
-// on October 3, 2026. See
+// on October 9, 2026. See
 // https://www.unicode.org/license.html for the Unicode license agreement.
 var wordBreakTestCases = []testCase{
 	{original: "\u000D\u000D", expected: [][]rune{{0x000D}, {0x000D}}},                                                                           // ÷ [1.0] <CARRIAGE RETURN (CR)> (CR) ÷ [3.1] <CARRIAGE RETURN (CR)> (CR) ÷ [2.0]

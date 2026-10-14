@@ -23,9 +23,10 @@ func TestSentenceCasesBytes(t *testing.T) {
 	WordLoop:
 		for index = 0; len(b) > 0; index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More sentences %d returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More sentences %d returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(testCase.expected))
 				break
@@ -33,9 +34,10 @@ func TestSentenceCasesBytes(t *testing.T) {
 			sentence, b, state = FirstSentence(b, state)
 			cluster := []rune(string(sentence))
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -45,9 +47,10 @@ func TestSentenceCasesBytes(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Sentence at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Sentence at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -56,9 +59,10 @@ func TestSentenceCasesBytes(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer sentences returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer sentences returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}
@@ -94,9 +98,10 @@ func TestSentenceCasesString(t *testing.T) {
 	WordLoop:
 		for index = 0; len(str) > 0; index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More sentences %d returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More sentences %d returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(testCase.expected))
 				break
@@ -104,9 +109,10 @@ func TestSentenceCasesString(t *testing.T) {
 			sentence, str, state = FirstSentenceInString(str, state)
 			cluster := []rune(string(sentence))
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Sentence at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -116,9 +122,10 @@ func TestSentenceCasesString(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Sentence at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Sentence at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -127,19 +134,20 @@ func TestSentenceCasesString(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer sentences returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer sentences returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}
 	}
 	sentence, rest, newState := FirstSentenceInString("", -1)
 	if len(sentence) > 0 {
-		t.Errorf(`Expected sentence to be empty string, got %q`, sentence)
+		t.Errorf(`Expected sentence to be empty string, got %q %x`, sentence, []rune(sentence))
 	}
 	if len(rest) > 0 {
-		t.Errorf(`Expected rest to be empty string, got %q`, rest)
+		t.Errorf(`Expected rest to be empty string, got %q %x`, rest, []rune(rest))
 	}
 	if newState != 0 {
 		t.Errorf(`Expected newState to be 0, got %d`, newState)
