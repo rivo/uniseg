@@ -21,9 +21,10 @@ func TestLineCasesBytes(t *testing.T) {
 	WordLoop:
 		for index = 0; len(b) > 0; index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More segments %d returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More segments %d returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(testCase.expected))
 				break
@@ -31,9 +32,10 @@ func TestLineCasesBytes(t *testing.T) {
 			segment, b, _, state = FirstLineSegment(b, state)
 			cluster := []rune(string(segment))
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Segment at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Segment at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -43,9 +45,10 @@ func TestLineCasesBytes(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Segment at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Segment at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -54,9 +57,10 @@ func TestLineCasesBytes(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer segments returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer segments returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}
@@ -95,9 +99,10 @@ func TestLineCasesString(t *testing.T) {
 	WordLoop:
 		for index = 0; len(str) > 0; index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More segments %d returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More segments %d returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(testCase.expected))
 				break
@@ -105,9 +110,10 @@ func TestLineCasesString(t *testing.T) {
 			segment, str, _, state = FirstLineSegmentInString(str, state)
 			cluster := []rune(string(segment))
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Segment at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Segment at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -117,9 +123,10 @@ func TestLineCasesString(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Segment at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Segment at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -128,9 +135,10 @@ func TestLineCasesString(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer segments returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer segments returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}

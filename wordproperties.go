@@ -7,7 +7,7 @@ package uniseg
 // and
 // https://unicode.org/Public/18.0.0/ucd/emoji/emoji-data.txt
 // ("Extended_Pictographic" only)
-// on October 9, 2026. See https://www.unicode.org/license.html for the Unicode
+// on October 30, 2026. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var workBreakCodePoints = [][3]int{
 	{0x000A, 0x000A, prLF},                            // Cc       <control-000A>

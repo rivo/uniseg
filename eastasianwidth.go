@@ -4,7 +4,7 @@ package uniseg
 
 // eastAsianWidth are taken from
 // https://www.unicode.org/Public/18.0.0/ucd/EastAsianWidth.txt
-// on October 9, 2026. See https://www.unicode.org/license.html for the Unicode
+// on October 30, 2026. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var eastAsianWidth = [][3]int{
 	{0x0000, 0x001F, prN},     // Cc    [32] <control-0000>..<control-001F>

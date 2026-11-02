@@ -4,7 +4,7 @@ package uniseg
 
 // indicConjunct are taken from
 // https://www.unicode.org/Public/18.0.0/ucd/DerivedCoreProperties.txt
-// on October 9, 2026. See https://www.unicode.org/license.html for the Unicode
+// on October 30, 2026. See https://www.unicode.org/license.html for the Unicode
 // license agreement.
 var indicConjunct = [][3]int{
 	{0x0300, 0x036F, prInCBExtend},      // Mn [112] COMBINING GRAVE ACCENT..COMBINING LATIN SMALL LETTER X

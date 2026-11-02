@@ -32,6 +32,7 @@ import (
 	"fmt"
 	"go/format"
 	"io/ioutil"
+	"iter"
 	"log"
 	"net/http"
 	"os"
@@ -46,7 +47,7 @@ import (
 // We want to test against a specific version rather than the latest. When the
 // package is upgraded to a new version, change these to generate new tests.
 const (
-	propertyURL = `https://www.unicode.org/Public/18.0.0/ucd/%s.txt`
+	urlTemplate = `https://www.unicode.org/Public/18.0.0/ucd/%s.txt`
 	emojiURL    = `https://unicode.org/Public/18.0.0/ucd/emoji/emoji-data.txt`
 )
 
@@ -83,7 +84,7 @@ func main() {
 	_, includeGeneralCategory := flags["gencat"]
 	var mainURL string
 	if os.Args[1] != "-" {
-		mainURL = fmt.Sprintf(propertyURL, os.Args[1])
+		mainURL = fmt.Sprintf(urlTemplate, os.Args[1])
 	}
 	src, err := parse(mainURL, flags["emojis"], includeGeneralCategory, sections)
 	if err != nil {
@@ -105,14 +106,14 @@ func main() {
 
 // parse parses the Unicode Properties text files located at the given URLs and
 // returns their equivalent Go source code to be used in the uniseg package. If
-// "emojiProperty" is not an empty string, emoji code points for that emoji
+// emojiProperty is not an empty string, emoji code points for that emoji
 // property (e.g. "Extended_Pictographic") will be included, adding to existing
 // properties where they overlap. In those cases, you may pass an empty
-// "propertyURL" to skip parsing the main properties file. If
-// "includeGeneralCategory" is true, the Unicode General Category property will
-// be extracted from the comments and included in the output. If "sections" is
-// not empty, only the specified sections will be included (see flags for
-// details)
+// propertyURL to skip parsing the main properties file. If
+// includeGeneralCategory is true, the Unicode General Category property will
+// be extracted from the derived general category file and added to the
+// properties as an extra value. If "sections" is not empty, only the specified
+// sections will be included (see flags for details).
 func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, sections []string) (string, error) {
 	if propertyURL == "" && emojiProperty == "" {
 		return "", errors.New("no properties to parse")
@@ -175,7 +176,7 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, secti
 		}
 	}
 
-	// Open the second URL.
+	// Add emoji properties if requested.
 	if emojiProperty != "" {
 		log.Printf("Parsing %s", emojiURL)
 		res, err := http.Get(emojiURL)
@@ -185,14 +186,8 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, secti
 		in2 := res.Body
 		defer in2.Close()
 
-		// Sort existing properties first to aid in determining overlaps.
-		sort.Slice(properties, func(i, j int) bool {
-			left, _ := strconv.ParseUint(properties[i][0], 16, 64)
-			right, _ := strconv.ParseUint(properties[j][0], 16, 64)
-			return left < right
-		})
-
 		// Parse it.
+		var emojiProperties [][4]string
 		scanner := bufio.NewScanner(in2)
 		num := 0
 		for scanner.Scan() {
@@ -205,65 +200,78 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, secti
 				continue
 			}
 
-			// Everything else must be a code point range, a property and a comment.
+			// Everything else must be a code point range, a property, and a
+			// comment.
 			fromStr, toStr, property, comment, err := parseProperty(line)
 			if err != nil {
 				return "", fmt.Errorf("emojis line %d: %v", num, err)
 			}
 
-			// Determine overlaps with existing properties.
-			from, _ := strconv.ParseUint(fromStr, 16, 64)
-			to, _ := strconv.ParseUint(toStr, 16, 64)
-			var (
-				overlapping bool
-				offset      int
-			)
-			for index := range len(properties) {
-				prop := properties[index+offset]
-				existingFrom, _ := strconv.ParseUint(prop[0], 16, 64)
-				existingTo, _ := strconv.ParseUint(prop[1], 16, 64)
-				if to < existingFrom {
-					break
-				}
-				if from > existingTo {
-					continue
-				}
-				overlapping = true
-				insert := make([][4]string, 0, 3)
-				if from < existingFrom {
-					// The beginning of the new range extending before the
-					// existing range.
-					insert = append(insert, [4]string{fmt.Sprintf("%04X", from), fmt.Sprintf("%04X", existingFrom-1), property, comment})
-				}
-				if from > existingFrom {
-					// The beginning of the existing range extending before the
-					// new range.
-					insert = append(insert, [4]string{fmt.Sprintf("%04X", existingFrom), fmt.Sprintf("%04X", from-1), prop[2], prop[3]})
-				}
-				// Both ranges.
-				insert = append(insert, [4]string{fmt.Sprintf("%04X", max(from, existingFrom)), fmt.Sprintf("%04X", min(to, existingTo)), prop[2] + property, prop[3] + " + " + comment})
-				if to < existingTo {
-					// The end of the existing range extending beyond the new
-					// range.
-					insert = append(insert, [4]string{fmt.Sprintf("%04X", to+1), fmt.Sprintf("%04X", existingTo), prop[2], prop[3]})
-				}
-				if to > existingTo {
-					// The end of the new range extending beyond the existing
-					// range.
-					insert = append(insert, [4]string{fmt.Sprintf("%04X", existingTo+1), fmt.Sprintf("%04X", to), property, comment})
-				}
-				properties = append(properties[:index], append(insert, properties[index+1:]...)...)
-				offset += len(insert) - 1
-			}
-
-			if !overlapping {
-				// No overlaps. Just add the entire thing.
-				properties = append(properties, [4]string{fromStr, toStr, property, comment})
-			}
+			emojiProperties = append(emojiProperties, [4]string{fromStr, toStr, property, comment})
 		}
 		if err := scanner.Err(); err != nil {
 			return "", err
 		}
+
+		// Merge emoji properties into the main properties list.
+		var p [][4]string
+		for r := range merge(properties, emojiProperties) {
+			p = append(p, [4]string{r[0], r[1], r[2] + r[3], r[4]})
+		}
+		properties = p
+	}
+
+	// Add general category if requested.
+	if includeGeneralCategory {
+		genCatURL := fmt.Sprintf(urlTemplate, "extracted/DerivedGeneralCategory")
+		log.Printf("Parsing %s", genCatURL)
+		res, err := http.Get(genCatURL)
+		if err != nil {
+			return "", err
+		}
+		in3 := res.Body
+		defer in3.Close()
+
+		// Parse it.
+		var generalCategories [][4]string
+		scanner := bufio.NewScanner(in3)
+		num := 0
+		for scanner.Scan() {
+			num++
+			line := scanner.Text()
+
+			// Skip comments and empty lines.
+			if strings.HasPrefix(line, "#") || line == "" {
+				continue
+			}
+
+			// Everything else must be a code point range, a category, and a
+			// comment.
+			fromStr, toStr, property, comment, err := parseProperty(line)
+			if err != nil {
+				return "", fmt.Errorf("general category line %d: %v", num, err)
+			}
+
+			generalCategories = append(generalCategories, [4]string{fromStr, toStr, property, comment})
+		}
+		if err := scanner.Err(); err != nil {
+			return "", err
+		}
+
+		// Merge general categories into the main properties list.
+		var p [][4]string
+		for r := range merge(properties, generalCategories) {
+			property := r[2]
+			if property == "" {
+				property = "XX"
+			}
+			generalCategory := r[3]
+			if generalCategory == "" {
+				generalCategory = "None"
+			}
+			p = append(p, [4]string{r[0], r[1], property + ";" + generalCategory, r[4]})
+		}
+		properties = p
 	}
 
 	// Avoid overflow during binary search.
@@ -307,12 +315,10 @@ var ` + os.Args[3] + ` = [][` + strconv.Itoa(columns) + `]int{
 	// Properties.
 	for _, prop := range properties {
 		if includeGeneralCategory {
-			generalCategory := "gc" + prop[3][:2]
-			if generalCategory == "gcL&" {
-				generalCategory = "gcLC"
-			}
-			prop[3] = prop[3][3:]
-			fmt.Fprintf(&buf, "{0x%s,0x%s,%s,%s}, // %s\n", prop[0], prop[1], translateProperty("pr", prop[2]), generalCategory, prop[3])
+			fields := strings.Split(prop[2], ";")
+			p := fields[0]
+			gc := fields[1]
+			fmt.Fprintf(&buf, "{0x%s,0x%s,%s,%s}, // %s\n", prop[0], prop[1], translateProperty("pr", p), "gc"+gc, prop[3])
 		} else {
 			fmt.Fprintf(&buf, "{0x%s,0x%s,%s}, // %s\n", prop[0], prop[1], translateProperty("pr", prop[2]), prop[3])
 		}
@@ -349,4 +355,84 @@ func parseProperty(line string) (from, to, property, comment string, err error) 
 // to a variable used in the Go code.
 func translateProperty(prefix, property string) string {
 	return prefix + strings.ReplaceAll(property, "_", "")
+}
+
+// merge returns an iterator over the merged properties from the first and
+// second slices. The iterator yields elements of type [5]string:
+//
+//  1. The starting code point of the range.
+//  2. The ending code point of the range.
+//  3. The property value from the first slice, if present.
+//  4. The property value from the second slice, if present.
+//  5. The (joined) comment associated with the property.
+//
+// Both first and second will get sorted by their starting code points.
+func merge(first, second [][4]string) iter.Seq[[5]string] {
+	// indices stores range start and exclusive end points from both slices.
+	// Each element contains the point, range index, start/end flag, and slice
+	// index (0 for first, 1 for second).
+	var indices [][4]uint64
+	for i, r := range first {
+		from, _ := strconv.ParseUint(r[0], 16, 64)
+		to, _ := strconv.ParseUint(r[1], 16, 64)
+		indices = append(indices, [4]uint64{from, uint64(i), 0, 0})
+		indices = append(indices, [4]uint64{to + 1, uint64(i), 1, 0})
+	}
+	for i, r := range second {
+		from, _ := strconv.ParseUint(r[0], 16, 64)
+		to, _ := strconv.ParseUint(r[1], 16, 64)
+		indices = append(indices, [4]uint64{from, uint64(i), 0, 1})
+		indices = append(indices, [4]uint64{to + 1, uint64(i), 1, 1})
+	}
+	sort.Slice(indices, func(i, j int) bool {
+		return indices[i][0] < indices[j][0]
+	})
+
+	return func(yield func([5]string) bool) {
+		active := [2]int{-1, -1}
+		var previous uint64
+		for i := 0; i < len(indices); {
+			point := indices[i][0]
+			if previous < point && (active[0] >= 0 || active[1] >= 0) {
+				firstProperty, secondProperty, comment := "", "", ""
+				if active[0] >= 0 {
+					property := first[active[0]]
+					firstProperty = property[2]
+					comment = property[3]
+				}
+				if active[1] >= 0 {
+					property := second[active[1]]
+					secondProperty = property[2]
+					if comment != "" {
+						comment += " + "
+					}
+					comment += property[3]
+				}
+				if !yield([5]string{
+					fmt.Sprintf("%04X", previous),
+					fmt.Sprintf("%04X", point-1),
+					firstProperty,
+					secondProperty,
+					comment,
+				}) {
+					return
+				}
+			}
+
+			for i < len(indices) && indices[i][0] == point {
+				idx := indices[i]
+				if idx[2] == 1 {
+					active[idx[3]] = -1
+				}
+				i++
+			}
+			for j := i - 1; j >= 0 && indices[j][0] == point; j-- {
+				idx := indices[j]
+				if idx[2] == 0 {
+					active[idx[3]] = int(idx[1])
+				}
+			}
+			previous = point
+		}
+	}
 }

@@ -138,6 +138,7 @@ const (
 	gcCn
 	gcCs
 	gcCo
+	gcLt
 )
 
 // Special code points.
