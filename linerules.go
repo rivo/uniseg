@@ -667,7 +667,7 @@ func transitionLineBreakState(state int, r rune, b []byte, str string) (newState
 
 	// LB15b.
 	if rule > 152 && nextProperty == prQU && generalCategory == gcPf {
-		applies := str == ""
+		applies := len(b) == 0 && str == ""
 		if !applies {
 			if la, _ := lookahead(1); len(la) > 0 {
 				after := la[0]
