@@ -20,7 +20,7 @@ const (
 	wbExtendNumLet
 	wbOddRI
 	wbEvenRI
-	wbZWJBit = 16 // This bit is set for any states followed by at least one zero-width joiner (see WB4 and WB3c).
+	wbZWJBit = 1 << 4 // This bit is set for any states followed by at least one zero-width joiner (see WB4 and WB3c).
 )
 
 // wbTransitions implements the word break parser's state transitions. It's

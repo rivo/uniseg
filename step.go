@@ -29,7 +29,7 @@ const (
 	shiftWordState     = 5
 	shiftSentenceState = 10
 	shiftLineState     = 14
-	shiftPropState     = 22 // No mask as these are always the remaining bits.
+	shiftPropState     = 26 // No mask as these are always the remaining bits.
 )
 
 // The bit mask used to extract the state returned by the [Step] function, after
@@ -38,7 +38,7 @@ const (
 	maskGraphemeState = 0x1f
 	maskWordState     = 0x1f
 	maskSentenceState = 0xf
-	maskLineState     = 0xff
+	maskLineState     = 0xfff
 )
 
 // Step returns the first grapheme cluster (user-perceived character) found in
