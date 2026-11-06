@@ -1,3 +1,3 @@
 module github.com/rivo/uniseg
 
-go 1.26
+go 1.23
