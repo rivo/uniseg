@@ -11,7 +11,8 @@ var EastAsianAmbiguousWidth = 1
 // Every rune has a width of 1, except for runes with the following properties
 // (evaluated in this order):
 //
-//   - Control, CR, LF, Extend, ZWJ: Width of 0
+//   - U+FF9E and U+FF9F, halfwidth Katakana voiced sound marks: Width of 1
+//   - Control, CR, LF, Extend, ZWJ: Width of 0 (except the marks above)
 //   - \u2e3a, TWO-EM DASH: Width of 3
 //   - \u2e3b, THREE-EM DASH: Width of 4
 //   - East-Asian width Fullwidth and Wide: Width of 2 (Ambiguous and Neutral
@@ -20,7 +21,13 @@ var EastAsianAmbiguousWidth = 1
 //   - Extended Pictographic: Width of 2, unless Emoji Presentation is "No".
 func runeWidth(r rune, graphemeProperty int) int {
 	switch graphemeProperty {
-	case prControl, prCR, prLF, prExtend, prZWJ:
+	case prExtend:
+		// These spacing marks occupy a cell despite extending a grapheme.
+		if r == '\uff9e' || r == '\uff9f' {
+			return 1
+		}
+		return 0
+	case prControl, prCR, prLF, prZWJ:
 		return 0
 	case prRegionalIndicator:
 		return 2
