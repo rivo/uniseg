@@ -29,13 +29,23 @@ var widthTestCases = []struct {
 	{"\u2985", 1},     // Na
 	{"\U0001F100", 1}, // A
 	{"\uff61", 1},     // H
-	{"\ufe6a", 2},     // W
-	{"\uff01", 2},     // F
-	{"\u2e3a", 3},     // TWO-EM DASH
-	{"\u2e3b", 4},     // THREE-EM DASH
-	{"\u00a9", 1},     // Extended Pictographic (Emoji Presentation = No)
-	{"\U0001F60A", 2}, // Extended Pictographic (Emoji Presentation = Yes)
-	{"\U0001F1E6", 2}, // Regional Indicator
+	{"\uff9e", 1},     // HALFWIDTH KATAKANA VOICED SOUND MARK
+	{"\uff9f", 1},     // HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK
+	{"ﾊﾟ", 2},
+	{"ｸﾞ", 2},
+	{"ﾊﾟｸﾞ", 4},
+	{"aﾞ", 2},
+	{"ﾞﾟ", 2},
+	{"ﾊﾟ\u0300", 2},
+	{"パグ", 4},             // Precomposed fullwidth equivalents.
+	{"ハ\u309aク\u3099", 4}, // Combining voiced marks remain zero-width.
+	{"\ufe6a", 2},         // W
+	{"\uff01", 2},         // F
+	{"\u2e3a", 3},         // TWO-EM DASH
+	{"\u2e3b", 4},         // THREE-EM DASH
+	{"\u00a9", 1},         // Extended Pictographic (Emoji Presentation = No)
+	{"\U0001F60A", 2},     // Extended Pictographic (Emoji Presentation = Yes)
+	{"\U0001F1E6", 2},     // Regional Indicator
 	{"\u061c\u061c", 0},
 	{"\u061c\u000a", 0},
 	{"\u061c\u000d", 0},
