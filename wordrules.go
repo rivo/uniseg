@@ -26,7 +26,7 @@ const (
 // wbTransitions implements the word break parser's state transitions. It's
 // anologous to [grTransitions], see comments there for details.
 //
-// Unicode version 15.0.0.
+// Unicode version 18.0.0.
 func wbTransitions(state, prop int) (newState int, wordBreak bool, rule int) {
 	switch uint64(state) | uint64(prop)<<32 {
 	// WB3b.

@@ -22,7 +22,7 @@ const (
 // sbTransitions implements the sentence break parser's state transitions. It's
 // anologous to [grTransitions], see comments there for details.
 //
-// Unicode version 15.0.0.
+// Unicode version 18.0.0.
 func sbTransitions(state, prop int) (newState int, sentenceBreak bool, rule int) {
 	switch uint64(state) | uint64(prop)<<32 {
 	// SB3.

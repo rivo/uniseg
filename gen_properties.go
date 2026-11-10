@@ -194,8 +194,8 @@ func parse(propertyURL, emojiProperty string, includeGeneralCategory bool, secti
 			num++
 			line := scanner.Text()
 
-			// Skip comments, empty lines, and everything not containing
-			// "Extended_Pictographic".
+			// Skip comments, empty lines, and everything not containing the
+			// emoji property.
 			if strings.HasPrefix(line, "#") || line == "" || !strings.Contains(line, emojiProperty) {
 				continue
 			}
