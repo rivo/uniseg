@@ -41,6 +41,9 @@ var testCases = []testCase{
 	{original: "\t🏳️‍🌈", expected: [][]rune{{0x9}, {0x1f3f3, 0xfe0f, 0x200d, 0x1f308}}},
 	{original: "\t🏳️‍🌈\t", expected: [][]rune{{0x9}, {0x1f3f3, 0xfe0f, 0x200d, 0x1f308}, {0x9}}},
 	{original: "\r\n\uFE0E", expected: [][]rune{{13, 10}, {0xfe0e}}},
+	{original: "a\t\u0915", expected: [][]rune{{0x61}, {0x9}, {0x915}}},
+	{original: " \r\u0915", expected: [][]rune{{0x20}, {0xd}, {0x915}}},
+	{original: "\t!\u0915", expected: [][]rune{{0x9}, {0x21}, {0x915}}},
 }
 
 // decomposed returns a grapheme cluster decomposition.
