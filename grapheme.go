@@ -199,7 +199,7 @@ func ReverseString(s string) string {
 
 // The number of bits the grapheme property must be shifted to make place for
 // grapheme states.
-const shiftGraphemePropState = 4
+const shiftGraphemePropState = 5
 
 // FirstGraphemeCluster returns the first grapheme cluster found in the given
 // byte slice according to the rules of [Unicode Standard Annex #29, Grapheme
