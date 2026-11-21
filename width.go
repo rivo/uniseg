@@ -20,7 +20,7 @@ var EastAsianAmbiguousWidth = 1
 //   - Regional Indicator: Width of 2
 //   - Extended Pictographic: Width of 2, unless Emoji Presentation is "No".
 func runeWidth(r rune, graphemeProperty int) int {
-	switch graphemeProperty {
+	switch graphemeProperty &^ prInCBMask {
 	case prExtend:
 		// These spacing marks occupy a cell despite extending a grapheme.
 		if r == '\uff9e' || r == '\uff9f' {

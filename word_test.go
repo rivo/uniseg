@@ -21,9 +21,10 @@ func TestWordCasesBytes(t *testing.T) {
 	WordLoop:
 		for index = 0; len(b) > 0; index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More words %d returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More words %d returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(testCase.expected))
 				break
@@ -31,9 +32,10 @@ func TestWordCasesBytes(t *testing.T) {
 			word, b, state = FirstWord(b, state)
 			cluster := []rune(string(word))
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Word at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -43,9 +45,10 @@ func TestWordCasesBytes(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Word at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Word at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -54,9 +57,10 @@ func TestWordCasesBytes(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer words returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer words returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}
@@ -92,9 +96,10 @@ func TestWordCasesString(t *testing.T) {
 	WordLoop:
 		for index = 0; len(str) > 0; index++ {
 			if index >= len(testCase.expected) {
-				t.Errorf(`Test case %d %q failed: More words %d returned than expected %d`,
+				t.Errorf(`Test case %d %q %x failed: More words %d returned than expected %d`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(testCase.expected))
 				break
@@ -102,9 +107,10 @@ func TestWordCasesString(t *testing.T) {
 			word, str, state = FirstWordInString(str, state)
 			cluster := []rune(string(word))
 			if len(cluster) != len(testCase.expected[index]) {
-				t.Errorf(`Test case %d %q failed: Word at index %d has %d codepoints %x, %d expected %x`,
+				t.Errorf(`Test case %d %q %x failed: Word at index %d has %d codepoints %x, %d expected %x`,
 					testNum,
 					testCase.original,
+					[]rune(testCase.original),
 					index,
 					len(cluster),
 					cluster,
@@ -114,9 +120,10 @@ func TestWordCasesString(t *testing.T) {
 			}
 			for i, r := range cluster {
 				if r != testCase.expected[index][i] {
-					t.Errorf(`Test case %d %q failed: Word at index %d is %x, expected %x`,
+					t.Errorf(`Test case %d %q %x failed: Word at index %d is %x, expected %x`,
 						testNum,
 						testCase.original,
+						[]rune(testCase.original),
 						index,
 						cluster,
 						testCase.expected[index])
@@ -125,9 +132,10 @@ func TestWordCasesString(t *testing.T) {
 			}
 		}
 		if index < len(testCase.expected) {
-			t.Errorf(`Test case %d %q failed: Fewer words returned (%d) than expected (%d)`,
+			t.Errorf(`Test case %d %q %x failed: Fewer words returned (%d) than expected (%d)`,
 				testNum,
 				testCase.original,
+				[]rune(testCase.original),
 				index,
 				len(testCase.expected))
 		}
@@ -146,7 +154,7 @@ func TestWordCasesString(t *testing.T) {
 
 // Benchmark the use of the word break function for byte slices.
 func BenchmarkWordFunctionBytes(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var c []byte
 		state := -1
 		str := benchmarkBytes
@@ -159,7 +167,7 @@ func BenchmarkWordFunctionBytes(b *testing.B) {
 
 // Benchmark the use of the word break function for strings.
 func BenchmarkWordFunctionString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var c string
 		state := -1
 		str := benchmarkStr
