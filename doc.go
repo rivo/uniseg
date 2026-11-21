@@ -80,7 +80,8 @@ To start, we assume that every code point has a width of 1, with the following
 exceptions:
 
   - Code points with grapheme cluster break properties Control, CR, LF, Extend,
-    and ZWJ have a width of 0.
+    and ZWJ have a width of 0, except U+FF9E and U+FF9F, the halfwidth Katakana
+    voiced and semi-voiced sound marks, which have a width of 1.
   - U+2E3A, Two-Em Dash, has a width of 3.
   - U+2E3B, Three-Em Dash, has a width of 4.
   - Characters with the East-Asian Width properties "Fullwidth" (F) and "Wide"
